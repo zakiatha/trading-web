@@ -35,6 +35,8 @@
             <nav class="nav-menu" id="nav-menu">
                 <a href="#home" class="nav-link active">Beranda</a>
                 <a href="#kalkulator" class="nav-link">Kalkulator</a>
+                <a href="#jurnal" class="nav-link">Jurnal</a>
+                <a href="#myplan" class="nav-link">My Plan</a>
                 <a href="#news" class="nav-link">News</a>
                 <a href="#indikator" class="nav-link">Indikator</a>
             </nav>
@@ -187,6 +189,257 @@
                     </div>
                     
                     <div id="calc-error" class="error-banner hidden"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 2.1: TRADING JOURNAL -->
+    <section id="jurnal" class="journal-section">
+        <div class="section-container">
+            <div class="section-header">
+                <h2 class="section-title">Trading <span class="text-accent">Journal</span></h2>
+                <p class="section-subtitle">Catat setiap trade, evaluasi emosi Anda, dan pelajari kesalahan masa lalu agar menjadi lebih disiplin.</p>
+            </div>
+
+            <!-- WALL OF SHAME / PSYCHOLOGY REMINDER -->
+            <div id="wall-of-shame" class="wall-of-shame hidden">
+                <div class="shame-header">
+                    <i class="fa-solid fa-triangle-exclamation text-bearish"></i>
+                    <span>EVALUASI EMOSI & PENGINGAT DIRI (JANGAN DIULANGI!)</span>
+                </div>
+                <div id="shame-list" class="shame-list">
+                    <!-- Dynamic content: List of bad emotional losses -->
+                </div>
+            </div>
+
+            <div class="journal-grid">
+                <!-- Left: Stats & Journal Form -->
+                <div class="journal-sidebar">
+                    <!-- Stats Card -->
+                    <div class="card glass-card journal-stats-card">
+                        <h3 class="card-title-sm">Rangkuman Performa</h3>
+                        <div class="stats-mini-grid">
+                            <div class="stat-box">
+                                <span class="stat-label">Total Trade</span>
+                                <span id="stat-total-trades" class="stat-val">0</span>
+                            </div>
+                            <div class="stat-box">
+                                <span class="stat-label">Win Rate</span>
+                                <span id="stat-winrate" class="stat-val">0%</span>
+                            </div>
+                            <div class="stat-box">
+                                <span class="stat-label">Net PnL</span>
+                                <span id="stat-net-pnl" class="stat-val">$0.00</span>
+                            </div>
+                        </div>
+                        <div class="emotion-insight">
+                            <span class="stat-label">Emosi Paling Sering:</span>
+                            <span id="stat-dominant-emotion" class="badge-emotion badge-neutral">Belum Ada</span>
+                        </div>
+                    </div>
+
+                    <!-- Journal Form -->
+                    <div class="card glass-card journal-form-card">
+                        <h3 class="card-title-sm" id="form-title">Catat Entry Baru</h3>
+                        <form id="journal-form" onsubmit="event.preventDefault();">
+                            <input type="hidden" id="journal-id">
+                            
+                            <div class="form-row">
+                                <div class="form-group col-half">
+                                    <label for="journal-pair" class="form-label">Instrumen</label>
+                                    <input type="text" id="journal-pair" class="form-input" placeholder="Cth: XAUUSD" required>
+                                </div>
+                                <div class="form-group col-half">
+                                    <label for="journal-type" class="form-label">Tipe</label>
+                                    <select id="journal-type" class="form-select">
+                                        <option value="BUY">BUY</option>
+                                        <option value="SELL">SELL</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group col-third">
+                                    <label for="journal-entry" class="form-label">Entry Price</label>
+                                    <input type="number" id="journal-entry" step="any" class="form-input" placeholder="0.0">
+                                </div>
+                                <div class="form-group col-third">
+                                    <label for="journal-sl" class="form-label">Stop Loss</label>
+                                    <input type="number" id="journal-sl" step="any" class="form-input" placeholder="0.0">
+                                </div>
+                                <div class="form-group col-third">
+                                    <label for="journal-tp" class="form-label">Take Profit</label>
+                                    <input type="number" id="journal-tp" step="any" class="form-input" placeholder="0.0">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="journal-emotion" class="form-label">Kondisi Emosi Saat Entry</label>
+                                <select id="journal-emotion" class="form-select">
+                                    <option value="Sabar">Sabar & Disiplin (Sesuai Plan) 🟢</option>
+                                    <option value="Confident">Yakin & Tenang 🟢</option>
+                                    <option value="FOMO">FOMO (Takut Ketinggalan) 🔴</option>
+                                    <option value="Greedy">Greedy (Serakah / Lot Kegedean) 🔴</option>
+                                    <option value="Revenge">Revenge Trading (Balas Dendam) 🔴</option>
+                                    <option value="Takut">Takut / Ragu-ragu 🟡</option>
+                                    <option value="Bosan">Bosan (Gak Ada Setup Tapi Maksa) 🟡</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="journal-reason" class="form-label">Alasan Entry / Catatan Setup</label>
+                                <textarea id="journal-reason" class="form-textarea" rows="3" placeholder="Mengapa Anda mengambil trade ini? Konfirmasi apa saja yang terlihat? (Cth: Break of Structure + FVG Tap)" required></textarea>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group col-half">
+                                    <label for="journal-status" class="form-label">Status Trade</label>
+                                    <select id="journal-status" class="form-select">
+                                        <option value="OPEN">OPEN (Sedang Berjalan)</option>
+                                        <option value="WIN">WIN (Profit)</option>
+                                        <option value="LOSS">LOSS (Rugi)</option>
+                                        <option value="BE">BE (Break Even / Balik Modal)</option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-half">
+                                    <label for="journal-pnl" class="form-label">PnL ($ USD)</label>
+                                    <input type="number" id="journal-pnl" step="any" class="form-input" placeholder="0.00">
+                                </div>
+                            </div>
+
+                            <!-- Conditional Loss Fields -->
+                            <div id="loss-details-group" class="hidden">
+                                <div class="form-group">
+                                    <label for="journal-loss-cause" class="form-label">Penyebab Loss Utama</label>
+                                    <select id="journal-loss-cause" class="form-select">
+                                        <option value="Market Normal">Market Noise / SL Hunter (Normal) 🟢</option>
+                                        <option value="FOMO">Masuk Terlalu Cepat (FOMO) 🔴</option>
+                                        <option value="Greedy">Gak Ambil TP / Tamak (Greedy) 🔴</option>
+                                        <option value="No Setup">Gak Ada Setup / Iseng Masuk 🔴</option>
+                                        <option value="Bad Risk">Manajemen Risiko Buruk / Overlot 🔴</option>
+                                        <option value="Overtrade">Balas Dendam / Kebanyakan Trade 🔴</option>
+                                        <option value="Bad Exit">Panik Close Manual / Exit Kepagian 🟡</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="journal-self-critique" class="form-label">Evaluasi / Maki-maki Diri Sendiri (Sebagai Pengingat)</label>
+                                    <textarea id="journal-self-critique" class="form-textarea" rows="2" placeholder="Tulis kritik pedas untuk diri sendiri jika melanggar rule. Cth: 'Bego banget jangan fomo lagi, tunggu retest!'"></textarea>
+                                </div>
+                            </div>
+
+                            <div class="form-actions">
+                                <button type="submit" id="btn-save-journal" class="btn btn-accent btn-block">Simpan Jurnal</button>
+                                <button type="button" id="btn-cancel-edit-journal" class="btn btn-secondary btn-block hidden">Batal Edit</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Right: Trade Logs List -->
+                <div class="journal-main">
+                    <div class="journal-filter-bar">
+                        <div class="filter-group">
+                            <button class="filter-btn active" data-filter="ALL">Semua</button>
+                            <button class="filter-btn" data-filter="OPEN">Open</button>
+                            <button class="filter-btn" data-filter="WIN">Win</button>
+                            <button class="filter-btn" data-filter="LOSS">Loss</button>
+                            <button class="filter-btn" data-filter="BE">BE</button>
+                        </div>
+                        <button id="btn-clear-journal" class="btn btn-danger-text"><i class="fa-solid fa-trash-can"></i> Hapus Semua</button>
+                    </div>
+
+                    <div id="journal-list" class="journal-list">
+                        <!-- Dynamic list of trade cards -->
+                        <div class="no-data">
+                            <i class="fa-regular fa-folder-open"></i>
+                            <p>Belum ada catatan jurnal. Mulai catat trade pertama Anda!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 2.2: MY TRADING PLAN -->
+    <section id="myplan" class="myplan-section">
+        <div class="section-container">
+            <div class="section-header">
+                <h2 class="section-title">My Trading <span class="text-bullish">Plan</span></h2>
+                <p class="section-subtitle">Tentukan aturan main Anda. Disiplin mematuhi rencana adalah kunci profit konsisten.</p>
+            </div>
+
+            <div class="myplan-grid">
+                <!-- Plan Editor Form -->
+                <div class="card glass-card plan-editor-card">
+                    <h3 class="card-title-sm">Atur Trading Plan Anda</h3>
+                    <form id="plan-form" onsubmit="event.preventDefault();">
+                        <div class="form-group">
+                            <label for="plan-rules" class="form-label">Aturan Emas / Golden Rules</label>
+                            <textarea id="plan-rules" class="form-textarea" rows="4" placeholder="Cth: &#10;1. Maksimal 2 trade per hari.&#10;2. Risiko per trade maksimal 1% dari modal.&#10;3. Stop trading jika loss 2x berturut-turut dalam sehari."></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="plan-setup" class="form-label">Kriteria Setup / Entry Model</label>
+                            <textarea id="plan-setup" class="form-textarea" rows="4" placeholder="Cth: &#10;- Harus ada Break of Structure (BOS) atau Change of Character (CHoCH) di M15.&#10;- Entry hanya di area Fair Value Gap (FVG) atau Order Block (OB) H1."></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="plan-exit" class="form-label">Rencana Exit & Manajemen Trade</label>
+                            <textarea id="plan-exit" class="form-textarea" rows="3" placeholder="Cth: &#10;- Pindahkan SL ke BE setelah running profit 1:1 RR.&#10;- Selalu pasang target TP realistis pada Major Liquidity terdekat."></textarea>
+                        </div>
+
+                        <button type="submit" id="btn-save-plan" class="btn btn-accent btn-block">Simpan Rencana</button>
+                    </form>
+                </div>
+
+                <!-- Plan Display (Discord Style) -->
+                <div class="card glass-card plan-display-card">
+                    <div class="discord-channel-header">
+                        <i class="fa-solid fa-hashtag"></i>
+                        <span>trading-rules-and-setup</span>
+                    </div>
+                    
+                    <div class="discord-message-box">
+                        <!-- Message 1: Golden Rules -->
+                        <div class="discord-msg">
+                            <div class="discord-avatar"><i class="fa-solid fa-user-shield"></i></div>
+                            <div class="discord-msg-content">
+                                <span class="discord-author">My Mind / System</span>
+                                <span class="discord-timestamp">Hari ini pukul 08:00</span>
+                                <div class="discord-text">
+                                    <h4>📌 GOLDEN RULES</h4>
+                                    <div id="display-rules" class="pre-wrap-text">Belum ada aturan yang disimpan. Klik simpan di form kiri untuk memperbarui.</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Message 2: Setup Criteria -->
+                        <div class="discord-msg">
+                            <div class="discord-avatar"><i class="fa-solid fa-circle-nodes"></i></div>
+                            <div class="discord-msg-content">
+                                <span class="discord-author">Entry Model</span>
+                                <span class="discord-timestamp">Hari ini pukul 08:01</span>
+                                <div class="discord-text">
+                                    <h4>⚡ SETUP CRITERIA</h4>
+                                    <div id="display-setup" class="pre-wrap-text">Belum ada kriteria setup yang disimpan.</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Message 3: Exit Plan -->
+                        <div class="discord-msg">
+                            <div class="discord-avatar"><i class="fa-solid fa-right-from-bracket"></i></div>
+                            <div class="discord-msg-content">
+                                <span class="discord-author">Risk & Exit</span>
+                                <span class="discord-timestamp">Hari ini pukul 08:02</span>
+                                <div class="discord-text">
+                                    <h4>🎯 EXIT PLAN & RISK MANAGEMENT</h4>
+                                    <div id="display-exit" class="pre-wrap-text">Belum ada rencana exit yang disimpan.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
