@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TradeVision - Platform Trading Pro</title>
+    
+    <!-- Google Fonts: Inter & Space Grotesk -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Three.js for 3D Background -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
+    <!-- Custom Stylesheet -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Canvas Container for 3D Background -->
+    <div id="canvas-container"></div>
+
+    <!-- Header / Navbar -->
+    <header class="navbar">
+        <div class="navbar-container">
+            <a href="#home" class="logo">
+                <i class="fa-solid fa-chart-line text-bullish"></i>
+                <span>Trade<span class="text-bullish">Vision</span></span>
+            </a>
+            
+            <nav class="nav-menu" id="nav-menu">
+                <a href="#home" class="nav-link active">Beranda</a>
+                <a href="#kalkulator" class="nav-link">Kalkulator</a>
+                <a href="#news" class="nav-link">News</a>
+                <a href="#indikator" class="nav-link">Indikator</a>
+            </nav>
+            
+            <button class="mobile-menu-toggle" id="mobile-menu-btn" aria-label="Toggle Menu">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- LIVE TICKER TAPE -->
+    <div class="ticker-tape-container">
+        <!-- TradingView Widget BEGIN -->
+        <div class="tradingview-widget-container">
+            <div class="tradingview-widget-container__widget"></div>
+            <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js" async>
+            {
+            "symbols": [
+                { "proName": "FX_IDC:EURUSD", "title": "EUR/USD" },
+                { "proName": "FX_IDC:GBPUSD", "title": "GBP/USD" },
+                { "proName": "FX_IDC:USDJPY", "title": "USD/JPY" },
+                { "proName": "OANDA:XAUUSD", "title": "XAU/USD" },
+                { "proName": "FX_IDC:AUDUSD", "title": "AUD/USD" },
+                { "proName": "FX_IDC:USDCAD", "title": "USD/CAD" }
+            ],
+            "showSymbolLogo": true,
+            "colorTheme": "dark",
+            "isTransparent": true,
+            "displayMode": "adaptive",
+            "locale": "id"
+            }
+            </script>
+        </div>
+        <!-- TradingView Widget END -->
+    </div>
+
+    <!-- SECTION 1: HERO -->
+    <section id="home" class="hero-section">
+        <div class="hero-content">
+            <div class="status-badge">
+                <span class="pulse-dot"></span>
+                <span>Sistem Live & Up-to-date</span>
+            </div>
+            <h1 class="hero-title">
+                Navigasi Pasar <br>Dengan <span class="gradient-text">Presisi Tinggi</span>
+            </h1>
+            <p class="hero-subtitle">
+                Platform cerdas dengan sentimen teknikal real-time, kalender ekonomi live, dan manajemen risiko ala trader profesional.
+            </p>
+            <div class="hero-actions">
+                <a href="#kalkulator" class="btn btn-primary">
+                    Kalkulator Lot <i class="fa-solid fa-arrow-right"></i>
+                </a>
+                <a href="#indikator" class="btn btn-secondary">
+                    Lihat Sentimen Pasar
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 2: RISK CALCULATOR -->
+    <section id="kalkulator" class="calculator-section">
+        <div class="section-container">
+            <div class="section-header">
+                <h2 class="section-title">Kalkulator <span class="text-accent">Risiko Pro</span></h2>
+                <p class="section-subtitle">Hitung ukuran Lot dengan akurat. Mendukung pasangan mata uang Major (Standard Contract 100k) dan XAUUSD.</p>
+            </div>
+
+            <div class="calculator-grid">
+                <!-- Form Input -->
+                <div class="card glass-card calculator-form-card">
+                    <form id="risk-form" onsubmit="event.preventDefault();">
+                        <div class="form-group">
+                            <label for="calc-pair" class="form-label">Pilih Instrumen</label>
+                            <select id="calc-pair" class="form-select">
+                                <optgroup label="USD sebagai Quote (Pip Value Tetap)">
+                                    <option value="eurusd" selected>EUR/USD</option>
+                                    <option value="gbpusd">GBP/USD</option>
+                                    <option value="audusd">AUD/USD</option>
+                                    <option value="nzdusd">NZD/USD</option>
+                                    <option value="xauusd">XAU/USD (Gold)</option>
+                                </optgroup>
+                                <optgroup label="USD sebagai Base (Pip Value Dinamis)">
+                                    <option value="usdjpy">USD/JPY</option>
+                                    <option value="usdchf">USD/CHF</option>
+                                    <option value="usdcad">USD/CAD</option>
+                                </optgroup>
+                            </select>
+                        </div>
+
+                        <!-- Harga Saat Ini (Dinamis untuk Base USD) -->
+                        <div id="current-price-div" class="form-group hidden">
+                            <label for="calc-price" class="form-label">Harga Pasar Saat Ini (Bid/Ask)</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="calc-price" min="0.0001" step="any" placeholder="Cth: 150.50 (JPY) atau 0.9000 (CHF)" class="form-input">
+                            </div>
+                            <span class="form-tip">*Dibutuhkan untuk menghitung nilai pip yang akurat karena USD di depan.</span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="calc-balance" class="form-label">Saldo Akun (USD)</label>
+                            <div class="input-wrapper prefix-wrapper">
+                                <span class="input-prefix">$</span>
+                                <input type="number" id="calc-balance" required min="1" step="any" placeholder="1000" class="form-input">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group col-half">
+                                <label for="calc-risk" class="form-label">Risiko (%)</label>
+                                <div class="input-wrapper suffix-wrapper">
+                                    <input type="number" id="calc-risk" required min="0.1" max="100" step="0.1" placeholder="1" class="form-input">
+                                    <span class="input-suffix">%</span>
+                                </div>
+                            </div>
+                            <div class="form-group col-half">
+                                <label for="calc-sl" class="form-label">Stop Loss (Pips)</label>
+                                <div class="input-wrapper">
+                                    <input type="number" id="calc-sl" required min="0.1" step="0.1" placeholder="30" class="form-input">
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="submit" id="btn-calculate" class="btn btn-accent btn-block">
+                            Hitung Lot Sekarang
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Result Display -->
+                <div class="card glass-card calculator-result-card">
+                    <div class="result-glow-top"></div>
+                    <div class="result-glow-bottom"></div>
+                    
+                    <h3 class="result-title">Ukuran Lot Ideal Anda</h3>
+                    <div class="result-value-container">
+                        <span id="lot-result" class="result-value">0.00</span>
+                        <span class="result-unit">Lot</span>
+                    </div>
+                    
+                    <div class="result-details">
+                        <div class="detail-row">
+                            <span class="detail-label">Modal Diresikokan:</span>
+                            <span id="risk-amount-result" class="detail-value text-bearish">$0.00</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Nilai Per Pip (1 Lot):</span>
+                            <span id="pip-value-result" class="detail-value text-bullish">$0.00</span>
+                        </div>
+                    </div>
+                    
+                    <div id="calc-error" class="error-banner hidden"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 3: NEWS & ECONOMIC CALENDAR -->
+    <section id="news" class="news-section">
+        <div class="section-container">
+            <div class="section-header-left">
+                <h2 class="section-title">Berita & <span class="text-bullish">Kalender Ekonomi</span></h2>
+                <p class="section-subtitle">Pantau sentimen fundamental dan jadwal rilis data penting dari pasar global.</p>
+            </div>
+
+            <div class="news-grid">
+                <!-- Market News (FXStreet Style) -->
+                <div class="news-list-container">
+                    <h3 class="news-group-title text-accent-border">Latest FX News</h3>
+                    
+                    <div class="news-cards-stack">
+                        <article class="news-card">
+                            <div class="news-badge-container">
+                                <span class="news-badge-breaking">
+                                    <i class="fa-solid fa-bolt animate-pulse"></i> BREAKING
+                                </span>
+                            </div>
+                            <h4 class="news-card-title">Dolar AS Melemah Jelang Rilis Data CPI Inti</h4>
+                            <p class="news-card-excerpt">Para pelaku pasar berhati-hati menjelang rilis inflasi yang dapat menentukan arah kebijakan The Fed selanjutnya.</p>
+                            <div class="news-card-meta">
+                                <span><i class="fa-regular fa-clock"></i> 10 Menit lalu</span>
+                                <span>via FXStreet</span>
+                            </div>
+                        </article>
+
+                        <article class="news-card">
+                            <h4 class="news-card-title">Harga Emas (XAU/USD) Tertahan di Resisten $2,050</h4>
+                            <p class="news-card-excerpt">Ketegangan geopolitik mereda sementara, membuat Emas kesulitan menembus area resisten krusial mingguan.</p>
+                            <div class="news-card-meta">
+                                <span><i class="fa-regular fa-clock"></i> 1 Jam lalu</span>
+                                <span>via FXStreet</span>
+                            </div>
+                        </article>
+
+                        <article class="news-card">
+                            <h4 class="news-card-title">Analisis EUR/USD: Tekanan Jual Masih Dominan di Sesi Eropa</h4>
+                            <p class="news-card-excerpt">Data PMI manufaktur Jerman yang mengecewakan kembali membebani mata uang tunggal Euro hari ini.</p>
+                            <div class="news-card-meta">
+                                <span><i class="fa-regular fa-clock"></i> 3 Jam lalu</span>
+                                <span>via FXStreet</span>
+                            </div>
+                        </article>
+                    </div>
+                </div>
+
+                <!-- Economic Calendar (Investing.com Widget) -->
+                <div class="calendar-container">
+                    <h3 class="news-group-title text-bullish-border">Jadwal Rilis Mendatang</h3>
+                    <div class="calendar-widget-wrapper">
+                        <iframe src="https://sslecal2.investing.com?columns=exc_flags,exc_currency,exc_importance,exc_actual,exc_forecast,exc_previous&features=datepicker,timezone&countries=25,32,6,37,72,22,17,39,14,10,35,43,56,36,110,11,26,12,4,5&calType=week&timeZone=18&lang=1" width="100%" height="100%" frameborder="0" allowtransparency="true" marginwidth="0" marginheight="0"></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 4: TECHNICAL ANALYSIS / SENTIMENT -->
+    <section id="indikator" class="sentiment-section">
+        <div class="section-container">
+            <div class="section-header">
+                <h2 class="section-title">Indikator <span class="text-bearish">Sentimen Live</span></h2>
+                <p class="section-subtitle">Analisis teknikal *real-time* yang merangkum sinyal dari Moving Averages, Osilator (RSI, MACD), dan indikator lainnya.</p>
+            </div>
+
+            <div class="sentiment-grid">
+                
+                <!-- XAUUSD Widget -->
+                <div class="card sentiment-card">
+                    <div class="tradingview-widget-container">
+                        <div class="tradingview-widget-container__widget"></div>
+                        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-technical-analysis.js" async>
+                        {
+                        "interval": "1D",
+                        "width": "100%",
+                        "isTransparent": true,
+                        "height": "100%",
+                        "symbol": "OANDA:XAUUSD",
+                        "showIntervalTabs": true,
+                        "locale": "id",
+                        "colorTheme": "dark"
+                        }
+                        </script>
+                    </div>
+                </div>
+
+                <!-- EURUSD Widget -->
+                <div class="card sentiment-card">
+                    <div class="tradingview-widget-container">
+                        <div class="tradingview-widget-container__widget"></div>
+                        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-technical-analysis.js" async>
+                        {
+                        "interval": "1D",
+                        "width": "100%",
+                        "isTransparent": true,
+                        "height": "100%",
+                        "symbol": "FX:EURUSD",
+                        "showIntervalTabs": true,
+                        "locale": "id",
+                        "colorTheme": "dark"
+                        }
+                        </script>
+                    </div>
+                </div>
+
+                <!-- GBPUSD Widget -->
+                <div class="card sentiment-card">
+                    <div class="tradingview-widget-container">
+                        <div class="tradingview-widget-container__widget"></div>
+                        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-technical-analysis.js" async>
+                        {
+                        "interval": "1D",
+                        "width": "100%",
+                        "isTransparent": true,
+                        "height": "100%",
+                        "symbol": "FX:GBPUSD",
+                        "showIntervalTabs": true,
+                        "locale": "id",
+                        "colorTheme": "dark"
+                        }
+                        </script>
+                    </div>
+                </div>
+
+                <!-- USDJPY Widget -->
+                <div class="card sentiment-card">
+                    <div class="tradingview-widget-container">
+                        <div class="tradingview-widget-container__widget"></div>
+                        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-technical-analysis.js" async>
+                        {
+                        "interval": "1D",
+                        "width": "100%",
+                        "isTransparent": true,
+                        "height": "100%",
+                        "symbol": "FX:USDJPY",
+                        "showIntervalTabs": true,
+                        "locale": "id",
+                        "colorTheme": "dark"
+                        }
+                        </script>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-info">
+                <div class="footer-logo">
+                    <i class="fa-solid fa-chart-line text-bullish"></i>
+                    <span>Trade<span class="text-bullish">Vision</span></span>
+                </div>
+                <p class="footer-desc">Memberikan alat canggih dan data akurat untuk keputusan trading Anda.</p>
+            </div>
+            <div class="footer-links">
+                <h4 class="footer-title">Tautan</h4>
+                <ul class="footer-list">
+                    <li><a href="#kalkulator" class="footer-link-item">Kalkulator Risiko</a></li>
+                    <li><a href="#news" class="footer-link-item">Berita & Kalender</a></li>
+                    <li><a href="#indikator" class="footer-link-item">Indikator Teknikal Live</a></li>
+                </ul>
+            </div>
+            <div class="footer-risk">
+                <h4 class="footer-title">Peringatan Risiko</h4>
+                <p class="footer-risk-text">Trading Foreign Exchange (Forex) dan Komoditas menggunakan leverage membawa tingkat risiko yang tinggi. Data dari widget eksternal seperti TradingView & Investing.com disediakan "as is".</p>
+            </div>
+        </div>
+        <div class="footer-copyright">
+            &copy; 2026 TradeVision. All rights reserved.
+        </div>
+    </footer>
+
+    <!-- Custom Script -->
+    <script src="app.js"></script>
+</body>
+</html>
