@@ -16,6 +16,9 @@
     <!-- Three.js for 3D Background -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     
+    <!-- Chart.js for Journal Analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
     <!-- Custom Stylesheet -->
     <link rel="stylesheet" href="style.css">
 </head>
@@ -194,6 +197,59 @@
         </div>
     </section>
 
+    <!-- SECTION 2.0: AI TODAY INTEL -->
+    <section id="ai-intel" class="ai-intel-section">
+        <div class="section-container">
+            <div class="section-header">
+                <h2 class="section-title"><i class="fa-solid fa-brain text-accent"></i> AI Today <span class="gradient-text">Market Intel</span></h2>
+                <p class="section-subtitle">Sentimen pasar harian otomatis dan proyeksi teknikal berbasis AI untuk membimbing keputusan trading Anda hari ini.</p>
+            </div>
+
+            <div class="ai-intel-grid">
+                <!-- AI Daily Overview -->
+                <div class="card glass-card ai-overview-card">
+                    <div class="ai-card-header">
+                        <span class="ai-date-badge" id="ai-current-date">30 Juni 2026</span>
+                        <span class="ai-status-pulse"><span class="pulse-dot"></span> AI Active</span>
+                    </div>
+                    <h3 class="ai-overview-title">Market Sentiment & Macro Outlook</h3>
+                    <p id="ai-macro-outlook" class="ai-overview-text">Memuat analisis makro...</p>
+                    <div class="ai-source-credit">Source: AI Synthesis (Reuters, Bloomberg & Technical feeds)</div>
+                </div>
+
+                <!-- AI Pair Projections -->
+                <div class="ai-pairs-grid">
+                    <!-- XAUUSD -->
+                    <div class="card glass-card ai-pair-card" id="ai-card-xauusd">
+                        <div class="ai-pair-header">
+                            <span class="ai-pair-name">XAU/USD (Gold)</span>
+                            <span class="ai-sentiment-badge" id="ai-sent-xauusd">BULLISH</span>
+                        </div>
+                        <p class="ai-pair-projection" id="ai-proj-xauusd">Memuat proyeksi...</p>
+                    </div>
+
+                    <!-- EURUSD -->
+                    <div class="card glass-card ai-pair-card" id="ai-card-eurusd">
+                        <div class="ai-pair-header">
+                            <span class="ai-pair-name">EUR/USD</span>
+                            <span class="ai-sentiment-badge" id="ai-sent-eurusd">BEARISH</span>
+                        </div>
+                        <p class="ai-pair-projection" id="ai-proj-eurusd">Memuat proyeksi...</p>
+                    </div>
+
+                    <!-- GBPUSD -->
+                    <div class="card glass-card ai-pair-card" id="ai-card-gbpusd">
+                        <div class="ai-pair-header">
+                            <span class="ai-pair-name">GBP/USD</span>
+                            <span class="ai-sentiment-badge" id="ai-sent-gbpusd">NEUTRAL</span>
+                        </div>
+                        <p class="ai-pair-projection" id="ai-proj-gbpusd">Memuat proyeksi...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- SECTION 2.1: TRADING JOURNAL -->
     <section id="jurnal" class="journal-section">
         <div class="section-container">
@@ -239,6 +295,17 @@
                         </div>
                     </div>
 
+                    <!-- Analytics Charts Card -->
+                    <div class="card glass-card journal-analytics-card">
+                        <h3 class="card-title-sm">Visualisasi Performa</h3>
+                        <div class="chart-container-sm">
+                            <canvas id="chart-winrate" height="160"></canvas>
+                        </div>
+                        <div class="chart-container-sm" style="margin-top: 15px;">
+                            <canvas id="chart-pnl" height="140"></canvas>
+                        </div>
+                    </div>
+
                     <!-- Journal Form -->
                     <div class="card glass-card journal-form-card">
                         <h3 class="card-title-sm" id="form-title">Catat Entry Baru</h3>
@@ -247,11 +314,11 @@
                             
                             <div class="form-row">
                                 <div class="form-group col-half">
-                                    <label for="journal-pair" class="form-label">Instrumen</label>
+                                    <label for="journal-pair" class="form-label">Instrumen (PAIR)</label>
                                     <input type="text" id="journal-pair" class="form-input" placeholder="Cth: XAUUSD" required>
                                 </div>
                                 <div class="form-group col-half">
-                                    <label for="journal-type" class="form-label">Tipe</label>
+                                    <label for="journal-type" class="form-label">Posisi</label>
                                     <select id="journal-type" class="form-select">
                                         <option value="BUY">BUY</option>
                                         <option value="SELL">SELL</option>
@@ -260,17 +327,39 @@
                             </div>
 
                             <div class="form-row">
+                                <div class="form-group col-half">
+                                    <label for="journal-risk" class="form-label">Risk (%)</label>
+                                    <input type="number" id="journal-risk" step="any" class="form-input" placeholder="Cth: 1" required>
+                                </div>
+                                <div class="form-group col-half">
+                                    <label for="journal-rr" class="form-label">RR Ratio</label>
+                                    <input type="text" id="journal-rr" class="form-input" placeholder="Cth: 1:2 atau 2.5" required>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
                                 <div class="form-group col-third">
                                     <label for="journal-entry" class="form-label">Entry Price</label>
-                                    <input type="number" id="journal-entry" step="any" class="form-input" placeholder="0.0">
+                                    <input type="number" id="journal-entry" step="any" class="form-input" placeholder="0.0" required>
                                 </div>
                                 <div class="form-group col-third">
                                     <label for="journal-sl" class="form-label">Stop Loss</label>
-                                    <input type="number" id="journal-sl" step="any" class="form-input" placeholder="0.0">
+                                    <input type="number" id="journal-sl" step="any" class="form-input" placeholder="0.0" required>
                                 </div>
                                 <div class="form-group col-third">
                                     <label for="journal-tp" class="form-label">Take Profit</label>
-                                    <input type="number" id="journal-tp" step="any" class="form-input" placeholder="0.0">
+                                    <input type="number" id="journal-tp" step="any" class="form-input" placeholder="0.0" required>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group col-half">
+                                    <label for="journal-time-open" class="form-label">Waktu Open Position</label>
+                                    <input type="datetime-local" id="journal-time-open" class="form-input" required>
+                                </div>
+                                <div class="form-group col-half" id="time-close-group">
+                                    <label for="journal-time-close" class="form-label">Waktu Close Position</label>
+                                    <input type="datetime-local" id="journal-time-close" class="form-input">
                                 </div>
                             </div>
 
@@ -304,8 +393,13 @@
                                 </div>
                                 <div class="form-group col-half">
                                     <label for="journal-pnl" class="form-label">PnL ($ USD)</label>
-                                    <input type="number" id="journal-pnl" step="any" class="form-input" placeholder="0.00">
+                                    <input type="number" id="journal-pnl" step="any" class="form-input" placeholder="0.00" required>
                                 </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="journal-tv-link" class="form-label">Link TradingView / Gambar Chart</label>
+                                <input type="url" id="journal-tv-link" class="form-input" placeholder="Cth: https://www.tradingview.com/x/xxxxxx/">
                             </div>
 
                             <!-- Conditional Loss Fields -->

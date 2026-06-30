@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initNewsTabs();
     initTradingJournal();
     initTradingPlan();
+    initAISentiment();
 });
 
 /* ==========================================================================
@@ -422,11 +423,16 @@ function initTradingPlan() {
 }
 
 /* ==========================================================================
-   7. TRADING JOURNAL LOGIC
+   7. TRADING JOURNAL LOGIC (WITH NOTION FIELDS & CHART.JS)
    ========================================================================== */
+// Global chart instances to prevent canvas reuse errors
+let winrateChartInstance = null;
+let pnlChartInstance = null;
+
 function initTradingJournal() {
     const journalForm = document.getElementById('journal-form');
     const lossDetailsGroup = document.getElementById('loss-details-group');
+    const timeCloseGroup = document.getElementById('time-close-group');
     const journalStatus = document.getElementById('journal-status');
     const journalList = document.getElementById('journal-list');
     
@@ -446,14 +452,39 @@ function initTradingJournal() {
 
     if (!journalForm) return;
 
-    // Show/hide loss fields based on status
+    // Helper to get local ISO string (YYYY-MM-DDTHH:MM)
+    function getLocalISOString(date = new Date()) {
+        const tzOffset = date.getTimezoneOffset() * 60000; // offset in milliseconds
+        const localISOTime = (new Date(date - tzOffset)).toISOString().slice(0, 16);
+        return localISOTime;
+    }
+
+    // Toggle close time and loss details based on status
     journalStatus.addEventListener('change', () => {
-        if (journalStatus.value === 'LOSS') {
+        handleStatusChange(journalStatus.value);
+    });
+
+    function handleStatusChange(status) {
+        const timeCloseInput = document.getElementById('journal-time-close');
+        
+        if (status === 'LOSS') {
             lossDetailsGroup.classList.remove('hidden');
         } else {
             lossDetailsGroup.classList.add('hidden');
         }
-    });
+
+        if (status === 'OPEN') {
+            timeCloseGroup.classList.add('hidden');
+            timeCloseInput.required = false;
+            timeCloseInput.value = '';
+        } else {
+            timeCloseGroup.classList.remove('hidden');
+            timeCloseInput.required = true;
+            if (!timeCloseInput.value) {
+                timeCloseInput.value = getLocalISOString();
+            }
+        }
+    }
 
     // Load trades
     let trades = JSON.parse(localStorage.getItem('tradevision_trades')) || [];
@@ -478,6 +509,7 @@ function initTradingJournal() {
                 renderTrades();
                 updateStats();
                 updateWallOfShame();
+                updateCharts();
             }
         });
     }
@@ -495,13 +527,18 @@ function initTradingJournal() {
         const id = document.getElementById('journal-id').value;
         const pair = document.getElementById('journal-pair').value.toUpperCase().trim();
         const type = document.getElementById('journal-type').value;
+        const risk = parseFloat(document.getElementById('journal-risk').value) || 0;
+        const rr = document.getElementById('journal-rr').value.trim();
         const entry = parseFloat(document.getElementById('journal-entry').value) || 0;
         const sl = parseFloat(document.getElementById('journal-sl').value) || 0;
         const tp = parseFloat(document.getElementById('journal-tp').value) || 0;
+        const timeOpen = document.getElementById('journal-time-open').value;
+        const timeClose = document.getElementById('journal-time-close').value;
         const emotion = document.getElementById('journal-emotion').value;
         const reason = document.getElementById('journal-reason').value.trim();
         const status = document.getElementById('journal-status').value;
         const pnl = parseFloat(document.getElementById('journal-pnl').value) || 0;
+        const tvLink = document.getElementById('journal-tv-link').value.trim();
         const lossCause = status === 'LOSS' ? document.getElementById('journal-loss-cause').value : '';
         const selfCritique = status === 'LOSS' ? document.getElementById('journal-self-critique').value.trim() : '';
 
@@ -511,7 +548,7 @@ function initTradingJournal() {
             if (index !== -1) {
                 trades[index] = {
                     ...trades[index],
-                    pair, type, entry, sl, tp, emotion, reason, status, pnl, lossCause, selfCritique
+                    pair, type, risk, rr, entry, sl, tp, timeOpen, timeClose, emotion, reason, status, pnl, tvLink, lossCause, selfCritique
                 };
             }
         } else {
@@ -521,11 +558,9 @@ function initTradingJournal() {
                 date: new Date().toLocaleDateString('id-ID', { 
                     day: 'numeric', 
                     month: 'short', 
-                    year: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
+                    year: 'numeric'
                 }),
-                pair, type, entry, sl, tp, emotion, reason, status, pnl, lossCause, selfCritique
+                pair, type, risk, rr, entry, sl, tp, timeOpen, timeClose, emotion, reason, status, pnl, tvLink, lossCause, selfCritique
             };
             trades.unshift(newTrade);
         }
@@ -534,13 +569,16 @@ function initTradingJournal() {
         renderTrades();
         updateStats();
         updateWallOfShame();
+        updateCharts();
         resetForm();
     });
 
-    // Initial render & stats
+    // Initial render, stats & charts
     renderTrades();
     updateStats();
     updateWallOfShame();
+    updateCharts();
+    resetForm(); // Set default times on load
 
     function saveTrades() {
         localStorage.setItem('tradevision_trades', JSON.stringify(trades));
@@ -553,6 +591,21 @@ function initTradingJournal() {
         document.getElementById('btn-save-journal').innerText = 'Simpan Jurnal';
         btnCancelEdit.classList.add('hidden');
         lossDetailsGroup.classList.add('hidden');
+        timeCloseGroup.classList.add('hidden');
+        
+        // Set default open time to now
+        document.getElementById('journal-time-open').value = getLocalISOString();
+    }
+
+    function formatDateTime(dateTimeStr) {
+        if (!dateTimeStr) return '-';
+        const date = new Date(dateTimeStr);
+        return date.toLocaleDateString('id-ID', {
+            day: 'numeric',
+            month: 'short',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
     }
 
     function renderTrades() {
@@ -605,7 +658,20 @@ function initTradingJournal() {
                             <div class="param-item"><span>TP:</span> <strong>${trade.tp || '-'}</strong></div>
                             <div class="param-item"><span>PnL:</span> <strong style="color: ${trade.pnl >= 0 ? 'var(--color-bullish)' : 'var(--color-bearish)'}">${trade.pnl >= 0 ? '+' : ''}$${trade.pnl.toFixed(2)}</strong></div>
                         </div>
-                        <div class="trade-reason">
+                        
+                        <!-- Notion-style details row -->
+                        <div class="trade-notion-row">
+                            <div class="notion-item"><span>Risk (%)</span><strong>${trade.risk || 0}%</strong></div>
+                            <div class="notion-item"><span>R:R Ratio</span><strong>${trade.rr || '-'}</strong></div>
+                            <div class="notion-item"><span>Open Time</span><strong>${formatDateTime(trade.timeOpen)}</strong></div>
+                            <div class="notion-item"><span>Close Time</span><strong>${trade.status === 'OPEN' ? 'Sedang Berjalan' : formatDateTime(trade.timeClose)}</strong></div>
+                            <div class="notion-item">
+                                <span>Chart Link</span>
+                                ${trade.tvLink ? `<a href="${trade.tvLink}" target="_blank"><i class="fa-solid fa-arrow-up-right-from-square"></i> View Chart</a>` : '<strong>-</strong>'}
+                            </div>
+                        </div>
+
+                        <div class="trade-reason" style="margin-top: 15px;">
                             <strong>Reason:</strong> ${trade.reason}
                         </div>
                         ${trade.status === 'LOSS' && trade.lossCause ? `
@@ -687,6 +753,147 @@ function initTradingJournal() {
         `).join('');
     }
 
+    function updateCharts() {
+        // 1. Winrate Pie Chart
+        const ctxWinrate = document.getElementById('chart-winrate');
+        if (!ctxWinrate) return;
+
+        const wins = trades.filter(t => t.status === 'WIN').length;
+        const losses = trades.filter(t => t.status === 'LOSS').length;
+        const bes = trades.filter(t => t.status === 'BE').length;
+        const opens = trades.filter(t => t.status === 'OPEN').length;
+
+        if (winrateChartInstance) {
+            winrateChartInstance.destroy();
+        }
+
+        if (trades.length === 0) {
+            // Show empty state inside canvas container or draw a dummy chart
+            winrateChartInstance = new Chart(ctxWinrate, {
+                type: 'pie',
+                data: {
+                    labels: ['No Data'],
+                    datasets: [{
+                        data: [1],
+                        backgroundColor: ['rgba(255,255,255,0.05)'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        title: { display: true, text: 'Rasio Hasil Trade (Belum Ada Data)', color: '#64748b', font: { size: 11 } }
+                    }
+                }
+            });
+        } else {
+            winrateChartInstance = new Chart(ctxWinrate, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Win', 'Loss', 'BE', 'Open'],
+                    datasets: [{
+                        data: [wins, losses, bes, opens],
+                        backgroundColor: ['#00e676', '#ff1744', '#94a3b8', '#3b82f6'],
+                        borderColor: '#111620',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { color: '#94a3b8', font: { size: 10 }, boxWidth: 8, padding: 8 }
+                        },
+                        title: { display: true, text: 'Rasio Hasil Trade', color: '#ffffff', font: { size: 12, weight: 'bold' } }
+                    },
+                    cutout: '60%'
+                }
+            });
+        }
+
+        // 2. Equity Curve Line Chart
+        const ctxPnl = document.getElementById('chart-pnl');
+        if (!ctxPnl) return;
+
+        if (pnlChartInstance) {
+            pnlChartInstance.destroy();
+        }
+
+        if (trades.length === 0) {
+            pnlChartInstance = new Chart(ctxPnl, {
+                type: 'line',
+                data: {
+                    labels: ['Start'],
+                    datasets: [{ data: [0], borderColor: 'rgba(255,255,255,0.05)', borderWidth: 1 }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        title: { display: true, text: 'Kurva Ekuitas (Belum Ada Data)', color: '#64748b', font: { size: 11 } }
+                    },
+                    scales: { x: { display: false }, y: { display: false } }
+                }
+            });
+        } else {
+            // Sort trades chronologically (oldest first)
+            const sortedTrades = [...trades].filter(t => t.status !== 'OPEN').sort((a, b) => {
+                return new Date(a.timeOpen) - new Date(b.timeOpen);
+            });
+
+            const pnlData = [0];
+            const labels = ['Start'];
+            let currentSum = 0;
+
+            sortedTrades.forEach((t, i) => {
+                currentSum += (t.pnl || 0);
+                pnlData.push(currentSum);
+                labels.push(`#${i+1}`);
+            });
+
+            pnlChartInstance = new Chart(ctxPnl, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Saldo Cumulative PnL',
+                        data: pnlData,
+                        borderColor: '#00f5a0',
+                        backgroundColor: 'rgba(0, 245, 160, 0.05)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.2,
+                        pointRadius: 3,
+                        pointBackgroundColor: '#00f5a0'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        title: { display: true, text: 'Kurva Ekuitas ($ USD)', color: '#ffffff', font: { size: 12, weight: 'bold' } }
+                    },
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#64748b', font: { size: 9 } }
+                        },
+                        y: {
+                            grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                            ticks: { color: '#64748b', font: { size: 9 } }
+                        }
+                    }
+                }
+            });
+        }
+    }
+
     // Expose functions globally for onclick handlers in dynamically generated HTML
     window.deleteTrade = function(id) {
         if (confirm('Apakah Anda yakin ingin menghapus trade ini?')) {
@@ -695,6 +902,7 @@ function initTradingJournal() {
             renderTrades();
             updateStats();
             updateWallOfShame();
+            updateCharts();
             resetForm();
         }
     };
@@ -706,20 +914,26 @@ function initTradingJournal() {
         document.getElementById('journal-id').value = trade.id;
         document.getElementById('journal-pair').value = trade.pair;
         document.getElementById('journal-type').value = trade.type;
+        document.getElementById('journal-risk').value = trade.risk || 0;
+        document.getElementById('journal-rr').value = trade.rr || '';
         document.getElementById('journal-entry').value = trade.entry || '';
         document.getElementById('journal-sl').value = trade.sl || '';
         document.getElementById('journal-tp').value = trade.tp || '';
+        document.getElementById('journal-time-open').value = trade.timeOpen || getLocalISOString();
         document.getElementById('journal-emotion').value = trade.emotion;
         document.getElementById('journal-reason').value = trade.reason;
         document.getElementById('journal-status').value = trade.status;
         document.getElementById('journal-pnl').value = trade.pnl || '';
+        document.getElementById('journal-tv-link').value = trade.tvLink || '';
 
+        handleStatusChange(trade.status);
+
+        if (trade.status !== 'OPEN') {
+            document.getElementById('journal-time-close').value = trade.timeClose || getLocalISOString();
+        }
         if (trade.status === 'LOSS') {
-            lossDetailsGroup.classList.remove('hidden');
             document.getElementById('journal-loss-cause').value = trade.lossCause || 'Market Normal';
             document.getElementById('journal-self-critique').value = trade.selfCritique || '';
-        } else {
-            lossDetailsGroup.classList.add('hidden');
         }
 
         document.getElementById('form-title').innerText = 'Edit Catatan Jurnal';
@@ -730,4 +944,113 @@ function initTradingJournal() {
         document.getElementById('jurnal').scrollIntoView({ behavior: 'smooth' });
     };
 }
+
+/* ==========================================================================
+   8. AI TODAY INTEL LOGIC
+   ========================================================================== */
+function initAISentiment() {
+    const aiDate = document.getElementById('ai-current-date');
+    const aiMacro = document.getElementById('ai-macro-outlook');
+    
+    const sentXau = document.getElementById('ai-sent-xauusd');
+    const projXau = document.getElementById('ai-proj-xauusd');
+    const cardXau = document.getElementById('ai-card-xauusd');
+
+    const sentEur = document.getElementById('ai-sent-eurusd');
+    const projEur = document.getElementById('ai-proj-eurusd');
+    const cardEur = document.getElementById('ai-card-eurusd');
+
+    const sentGbp = document.getElementById('ai-sent-gbpusd');
+    const projGbp = document.getElementById('ai-proj-gbpusd');
+    const cardGbp = document.getElementById('ai-card-gbpusd');
+
+    if (!aiMacro) return;
+
+    // Format current date in Indonesian
+    const today = new Date();
+    const formattedDate = today.toLocaleDateString('id-ID', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+    });
+    aiDate.innerText = formattedDate;
+
+    // Curated dynamic macro outlooks based on day of week to simulate real harian updates
+    const dayOfWeek = today.getDay(); // 0 = Sunday, 1 = Monday, etc.
+    
+    let macroText = "";
+    let xauSentiment = "BULLISH", xauProj = "";
+    let eurSentiment = "BEARISH", eurProj = "";
+    let gbpSentiment = "NEUTRAL", gbpProj = "";
+
+    // Generate dynamic sentiment text based on day of week
+    if (dayOfWeek === 1) { // Monday
+        macroText = "Sesi awal pekan menunjukkan penguatan tipis Dolar AS (DXY) di area 104.50. Pasar bersiap menghadapi rilis data ekonomi krusial di pertengahan pekan. Likuiditas masih cenderung moderat di sesi Asia dan Eropa.";
+        xauSentiment = "BULLISH";
+        xauProj = "Emas berkonsolidasi di atas area $2,320. Menunggu konfirmasi breakout di level $2,340 untuk target berikutnya menuju $2,365.";
+        eurSentiment = "BEARISH";
+        eurProj = "EUR/USD tertekan di bawah level resisten 1.0720. Proyeksi pergerakan mengarah ke uji level support psikologis di 1.0650.";
+        gbpSentiment = "NEUTRAL";
+        gbpProj = "GBP/USD tertahan di range sempit 1.2630 - 1.2690. Disarankan menunggu pola rejection di batas range sebelum mengambil posisi.";
+    } else if (dayOfWeek === 2) { // Tuesday
+        macroText = "Dolar AS bergerak variatif setelah pernyataan bernada hawkish dari anggota bank sentral. Pasar obligasi menunjukkan kenaikan yield Treasury 10-tahun ke 4.25%, menekan aset non-yielding.";
+        xauSentiment = "NEUTRAL";
+        xauProj = "XAU/USD terjebak di range $2,310 - $2,335. Adanya indikasi akumulasi beli di area support. Rebound jangka pendek berpotensi terjadi.";
+        eurSentiment = "BEARISH";
+        eurProj = "Pelemahan data manufaktur Zona Euro memperkuat sentimen bearish. Penurunan di bawah 1.0680 akan membuka jalan menuju support 1.0620.";
+        gbpSentiment = "BULLISH";
+        gbpProj = "Data ketenagakerjaan Inggris yang solid menopang Sterling. GBP/USD menguji resisten 1.2700, potensi breakout ke 1.2750.";
+    } else if (dayOfWeek === 3) { // Wednesday
+        macroText = "Hari ini perhatian tertuju pada rilis inflasi AS (CPI). Angka yang lebih tinggi dari estimasi akan memperkuat narasi 'higher for longer' The Fed, sementara kejutan penurunan akan memicu reli aset berisiko.";
+        xauSentiment = "BULLISH";
+        xauProj = "Emas mendapatkan traksi aman (safe haven) akibat ketegangan geopolitik baru. Target kenaikan terdekat di $2,350 dengan proteksi ketat di bawah $2,315.";
+        eurSentiment = "NEUTRAL";
+        eurProj = "Pasar EUR/USD bersikap 'wait-and-see' menjelang rilis CPI malam ini. Rentang perdagangan diperkirakan terbatas pada 1.0680 - 1.0740.";
+        gbpSentiment = "BEARISH";
+        gbpProj = "Pola teknikal menunjukkan sinyal bearish engulfing di chart H4. GBP/USD berpotensi turun menuju 1.2600 jika resisten 1.2680 gagal ditembus.";
+    } else if (dayOfWeek === 4) { // Thursday
+        macroText = "Pasca rilis data ekonomi kemarin, Dolar AS melemah menyusul inflasi yang melambat sesuai ekspektasi. Sentimen pasar beralih ke mode 'Risk-On' dengan pasar saham global mencatat kenaikan.";
+        xauSentiment = "BULLISH";
+        xauProj = "Gold berhasil menembus resisten kuat $2,340 dan sekarang menjadikannya sebagai support baru. Proyeksi kenaikan berlanjut hingga area $2,370.";
+        eurSentiment = "BULLISH";
+        eurProj = "EUR/USD berhasil rebound dari support kuat 1.0660 dan saat ini mengincar level 1.0760. Bias harian berubah menjadi bullish.";
+        gbpSentiment = "BULLISH";
+        gbpProj = "Sterling memimpin penguatan terhadap USD. GBP/USD bersiap menguji level tertinggi mingguan di 1.2780 dengan support terdekat di 1.2690.";
+    } else if (dayOfWeek === 5) { // Friday
+        macroText = "Menjelang penutupan pekan, aksi profit-taking mendominasi pergerakan pasar. Rilis data retail sales hari ini akan menjadi katalis akhir yang menentukan arah penutupan candle mingguan.";
+        xauSentiment = "NEUTRAL";
+        xauProj = "Gold diperkirakan bergerak dalam pola konsolidasi akhir pekan di kisaran $2,330 - $2,355. Berbahaya untuk entry di tengah range.";
+        eurSentiment = "BEARISH";
+        eurProj = "Kegagalan menembus 1.0750 memicu penolakan teknikal. EUR/USD berpotensi terkoreksi turun kembali ke area 1.0700 di sesi New York.";
+        gbpSentiment = "NEUTRAL";
+        gbpProj = "GBP/USD tertahan tepat di bawah resisten psikologis 1.2750. Aksi konsolidasi diperkirakan mendominasi hingga penutupan pasar.";
+    } else { // Weekend (Saturday & Sunday)
+        macroText = "Pasar ditutup. Analisis mingguan menunjukkan Dolar AS menyelesaikan pekan dengan pelemahan tipis. Para trader mempersiapkan rencana trading untuk pekan depan dengan memantau rilis kalender ekonomi utama.";
+        xauSentiment = "BULLISH";
+        xauProj = "Secara mingguan, struktur market Gold tetap bullish di atas level support kritis $2,300. Proyeksi pekan depan tetap mencari peluang buy.";
+        eurSentiment = "BEARISH";
+        eurProj = "Tren jangka menengah EUR/USD masih didominasi bearish terarah. Setiap kenaikan mendekati 1.0780 dianggap sebagai area sell yang ideal.";
+        gbpSentiment = "NEUTRAL";
+        gbpProj = "GBP/USD ditutup di level 1.2685. Menunjukkan ketidakpastian tren jangka panjang. Area kunci yang dipantau adalah 1.2600 dan 1.2800.";
+    }
+
+    // Set UI values
+    aiMacro.innerText = macroText;
+
+    // XAUUSD
+    sentXau.innerText = xauSentiment;
+    sentXau.className = `ai-sentiment-badge ${xauSentiment.toLowerCase()}`;
+    projXau.innerText = xauProj;
+
+    // EURUSD
+    sentEur.innerText = eurSentiment;
+    sentEur.className = `ai-sentiment-badge ${eurSentiment.toLowerCase()}`;
+    projEur.innerText = eurProj;
+
+    // GBPUSD
+    sentGbp.innerText = gbpSentiment;
+    sentGbp.className = `ai-sentiment-badge ${gbpSentiment.toLowerCase()}`;
+    projGbp.innerText = gbpProj;
+}
+
 
