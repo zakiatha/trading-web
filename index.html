@@ -203,9 +203,18 @@
             <div class="news-grid">
                 <!-- Market News (FXStreet Style) -->
                 <div class="news-list-container">
-                    <h3 class="news-group-title text-accent-border">Latest FX News</h3>
+                    <div class="news-tabs-header">
+                        <h3 class="news-group-title text-accent-border">Market News</h3>
+                        <div class="news-tabs">
+                            <button class="news-tab-btn active" data-category="forex">Forex</button>
+                            <button class="news-tab-btn" data-category="crypto">Crypto</button>
+                            <button class="news-tab-btn" data-category="index">Index Lokal</button>
+                            <button class="news-tab-btn" data-category="commodities">Commodities</button>
+                        </div>
+                    </div>
                     
-                    <div class="news-cards-stack">
+                    <!-- Forex News -->
+                    <div class="news-cards-stack" id="news-forex">
                         <article class="news-card">
                             <div class="news-badge-container">
                                 <span class="news-badge-breaking">
@@ -221,8 +230,8 @@
                         </article>
 
                         <article class="news-card">
-                            <h4 class="news-card-title">Harga Emas (XAU/USD) Tertahan di Resisten $2,050</h4>
-                            <p class="news-card-excerpt">Ketegangan geopolitik mereda sementara, membuat Emas kesulitan menembus area resisten krusial mingguan.</p>
+                            <h4 class="news-card-title">GBP/USD Stabil di Atas 1.2650 Pasca Data Tenaga Kerja</h4>
+                            <p class="news-card-excerpt">Perekonomian Inggris menunjukkan ketahanan dengan tingkat pengangguran yang tetap stabil, mendukung penguatan sterling.</p>
                             <div class="news-card-meta">
                                 <span><i class="fa-regular fa-clock"></i> 1 Jam lalu</span>
                                 <span>via FXStreet</span>
@@ -235,6 +244,111 @@
                             <div class="news-card-meta">
                                 <span><i class="fa-regular fa-clock"></i> 3 Jam lalu</span>
                                 <span>via FXStreet</span>
+                            </div>
+                        </article>
+                    </div>
+
+                    <!-- Crypto News -->
+                    <div class="news-cards-stack hidden" id="news-crypto">
+                        <article class="news-card">
+                            <div class="news-badge-container">
+                                <span class="news-badge-breaking">
+                                    <i class="fa-solid fa-bolt animate-pulse"></i> HOT
+                                </span>
+                            </div>
+                            <h4 class="news-card-title">Bitcoin (BTC) Tembus $95,000 Didorong Arus Masuk ETF</h4>
+                            <p class="news-card-excerpt">Minat institusional terus meningkat dengan rekor pembelian bersih harian baru pada produk ETF Spot Bitcoin.</p>
+                            <div class="news-card-meta">
+                                <span><i class="fa-regular fa-clock"></i> 30 Menit lalu</span>
+                                <span>via Cointelegraph</span>
+                            </div>
+                        </article>
+
+                        <article class="news-card">
+                            <h4 class="news-card-title">Ethereum (ETH) Menguji Area $3,200 Saat Gas Fee Turun</h4>
+                            <p class="news-card-excerpt">Pembaruan layer-2 berhasil menurunkan biaya transaksi jaringan, memicu lonjakan aktivitas smart contract.</p>
+                            <div class="news-card-meta">
+                                <span><i class="fa-regular fa-clock"></i> 2 Jam lalu</span>
+                                <span>via CoinDesk</span>
+                            </div>
+                        </article>
+
+                        <article class="news-card">
+                            <h4 class="news-card-title">Solana Memimpin Reli Altcoin dengan Kenaikan 12%</h4>
+                            <p class="news-card-excerpt">Volume transaksi DEX di jaringan Solana melampaui Ethereum dalam basis mingguan, didorong antusiasme pasar.</p>
+                            <div class="news-card-meta">
+                                <span><i class="fa-regular fa-clock"></i> 4 Jam lalu</span>
+                                <span>via Decrypt</span>
+                            </div>
+                        </article>
+                    </div>
+
+                    <!-- Index Lokal News -->
+                    <div class="news-cards-stack hidden" id="news-index">
+                        <article class="news-card">
+                            <div class="news-badge-container">
+                                <span class="news-badge-breaking">
+                                    <i class="fa-solid fa-circle-check"></i> IHSG LIVE
+                                </span>
+                            </div>
+                            <h4 class="news-card-title">IHSG Ditutup Menguat ke Level 7,300 Didorong Sektor Perbankan</h4>
+                            <p class="news-card-excerpt">Saham-saham bank papan atas seperti BBRI, BMRI, dan BBCA memimpin penguatan indeks di sesi perdagangan sore.</p>
+                            <div class="news-card-meta">
+                                <span><i class="fa-regular fa-clock"></i> 45 Menit lalu</span>
+                                <span>via CNBC Indonesia</span>
+                            </div>
+                        </article>
+
+                        <article class="news-card">
+                            <h4 class="news-card-title">Rupiah Menguat Terhadap Dolar AS Pasca Keputusan BI-Rate</h4>
+                            <p class="news-card-excerpt">Bank Indonesia memutuskan untuk menahan suku bunga acuan, memberikan sentimen positif bagi stabilitas nilai tukar rupiah.</p>
+                            <div class="news-card-meta">
+                                <span><i class="fa-regular fa-clock"></i> 2 Jam lalu</span>
+                                <span>via Kontan</span>
+                            </div>
+                        </article>
+
+                        <article class="news-card">
+                            <h4 class="news-card-title">Saham BBRI dan BMRI Catat Net Buy Asing Tertinggi Pekan Ini</h4>
+                            <p class="news-card-excerpt">Investor asing kembali masuk ke pasar saham Indonesia dengan akumulasi nilai transaksi bersih yang signifikan.</p>
+                            <div class="news-card-meta">
+                                <span><i class="fa-regular fa-clock"></i> 5 Jam lalu</span>
+                                <span>via Bisnis Indonesia</span>
+                            </div>
+                        </article>
+                    </div>
+
+                    <!-- Commodities News -->
+                    <div class="news-cards-stack hidden" id="news-commodities">
+                        <article class="news-card">
+                            <div class="news-badge-container">
+                                <span class="news-badge-breaking">
+                                    <i class="fa-solid fa-leaf"></i> KOMODITAS
+                                </span>
+                            </div>
+                            <h4 class="news-card-title">Harga Emas (XAU/USD) Tertahan di Resisten $2,050</h4>
+                            <p class="news-card-excerpt">Ketegangan geopolitik mereda sementara, membuat Emas kesulitan menembus area resisten krusial mingguan.</p>
+                            <div class="news-card-meta">
+                                <span><i class="fa-regular fa-clock"></i> 1 Jam lalu</span>
+                                <span>via Reuters</span>
+                            </div>
+                        </article>
+
+                        <article class="news-card">
+                            <h4 class="news-card-title">Minyak Mentah Brent Turun ke $78 Per Barel</h4>
+                            <p class="news-card-excerpt">Kenaikan cadangan minyak mentah komersial di Amerika Serikat memicu kekhawatiran kelebihan pasokan global.</p>
+                            <div class="news-card-meta">
+                                <span><i class="fa-regular fa-clock"></i> 2 Jam lalu</span>
+                                <span>via Bloomberg</span>
+                            </div>
+                        </article>
+
+                        <article class="news-card">
+                            <h4 class="news-card-title">Harga Tembaga Melonjak Didorong Permintaan Industri Global</h4>
+                            <p class="news-card-excerpt">Optimisme atas pulihnya aktivitas manufaktur di Asia dan Amerika Utara mendorong lonjakan harga logam industri.</p>
+                            <div class="news-card-meta">
+                                <span><i class="fa-regular fa-clock"></i> 6 Jam lalu</span>
+                                <span>via Investing.com</span>
                             </div>
                         </article>
                     </div>

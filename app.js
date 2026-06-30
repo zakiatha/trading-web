@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initRiskCalculator();
     init3DBackground();
     initActiveLinkTracker();
+    initNewsTabs();
 });
 
 /* ==========================================================================
@@ -324,6 +325,36 @@ function initActiveLinkTracker() {
             link.classList.remove('active');
             if (link.getAttribute('href') === `#${currentSectionId}`) {
                 link.classList.add('active');
+            }
+        });
+    });
+}
+
+/* ==========================================================================
+   5. NEWS CATEGORY TABS
+   ========================================================================== */
+function initNewsTabs() {
+    const tabButtons = document.querySelectorAll('.news-tab-btn');
+    const newsStacks = document.querySelectorAll('.news-cards-stack');
+
+    if (tabButtons.length === 0) return;
+
+    tabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            // Remove active class from all buttons
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+            
+            // Add active class to clicked button
+            button.classList.add('active');
+
+            // Hide all news stacks
+            newsStacks.forEach(stack => stack.classList.add('hidden'));
+
+            // Show selected news stack
+            const category = button.getAttribute('data-category');
+            const targetStack = document.getElementById(`news-${category}`);
+            if (targetStack) {
+                targetStack.classList.remove('hidden');
             }
         });
     });
