@@ -941,7 +941,7 @@ function initTradingJournal() {
         btnCancelEdit.classList.remove('hidden');
 
         // Scroll to form
-        document.getElementById('jurnal').scrollIntoView({ behavior: 'smooth' });
+        document.getElementById('journal-form').scrollIntoView({ behavior: 'smooth' });
     };
 }
 
