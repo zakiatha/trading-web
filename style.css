@@ -1619,9 +1619,15 @@ section {
 
 /* AI Pairs Grid */
 .ai-pairs-grid {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
     gap: 16px;
+}
+
+@media (max-width: 768px) {
+    .ai-pairs-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 .ai-pair-card {

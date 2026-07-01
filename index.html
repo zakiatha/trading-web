@@ -44,6 +44,7 @@
                 <a href="#jurnal" class="nav-link">Jurnal</a>
                 <a href="#myplan" class="nav-link">My Plan</a>
                 <a href="#news" class="nav-link">News</a>
+                <a href="#ship-tracker" class="nav-link">Ship Tracker</a>
                 <a href="#indikator" class="nav-link">Indikator</a>
             </nav>
             
@@ -253,6 +254,68 @@
                         </div>
                         <p class="ai-pair-projection" id="ai-proj-gbpusd">Memuat proyeksi...</p>
                     </div>
+
+                    <!-- AUDUSD -->
+                    <div class="card glass-card ai-pair-card" id="ai-card-audusd">
+                        <div class="ai-pair-header">
+                            <span class="ai-pair-name">AUD/USD</span>
+                            <span class="ai-sentiment-badge" id="ai-sent-audusd">NEUTRAL</span>
+                        </div>
+                        <p class="ai-pair-projection" id="ai-proj-audusd">Memuat proyeksi...</p>
+                    </div>
+
+                    <!-- NZDUSD -->
+                    <div class="card glass-card ai-pair-card" id="ai-card-nzdusd">
+                        <div class="ai-pair-header">
+                            <span class="ai-pair-name">NZD/USD</span>
+                            <span class="ai-sentiment-badge" id="ai-sent-nzdusd">NEUTRAL</span>
+                        </div>
+                        <p class="ai-pair-projection" id="ai-proj-nzdusd">Memuat proyeksi...</p>
+                    </div>
+
+                    <!-- USDJPY -->
+                    <div class="card glass-card ai-pair-card" id="ai-card-usdjpy">
+                        <div class="ai-pair-header">
+                            <span class="ai-pair-name">USD/JPY</span>
+                            <span class="ai-sentiment-badge" id="ai-sent-usdjpy">NEUTRAL</span>
+                        </div>
+                        <p class="ai-pair-projection" id="ai-proj-usdjpy">Memuat proyeksi...</p>
+                    </div>
+
+                    <!-- USDCHF -->
+                    <div class="card glass-card ai-pair-card" id="ai-card-usdchf">
+                        <div class="ai-pair-header">
+                            <span class="ai-pair-name">USD/CHF</span>
+                            <span class="ai-sentiment-badge" id="ai-sent-usdchf">NEUTRAL</span>
+                        </div>
+                        <p class="ai-pair-projection" id="ai-proj-usdchf">Memuat proyeksi...</p>
+                    </div>
+
+                    <!-- USDCAD -->
+                    <div class="card glass-card ai-pair-card" id="ai-card-usdcad">
+                        <div class="ai-pair-header">
+                            <span class="ai-pair-name">USD/CAD</span>
+                            <span class="ai-sentiment-badge" id="ai-sent-usdcad">NEUTRAL</span>
+                        </div>
+                        <p class="ai-pair-projection" id="ai-proj-usdcad">Memuat proyeksi...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- INSTITUTIONAL SENTIMENT & VOLUME (COT REPORT) -->
+            <div class="card glass-card ai-cot-card" style="margin-top: 30px; padding: 24px;">
+                <div class="ai-card-header" style="border-bottom: 1px solid var(--card-border); padding-bottom: 12px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <h3 class="ai-overview-title" style="margin: 0; font-size: 1.2rem;"><i class="fa-solid fa-building-columns text-accent"></i> Institutional Positions (COT Report)</h3>
+                        <button id="btn-refresh-cot" class="btn-refresh" title="Refresh Data Institusi">
+                            <i class="fa-solid fa-arrows-rotate"></i>
+                        </button>
+                    </div>
+                    <span class="ai-date-badge" style="background: rgba(0, 245, 160, 0.15); color: var(--color-teal); font-weight: 600;">Commitment of Traders (Speculative Net)</span>
+                </div>
+                <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 20px;">Menampilkan volume posisi Long (Beli) vs Short (Jual) bersih yang diakumulasikan oleh hedge fund besar dan bank institusi global saat ini.</p>
+                <div class="cot-chart-wrapper" style="position: relative; height: 320px; width: 100%;">
+                    <canvas id="chart-cot-report"></canvas>
                 </div>
             </div>
         </div>
@@ -721,6 +784,20 @@
                         <iframe src="https://sslecal2.investing.com?columns=exc_flags,exc_currency,exc_importance,exc_actual,exc_forecast,exc_previous&features=datepicker,timezone&countries=25,32,6,37,72,22,17,39,14,10,35,43,56,36,110,11,26,12,4,5&calType=week&timeZone=18&lang=1" width="100%" height="100%" frameborder="0" allowtransparency="true" marginwidth="0" marginheight="0"></iframe>
                     </div>
                 </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 3.1: GLOBAL SHIP TRACKER -->
+    <section id="ship-tracker" class="ship-tracker-section" style="padding: 60px 0; border-top: 1px solid var(--card-border);">
+        <div class="section-container">
+            <div class="section-header">
+                <h2 class="section-title"><i class="fa-solid fa-ship text-accent"></i> Global Live <span class="gradient-text">Ship Tracker</span></h2>
+                <p class="section-subtitle">Pelacakan lalu lintas kapal niaga, tanker, kargo, dan logistik perdagangan laut dunia secara real-time.</p>
+            </div>
+
+            <div class="card glass-card ship-map-card" style="padding: 0; overflow: hidden; border-radius: var(--radius-lg); height: 500px; position: relative;">
+                <iframe src="https://www.vesselfinder.com/aismap?zoom=3&lat=0&lon=0&width=100%&height=500&names=false&clicktoact=false" width="100%" height="100%" frameborder="0" allowtransparency="true" loading="lazy" style="border: none;"></iframe>
             </div>
         </div>
     </section>

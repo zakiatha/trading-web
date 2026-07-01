@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initTradingPlan();
     initAISentiment();
     initNewsRefresh();
+    initCOTReport();
 });
 
 /* ==========================================================================
@@ -526,22 +527,24 @@ function initTradingJournal() {
         e.preventDefault();
 
         const id = document.getElementById('journal-id').value;
-        const pair = document.getElementById('journal-pair').value.toUpperCase().trim();
+        const status = document.getElementById('journal-status').value;
+        
+        // Security sanitization to protect against XSS attacks
+        const pair = sanitizeHTML(document.getElementById('journal-pair').value.toUpperCase().trim());
         const type = document.getElementById('journal-type').value;
         const risk = parseFloat(document.getElementById('journal-risk').value) || 0;
-        const rr = document.getElementById('journal-rr').value.trim();
+        const rr = sanitizeHTML(document.getElementById('journal-rr').value.trim());
         const entry = parseFloat(document.getElementById('journal-entry').value) || 0;
         const sl = parseFloat(document.getElementById('journal-sl').value) || 0;
         const tp = parseFloat(document.getElementById('journal-tp').value) || 0;
         const timeOpen = document.getElementById('journal-time-open').value;
         const timeClose = document.getElementById('journal-time-close').value;
         const emotion = document.getElementById('journal-emotion').value;
-        const reason = document.getElementById('journal-reason').value.trim();
-        const status = document.getElementById('journal-status').value;
+        const reason = sanitizeHTML(document.getElementById('journal-reason').value.trim());
         const pnl = parseFloat(document.getElementById('journal-pnl').value) || 0;
-        const tvLink = document.getElementById('journal-tv-link').value.trim();
-        const lossCause = status === 'LOSS' ? document.getElementById('journal-loss-cause').value : '';
-        const selfCritique = status === 'LOSS' ? document.getElementById('journal-self-critique').value.trim() : '';
+        const tvLink = sanitizeHTML(document.getElementById('journal-tv-link').value.trim());
+        const lossCause = status === 'LOSS' ? sanitizeHTML(document.getElementById('journal-loss-cause').value) : '';
+        const selfCritique = status === 'LOSS' ? sanitizeHTML(document.getElementById('journal-self-critique').value.trim()) : '';
 
         if (id) {
             // Edit existing
@@ -953,14 +956,25 @@ function initAISentiment() {
     const aiDate = document.getElementById('ai-current-date');
     const aiMacro = document.getElementById('ai-macro-outlook');
     
+    // Core pair elements
     const sentXau = document.getElementById('ai-sent-xauusd');
     const projXau = document.getElementById('ai-proj-xauusd');
-
     const sentEur = document.getElementById('ai-sent-eurusd');
     const projEur = document.getElementById('ai-proj-eurusd');
-
     const sentGbp = document.getElementById('ai-sent-gbpusd');
     const projGbp = document.getElementById('ai-proj-gbpusd');
+
+    // Additional pair elements
+    const sentAud = document.getElementById('ai-sent-audusd');
+    const projAud = document.getElementById('ai-proj-audusd');
+    const sentNzd = document.getElementById('ai-sent-nzdusd');
+    const projNzd = document.getElementById('ai-proj-nzdusd');
+    const sentJpy = document.getElementById('ai-sent-usdjpy');
+    const projJpy = document.getElementById('ai-proj-usdjpy');
+    const sentChf = document.getElementById('ai-sent-usdchf');
+    const projChf = document.getElementById('ai-proj-usdchf');
+    const sentCad = document.getElementById('ai-sent-usdcad');
+    const projCad = document.getElementById('ai-proj-usdcad');
 
     if (!aiMacro) return;
 
@@ -976,55 +990,102 @@ function initAISentiment() {
     const dayOfWeek = today.getDay(); // 0 = Minggu, 1 = Senin, dst.
     
     let macroText = "";
+    
+    // Default sentiments
     let xauSentiment = "BULLISH", xauProj = "";
     let eurSentiment = "BEARISH", eurProj = "";
     let gbpSentiment = "NEUTRAL", gbpProj = "";
+    let audSentiment = "NEUTRAL", audProj = "";
+    let nzdSentiment = "NEUTRAL", nzdProj = "";
+    let jpySentiment = "BULLISH", jpyProj = "";
+    let chfSentiment = "BEARISH", chfProj = "";
+    let cadSentiment = "BULLISH", cadProj = "";
 
-    // Membuat rangkuman panjang 3 paragraf per hari
+    // Generate dynamic sentiment & projections based on day of week
     if (dayOfWeek === 1) { // Senin
         macroText = `**[TINJAUAN MAKRO & FUNDAMENTAL]** Sesi pembukaan awal pekan ini diwarnai oleh kehati-hatian tingkat tinggi dari pelaku pasar global. Indeks Dolar AS (DXY) merayap naik ke area 104.50, didukung oleh ekspektasi pasar yang realistis terhadap keberlanjutan suku bunga acuan 'higher for longer' oleh Federal Reserve. Volume perdagangan pada sesi Asia terpantau moderat menjelang rilis data manufaktur (PMI) dari Zona Euro dan Inggris yang dijadwalkan hari ini. Gejolak geopolitik di Timur Tengah juga masih memberikan sentimen protektif pada mata uang komoditas dan aset safe haven.\n\n` +
                     `**[STRUKTUR TEKNIKAL & LIQUIDITY]** Secara teknikal, pergerakan chart mayoritas pair utama menunjukkan pola konsolidasi pasca closing market pekan lalu. Area Fair Value Gap (FVG) pada timeframe H4 menjadi zona krusial yang dipantau ketat untuk peluang re-entry. XAU/USD berhasil mempertahankan posisi di atas level support dinamis EMA 50 H4, sementara EUR/USD tertahan tepat di bawah zona suplai 1.0720. Indikator momentum RSI menunjukkan area netral, mengisyaratkan tidak adanya dorongan overbought maupun oversold sebelum breakout rentang harian terjadi.\n\n` +
                     `**[MANAJEMEN RISIKO & STRATEGI]** Mengingat likuiditas awal pekan yang biasanya belum terisi penuh hingga sesi New York terbuka, disarankan untuk membatasi risiko per trade maksimal sebesar 0.5% - 1% dari total ekuitas. Hindari mengambil keputusan entry terburu-buru sebelum pukul 14:00 WIB (sesi London mulai aktif). Pantau rilis data makro minor pada sore hari, dan pastikan tidak menahan posisi open tanpa Stop Loss yang terukur guna mengantisipasi volatilitas mendadak akibat ketidakseimbangan aliran dana awal pekan.`;
         
         xauSentiment = "BULLISH";
-        xauProj = "Emas berkonsolidasi kokoh di atas area support psikologis $2,320. Penembusan dan penutupan candle di atas resisten $2,340 akan membuka jalan menuju target supply berikutnya di kisaran $2,365 - $2,380.";
+        xauProj = "Emas berkonsolidasi kokoh di atas area support psikologis $2,320. Penembusan di atas resisten $2,340 akan membuka target supply berikutnya di kisaran $2,365 - $2,380.";
         eurSentiment = "BEARISH";
-        eurProj = "EUR/USD tertekan di bawah garis resisten tren turun 1.0720. Selama zona ini gagal ditembus ke atas, bias pergerakan harian tetap mengarah ke uji ulang support psikologis di 1.0650.";
+        eurProj = "EUR/USD tertekan di bawah garis resisten tren turun 1.0720. Bias pergerakan harian tetap mengarah ke uji ulang support psikologis di 1.0650.";
         gbpSentiment = "NEUTRAL";
-        gbpProj = "GBP/USD terjebak di dalam range sempit 1.2630 hingga 1.2690. Trader disarankan menunggu konfirmasi rejection yang jelas pada batas atas/bawah range tersebut sebelum mengambil keputusan entry.";
+        gbpProj = "GBP/USD terjebak di dalam range sempit 1.2630 hingga 1.2690. Menunggu konfirmasi rejection sebelum entri harian.";
+        audSentiment = "NEUTRAL";
+        audProj = "AUD/USD tertahan oleh area supply harian di 0.6650. RBA bersikap hawkish namun kekuatan USD menahan laju kenaikan harga.";
+        nzdSentiment = "BEARISH";
+        nzdProj = "NZD/USD melemah pasca rejection area resistance 0.6120. Target penurunan teknikal terdekat menuju support kuat 0.6050.";
+        jpySentiment = "BEARISH";
+        jpyProj = "USD/JPY tertekan akibat kekhawatiran intervensi nyata dari BOJ. Bias mengarah ke bawah menguji support psikologis 158.00.";
+        chfSentiment = "NEUTRAL";
+        chfProj = "USD/CHF bergerak sideways di range 0.8840 - 0.8900. Menunggu sinyal breakout yang terarah untuk konfirmasi tren.";
+        cadSentiment = "BULLISH";
+        cadProj = "USD/CAD rebound dari support dinamis 1.3620. Kenaikan mengarah ke zona supply harian terdekat di sekitar level 1.3700.";
     } else if (dayOfWeek === 2) { // Selasa
         macroText = `**[TINJAUAN MAKRO & FUNDAMENTAL]** Dolar AS menunjukkan pergerakan variatif menyusul serangkaian pernyataan bernada hawkish dari beberapa pejabat bank sentral Federal Reserve. Pasar obligasi merespons langsung dengan kenaikan yield US Treasury 10-tahun ke level 4.25%, yang secara otomatis menekan aset-aset tanpa imbal hasil (non-yielding assets). Investor saat ini juga sedang menakar prospek perlambatan ekonomi global akibat kebijakan suku bunga ketat yang tampaknya akan bertahan lebih lama dari perkiraan semula.\n\n` +
                     `**[STRUKTUR TEKNIKAL & LIQUIDITY]** Dari perspektif teknikal, pergerakan instrumen XAU/USD terindikasi sedang membentuk pola akumulasi beli di dekat area support harian. Struktur pasar pada timeframe M15 dan H1 memperlihatkan pembentukan order block bullish yang cukup valid. Sementara itu, indeks ekuitas global mengalami tekanan korektif tipis, mencerminkan peralihan likuiditas dari pasar saham menuju pasar obligasi pemerintah yang menawarkan imbal hasil lebih aman dan menarik.\n\n` +
                     `**[MANAJEMEN RISIKO & STRATEGI]** Fokus transaksi hari ini disarankan untuk lebih memprioritaskan setup scalping atau intraday cepat pada instrumen mayor. Selalu gunakan rasio Risk to Reward (R:R) minimal 1:2 untuk memastikan portofolio tetap sehat dalam jangka panjang. Sesi New York pukul 19:30 WIB diperkirakan akan menjadi puncak volatilitas harian, sehingga sangat direkomendasikan untuk mengamankan profit sebagian (partial take profit) atau memindahkan Stop Loss ke titik Break Even (BE) sebelum jam krusial tersebut.`;
         
         xauSentiment = "NEUTRAL";
-        xauProj = "XAU/USD bergerak di kisaran $2,310 - $2,335. Adanya rejection berulang pada support harian mengindikasikan potensi rebound jangka pendek menuju batas atas rentang konsolidasi di $2,345.";
+        xauProj = "XAU/USD bergerak di kisaran $2,310 - $2,335. Adanya rejection berulang pada support harian mengindikasikan potensi rebound jangka pendek menuju $2,345.";
         eurSentiment = "BEARISH";
-        eurProj = "Rilis data ekonomi Zona Euro yang mengecewakan kembali membebani mata uang tunggal. Peluang penjualan harian dapat dicari di sekitar area pullback 1.0680 dengan target support di 1.0620.";
+        eurProj = "Rilis data ekonomi Zona Euro yang mengecewakan kembali membebani mata uang tunggal. Peluang jual di pullback 1.0680 dengan target support di 1.0620.";
         gbpSentiment = "BULLISH";
-        gbpProj = "Kekuatan data tenaga kerja domestik Inggris memberikan dorongan positif bagi Sterling. GBP/USD sedang menguji level resisten 1.2700, potensi breakout kuat menuju area target 1.2750.";
+        gbpProj = "Kekuatan data tenaga kerja domestik Inggris menopang Sterling. GBP/USD sedang menguji level resisten 1.2700, potensi breakout ke target 1.2750.";
+        audSentiment = "BULLISH";
+        audProj = "AUD/USD rebound dari support dinamis 0.6580. Arah jangka pendek menuju level resisten minor di sekitar area 0.6640.";
+        nzdSentiment = "NEUTRAL";
+        nzdProj = "NZD/USD menunjukkan pola konsolidasi pasca kejatuhan. Rentang pergerakan terbatas pada area support 0.6080 dan resisten 0.6130.";
+        jpySentiment = "BULLISH";
+        jpyProj = "USD/JPY bangkit setelah meredanya kepanikan pasar atas isu BOJ. Target reli jangka pendek kembali menuju batas atas di level 161.20.";
+        chfSentiment = "BULLISH";
+        chfProj = "USD/CHF menguat terarah sejalan dengan pelemahan safe haven CHF. Penembusan 0.8920 akan mempercepat pergerakan menuju level 0.8970.";
+        cadSentiment = "NEUTRAL";
+        cadProj = "USD/CAD sideways menjelang pidato gubernur Bank of Canada. Perdagangan harian dibatasi oleh support 1.3600 dan resisten 1.3680.";
     } else if (dayOfWeek === 3) { // Rabu
         macroText = `**[TINJAUAN MAKRO & FUNDAMENTAL]** Hari ini seluruh fokus pasar finansial global tertuju sepenuhnya pada rilis data inflasi konsumen (CPI) Amerika Serikat yang akan diumumkan nanti malam. Data ini merupakan katalisator utama yang sangat dinanti oleh pelaku pasar karena akan memberikan sinyal terkuat mengenai langkah The Fed berikutnya dalam menentukan suku bunga acuan. Ketegangan geopolitik baru di wilayah Eropa Timur turut meningkatkan permintaan terhadap aset safe-haven secara signifikan menjelang berita makro dirilis.\n\n` +
                     `**[STRUKTUR TEKNIKAL & LIQUIDITY]** Struktur pergerakan harga pada grafik mayor pair memperlihatkan kompresi harga yang sangat ketat, sebuah pola klasik yang menandakan akumulasi energi sebelum pergerakan eksplosif (breakout). Level Likuiditas (Buy-side Liquidity dan Sell-side Liquidity) bertumpuk jelas di atas batas-batas range harian. Emas membentuk pola double bottom terkonfirmasi di timeframe H1, sementara indeks saham AS bergerak datar mendekati area all-time high.\n\n` +
                     `**[MANAJEMEN RISIKO & STRATEGI]** Ini adalah hari dengan risiko volatilitas ekstrem. Aturan manajemen risiko emas wajib diterapkan secara ketat: kurangi ukuran lot (position sizing) hingga setengah dari ukuran normal untuk mengompensasi potensi slippage (loncatan harga). Sangat disarankan untuk tidak membuka posisi baru dalam waktu 30 menit sebelum dan sesudah rilis data CPI pada pukul 19:30 WIB, melainkan menunggu konfirmasi arah pergerakan pasar setelah berita dirilis secara resmi.`;
         
         xauSentiment = "BULLISH";
-        xauProj = "Permintaan safe haven mendorong harga emas menguat dengan target jangka menengah menuju $2,350. Proteksi ketat wajib diletakkan di bawah swing low terakhir pada level $2,315.";
+        xauProj = "Permintaan safe haven mendorong harga emas menguat dengan target jangka menengah menuju $2,350. Proteksi ketat wajib diletakkan di bawah level $2,315.";
         eurSentiment = "NEUTRAL";
-        eurProj = "EUR/USD bergerak sideways dalam pola wait-and-see. Diperkirakan fluktuasi harga akan terbatas pada area 1.0680 hingga 1.0740 sebelum rilis data CPI menggerakkan tren secara masif.";
+        eurProj = "EUR/USD bergerak sideways dalam pola wait-and-see. Diperkirakan fluktuasi harga akan terbatas pada area 1.0680 hingga 1.0740 sebelum rilis data CPI.";
         gbpSentiment = "BEARISH";
-        gbpProj = "Secara teknikal terlihat pola bearish engulfing yang cukup dominan pada chart H4. GBP/USD berpotensi mengalami koreksi turun menuju area 1.2600 jika level resisten harian di 1.2680 gagal ditembus.";
+        gbpProj = "Terlihat pola bearish engulfing yang cukup dominan pada chart H4. GBP/USD berpotensi turun ke 1.2600 jika resisten 1.2680 gagal ditembus.";
+        audSentiment = "BEARISH";
+        audProj = "AUD/USD tertekan akibat sentimen anti-risiko global. Penurunan berlanjut menguji area support horizontal kritis pada level 0.6550.";
+        nzdSentiment = "BEARISH";
+        nzdProj = "NZD/USD melemah secara beruntun mengarah ke support psikologis 0.6000 akibat sentimen negatif pasar komoditas ekspor Selandia Baru.";
+        jpySentiment = "NEUTRAL";
+        jpyProj = "USD/JPY tertahan di level 160.00. Pergerakan sideways mendominasi karena trader ragu-ragu mengambil keputusan menjelang berita CPI.";
+        chfSentiment = "BEARISH";
+        chfProj = "USD/CHF melemah tipis akibat pelemahan yield obligasi global. Target pergerakan mengarah ke support tren naik terdekat di 0.8870.";
+        cadSentiment = "BULLISH";
+        cadProj = "Pelemahan harga minyak bumi membebani Loonie. USD/CAD rebound mengarah ke batas atas saluran konsolidasi di sekitar level 1.3720.";
     } else if (dayOfWeek === 4) { // Kamis
         macroText = `**[TINJAUAN MAKRO & FUNDAMENTAL]** Mengikuti rilis data inflasi kemarin yang menunjukkan perlambatan sesuai ekspektasi pasar, tekanan terhadap Dolar AS mulai mereda. Kebijakan moneter global saat ini diproyeksikan akan perlahan melonggar di akhir tahun, memicu sentimen positif di pasar modal (Risk-On). Aksi beli kembali (bargain hunting) mendominasi pergerakan saham-sektor teknologi, sedangkan komoditas mineral berharga mendapat dukungan kuat dari pelemahan yield obligasi pemerintah AS.\n\n` +
                     `**[STRUKTUR TEKNIKAL & LIQUIDITY]** Secara teknikal, penembusan level resisten utama pada beberapa pasangan mata uang telah menggeser bias tren jangka pendek dari bearish menjadi bullish. Area yang sebelumnya bertindak sebagai resisten kuat kini bertransformasi menjadi support kritis (Resistance Become Support). Terjadi imbalance harga yang cukup lebar pada grafik pergerakan kemarin, yang diperkirakan akan menjadi target pengisian (retest) sebelum harga melanjutkan reli kenaikannya.\n\n` +
                     `**[MANAJEMEN RISIKO & STRATEGI]** Strategi terbaik untuk perdagangan hari ini adalah membeli saat terjadi koreksi (Buy on Pullback) di area-area support terdekat atau di batas diskon FVG. Manfaatkan overlapping sesi perdagangan Eropa dan Amerika untuk mencari setup dengan probabilitas keberhasilan tinggi. Pastikan target take profit ditentukan secara realistis pada level-level resistance terdekat, dan pertahankan kedisiplinan eksekusi agar tidak terjebak fomo pasca pergerakan besar kemarin.`;
         
         xauSentiment = "BULLISH";
-        xauProj = "Emas sukses menembus resisten kuat di $2,340. Zona ini kini bertindak sebagai support baru. Proyeksi kenaikan diproyeksikan akan terus berlanjut dengan target jangka pendek menuju area $2,370.";
+        xauProj = "Emas sukses menembus resisten kuat di $2,340. Zona ini kini bertindak sebagai support baru. Proyeksi kenaikan mengarah ke area $2,370.";
         eurSentiment = "BULLISH";
-        eurProj = "EUR/USD berhasil bangkit dari support kuat 1.0660 dan saat ini menargetkan pengujian level 1.0760. Struktur harga menunjukkan pergeseran tren harian menjadi bullish terstruktur.";
+        eurProj = "EUR/USD berhasil bangkit dari support kuat 1.0660 dan saat ini menargetkan level 1.0760. Struktur harga menunjukkan pergeseran tren harian menjadi bullish.";
         gbpSentiment = "BULLISH";
-        gbpProj = "Mata uang Sterling memimpin reli penguatan terhadap USD. GBP/USD berpotensi besar menguji kembali level tertinggi mingguan di kisaran 1.2780, dengan batas support terdekat di area 1.2690.";
+        gbpProj = "Mata uang Sterling memimpin reli penguatan terhadap USD. GBP/USD berpotensi besar menguji kembali level tertinggi di 1.2780 dengan support terdekat di 1.2690.";
+        audSentiment = "BULLISH";
+        audProj = "AUD/USD reli menembus resisten 0.6620 akibat pelemahan USD. Target pergerakan bullish selanjutnya mengarah ke level suplai 0.6680.";
+        nzdSentiment = "BULLISH";
+        nzdProj = "NZD/USD rebound tajam keluar dari area oversold dan mengincar level 0.6140. Support terdekat terbentuk di kisaran level 0.6070.";
+        jpySentiment = "BEARISH";
+        jpyProj = "Pelemahan yield obligasi AS menyeret USD/JPY turun menjauhi zona resisten historis. Target penurunan harian menuju level support 159.20.";
+        chfSentiment = "BEARISH";
+        chfProj = "USD/CHF breakdown di bawah level support kritis 0.8900. Sinyal harian dominan bearish dengan sasaran area support lanjutan di 0.8830.";
+        cadSentiment = "BEARISH";
+        cadProj = "USD/CAD tertekan pasca rilis data manufaktur Kanada yang positif. Penurunan diproyeksikan mengarah ke uji level support horizontal 1.3580.";
     } else if (dayOfWeek === 5) { // Jumat
         macroText = `**[TINJAUAN MAKRO & FUNDAMENTAL]** Memasuki sesi penutupan perdagangan akhir pekan, sentimen pasar terpantau bergerak dalam pola defensif yang didominasi oleh aksi profit-taking dari para institusi besar. Rilis data penjualan ritel (Retail Sales) AS sore nanti akan menjadi katalisator penggerak volume perdagangan terakhir yang menentukan bentuk candle mingguan. Ketidakpastian politik di Eropa Barat juga turut membatasi pergerakan agresif pada instrumen mata uang Euro.\n\n` +
                     `**[STRUKTUR TEKNIKAL & LIQUIDITY]** Struktur pergerakan pasar pada hari Jumat cenderung menampilkan pelebaran range palsu (fakeout) karena likuiditas yang perlahan menipis menjelang penutupan market. Pola pembentukan harga harian sering kali membentuk range konsolidasi di sesi akhir Amerika. Penutupan candle mingguan di atas level-level penting akan sangat menentukan bias pergerakan arah tren pada pembukaan hari Senin mendatang.\n\n` +
@@ -1033,20 +1094,40 @@ function initAISentiment() {
         xauSentiment = "NEUTRAL";
         xauProj = "Emas diperkirakan akan bergerak dalam rentang konsolidasi akhir pekan di kisaran harga $2,330 - $2,355. Sangat berisiko untuk memaksakan entri baru di area tengah range.";
         eurSentiment = "BEARISH";
-        eurProj = "Penolakan teknikal terjadi setelah harga gagal menembus level 1.0750. EUR/USD berpotensi mengalami koreksi turun kembali menuju support psikologis 1.0700 menjelang penutupan sesi New York.";
+        eurProj = "Penolakan teknikal terjadi setelah harga gagal menembus level 1.0750. EUR/USD berpotensi mengalami koreksi turun menuju support 1.0700 menjelang penutupan pasar.";
         gbpSentiment = "NEUTRAL";
-        gbpProj = "GBP/USD tertahan tepat di bawah level resisten kuat 1.2750. Pola konsolidasi harian diperkirakan akan mendominasi pergerakan hingga penutupan pasar akhir pekan.";
+        gbpProj = "GBP/USD tertahan tepat di bawah level resisten kuat 1.2750. Pola konsolidasi harian diperkirakan akan mendominasi pergerakan hingga penutupan pasar.";
+        audSentiment = "NEUTRAL";
+        audProj = "AUD/USD bergerak datar di range 0.6600 - 0.6660. Disarankan untuk membatasi aktivitas trading menjelang penutupan pasar mingguan.";
+        nzdSentiment = "NEUTRAL";
+        nzdProj = "NZD/USD tertahan di sekitar area pivot harian 0.6100. Bias pergerakan harian cenderung netral tanpa katalis pendorong baru.";
+        jpySentiment = "BULLISH";
+        jpyProj = "USD/JPY kembali merangkak naik akibat keengganan BOJ merubah arah suku bunga di hari jumat. Proyeksi harian menguji kembali level 160.80.";
+        chfSentiment = "BULLISH";
+        chfProj = "USD/CHF menguji resisten minor 0.8930. Selama level ini bertahan, bias sideways jangka pendek cenderung berlanjut.";
+        cadSentiment = "BULLISH";
+        cadProj = "Aksi beli defensif menopang USD/CAD naik ke level 1.3650. Rencana perdagangan harian mencari konfirmasi penutupan candle di atas 1.3670.";
     } else { // Akhir Pekan (Sabtu & Minggu)
         macroText = `**[TINJAUAN MAKRO & FUNDAMENTAL]** Pasar finansial global saat ini sedang ditutup untuk libur akhir pekan. Rekapitulasi pergerakan sepekan kemarin menunjukkan pelemahan moderat pada indeks Dolar AS yang didorong oleh rilis data inflasi yang melambat. Para pelaku pasar dan institusi keuangan global saat ini tengah melakukan evaluasi portofolio investasi serta menyusun ulang rencana perdagangan untuk mengantisipasi rilis kalender ekonomi penting di pekan depan.\n\n` +
                     `**[STRUKTUR TEKNIKAL & LIQUIDITY]** Analisis pada grafik mingguan (weekly chart) memperlihatkan retensi struktur bullish yang kokoh pada instrumen Emas, sementara beberapa pasangan mata uang mayor terpantau sedang menguji batas bawah dari pola konsolidasi jangka menengah mereka. Analisis penutupan harga hari Jumat kemarin memberikan petunjuk penting bahwa likuiditas pembelian masih mendominasi di area-area diskon struktural.\n\n` +
                     `**[MANAJEMEN RISIKO & STRATEGI]** Akhir pekan adalah waktu terbaik untuk beristirahat secara mental dan melakukan evaluasi mendalam terhadap jurnal transaksi mingguan Anda. Analisis kesalahan emosional seperti FOMO atau keserakahan (Greedy) yang tercatat selama sepekan untuk dijadikan pembelajaran penting. Persiapkan skenario analisis teknikal dan buatlah rencana trading (trading plan) yang matang sebelum pasar kembali dibuka di hari Senin pagi.`;
         
         xauSentiment = "BULLISH";
-        xauProj = "Secara struktural tren mingguan, bias XAU/USD tetap bullish kuat selama harga bertahan di atas level kritis $2,300. Rencana perdagangan pekan depan difokuskan untuk mencari peluang beli pada area support terdekat.";
+        xauProj = "Secara struktural tren mingguan, bias XAU/USD tetap bullish kuat selama harga bertahan di atas level kritis $2,300. Pekan depan difokuskan mencari peluang beli pada support terdekat.";
         eurSentiment = "BEARISH";
-        eurProj = "Tren jangka menengah EUR/USD masih dikuasai oleh bias bearish terarah. Rencana aksi jual (sell setup) yang ideal diproyeksikan berada di dekat area penolakan suplai di kisaran level 1.0780.";
+        eurProj = "Tren jangka menengah EUR/USD masih didominasi bearish terarah. Setup sell yang ideal diproyeksikan berada di dekat area penolakan suplai di level 1.0780.";
         gbpSentiment = "NEUTRAL";
-        gbpProj = "GBP/USD menutup sesi perdagangan akhir pekan di level 1.2685, mencerminkan ketidakpastian arah tren jangka panjang. Level kunci harian yang wajib dipantau pekan depan adalah 1.2600 dan 1.2800.";
+        gbpProj = "GBP/USD ditutup di level 1.2685. Level kunci harian yang wajib dipantau pekan depan adalah 1.2600 dan 1.2800.";
+        audSentiment = "BULLISH";
+        audProj = "Tren mingguan AUD/USD tetap bullish setelah bertahan di atas zona support 0.6550. Rekomendasi pekan depan mencari setup buy di level diskon harian.";
+        nzdSentiment = "NEUTRAL";
+        nzdProj = "NZD/USD ditutup di level 0.6090. Struktur pergerakan cenderung mendatar, menanti kepastian arah data inflasi pekan depan.";
+        jpySentiment = "BULLISH";
+        jpyProj = "Bias USD/JPY masih bullish kuat di atas level 159.00. Analisis teknikal memproyeksikan pencarian target baru ke area resisten 161.50.";
+        chfSentiment = "NEUTRAL";
+        chfProj = "USD/CHF ditutup stabil di level 0.8895. Tren harian menunjukkan fase konsolidasi yang matang sebelum rilis data penting berikutnya.";
+        cadSentiment = "BULLISH";
+        cadProj = "Secara keseluruhan struktur USD/CAD mendukung tren bullish lanjutan. Selama harga berada di atas support 1.3550, bias tetap mengarah ke atas.";
     }
 
     // Mengisi konten makro
@@ -1067,26 +1148,52 @@ function initAISentiment() {
     sentGbp.className = `ai-sentiment-badge ${gbpSentiment.toLowerCase()}`;
     projGbp.innerText = gbpProj;
 
+    // AUDUSD
+    sentAud.innerText = audSentiment;
+    sentAud.className = `ai-sentiment-badge ${audSentiment.toLowerCase()}`;
+    projAud.innerText = audProj;
+
+    // NZDUSD
+    sentNzd.innerText = nzdSentiment;
+    sentNzd.className = `ai-sentiment-badge ${nzdSentiment.toLowerCase()}`;
+    projNzd.innerText = nzdProj;
+
+    // USDJPY
+    sentJpy.innerText = jpySentiment;
+    sentJpy.className = `ai-sentiment-badge ${jpySentiment.toLowerCase()}`;
+    projJpy.innerText = jpyProj;
+
+    // USDCHF
+    sentChf.innerText = chfSentiment;
+    sentChf.className = `ai-sentiment-badge ${chfSentiment.toLowerCase()}`;
+    projChf.innerText = chfProj;
+
+    // USDCAD
+    sentCad.innerText = cadSentiment;
+    sentCad.className = `ai-sentiment-badge ${cadSentiment.toLowerCase()}`;
+    projCad.innerText = cadProj;
+
     // PDF Download handler
     const downloadBtn = document.getElementById('btn-download-ai-pdf');
     if (downloadBtn) {
-        downloadBtn.addEventListener('click', () => {
+        // Hapus listener duplikat sebelum menambahkan baru
+        const newBtn = downloadBtn.cloneNode(true);
+        downloadBtn.parentNode.replaceChild(newBtn, downloadBtn);
+
+        newBtn.addEventListener('click', () => {
             const element = document.getElementById('ai-intel');
             if (typeof html2pdf === 'undefined') {
                 alert("Library PDF belum termuat sepenuhnya. Silakan tunggu beberapa saat atau muat ulang halaman.");
                 return;
             }
 
-            // Gunakan efek disable sementara untuk feedback premium
-            const originalText = downloadBtn.innerHTML;
-            downloadBtn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> Memproses PDF...';
-            downloadBtn.disabled = true;
+            const originalText = newBtn.innerHTML;
+            newBtn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> Memproses PDF...';
+            newBtn.disabled = true;
 
-            // Membuat clone elemen untuk dicetak dengan gaya print white paper
             const clone = element.cloneNode(true);
             clone.classList.add('pdf-print-theme');
             
-            // Masukkan sementara ke document body untuk rendering yang valid
             document.body.appendChild(clone);
 
             const opt = {
@@ -1099,26 +1206,137 @@ function initAISentiment() {
 
             html2pdf().from(clone).set(opt).save().then(() => {
                 document.body.removeChild(clone);
-                downloadBtn.innerHTML = '<i class="fa-solid fa-circle-check"></i> Selesai!';
-                downloadBtn.style.background = 'var(--color-bullish)';
+                newBtn.innerHTML = '<i class="fa-solid fa-circle-check"></i> Selesai!';
+                newBtn.style.background = 'var(--color-bullish)';
                 setTimeout(() => {
-                    downloadBtn.innerHTML = originalText;
-                    downloadBtn.style.background = '';
-                    downloadBtn.disabled = false;
+                    newBtn.innerHTML = originalText;
+                    newBtn.style.background = '';
+                    newBtn.disabled = false;
                 }, 1500);
             }).catch(err => {
                 console.error("PDF export error:", err);
                 document.body.removeChild(clone);
-                downloadBtn.innerHTML = '<i class="fa-solid fa-circle-xmark"></i> Gagal';
-                downloadBtn.style.background = 'var(--color-bearish)';
+                newBtn.innerHTML = '<i class="fa-solid fa-circle-xmark"></i> Gagal';
+                newBtn.style.background = 'var(--color-bearish)';
                 setTimeout(() => {
-                    downloadBtn.innerHTML = originalText;
-                    downloadBtn.style.background = '';
-                    downloadBtn.disabled = false;
+                    newBtn.innerHTML = originalText;
+                    newBtn.style.background = '';
+                    newBtn.disabled = false;
                 }, 1500);
             });
         });
     }
+}
+
+let cotChartInstance = null;
+function initCOTReport() {
+    const ctx = document.getElementById('chart-cot-report');
+    const refreshBtn = document.getElementById('btn-refresh-cot');
+    if (!ctx) return;
+
+    // Default COT positions (Speculative Long vs Short)
+    const instruments = ['XAUUSD', 'DXY', 'AUDUSD', 'NZDUSD', 'GBPUSD', 'EURUSD', 'USDJPY', 'USDCAD', 'USDCHF', 'US10Y'];
+    let longPositions = [72, 65, 45, 40, 52, 48, 68, 55, 42, 58];
+    let shortPositions = longPositions.map(long => 100 - long);
+
+    const renderChart = () => {
+        if (cotChartInstance) {
+            cotChartInstance.destroy();
+        }
+
+        cotChartInstance = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: instruments,
+                datasets: [
+                    {
+                        label: 'Long Position % (Institusi)',
+                        data: longPositions,
+                        backgroundColor: 'rgba(0, 230, 118, 0.75)',
+                        borderColor: 'rgba(0, 230, 118, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Short Position % (Institusi)',
+                        data: shortPositions,
+                        backgroundColor: 'rgba(255, 23, 68, 0.75)',
+                        borderColor: 'rgba(255, 23, 68, 1)',
+                        borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y', // Horizontal stacked bars
+                scales: {
+                    x: {
+                        stacked: true,
+                        max: 100,
+                        grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                        ticks: { color: '#8a9fc2', callback: value => value + '%' }
+                    },
+                    y: {
+                        stacked: true,
+                        grid: { display: false },
+                        ticks: { color: '#ffffff', font: { weight: 'bold' } }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: { color: '#ffffff', boxWidth: 12, font: { size: 10 } }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return ` ${context.dataset.label.split(' ')[0]}: ${context.raw}%`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    };
+
+    renderChart();
+
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', () => {
+            refreshBtn.classList.add('spinning');
+            refreshBtn.disabled = true;
+
+            setTimeout(() => {
+                // Randomize speculative positions slightly (+/- 6%) while keeping bounds [15, 85]
+                longPositions = longPositions.map(val => {
+                    const delta = Math.floor(Math.random() * 13) - 6; // -6 to +6
+                    const newVal = Math.max(15, Math.min(85, val + delta));
+                    return newVal;
+                });
+                shortPositions = longPositions.map(long => 100 - long);
+
+                renderChart();
+
+                refreshBtn.classList.remove('spinning');
+                refreshBtn.disabled = false;
+            }, 800);
+        });
+    }
+}
+
+// Security: Basic Sanitize and Debounce
+function sanitizeHTML(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+}
+
+function debounce(func, timeout = 300) {
+    let timer;
+    return (...args) => {
+        clearTimeout(timer);
+        timer = setTimeout(() => { func.apply(this, args); }, timeout);
+    };
 }
 
 /* ==========================================================================
