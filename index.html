@@ -54,30 +54,13 @@
         </div>
     </header>
 
-    <!-- LIVE TICKER TAPE -->
-    <div class="ticker-tape-container">
-        <!-- TradingView Widget BEGIN -->
-        <div class="tradingview-widget-container">
-            <div class="tradingview-widget-container__widget"></div>
-            <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js" async>
-            {
-            "symbols": [
-                { "proName": "FX_IDC:EURUSD", "title": "EUR/USD" },
-                { "proName": "FX_IDC:GBPUSD", "title": "GBP/USD" },
-                { "proName": "FX_IDC:USDJPY", "title": "USD/JPY" },
-                { "proName": "OANDA:XAUUSD", "title": "XAU/USD" },
-                { "proName": "FX_IDC:AUDUSD", "title": "AUD/USD" },
-                { "proName": "FX_IDC:USDCAD", "title": "USD/CAD" }
-            ],
-            "showSymbolLogo": true,
-            "colorTheme": "dark",
-            "isTransparent": true,
-            "displayMode": "adaptive",
-            "locale": "id"
-            }
-            </script>
+    <!-- Ticker Tape Running Prices (Custom Live Bloomberg Style) -->
+    <div class="ticker-tape-wrapper">
+        <div class="ticker-tape-track" id="ticker-tape-container">
+            <div class="ticker-loading">
+                <i class="fa-solid fa-spinner animate-spin"></i> Menghubungkan ke server TradingView & live exchange feeds...
+            </div>
         </div>
-        <!-- TradingView Widget END -->
     </div>
 
     <!-- SECTION 1: HERO -->

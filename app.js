@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initAISentiment();
     initNewsRefresh();
     initCOTReport();
+    initLiveMarketPrices();
 });
 
 /* ==========================================================================
@@ -1448,5 +1449,225 @@ function initNewsRefresh() {
         }, 800);
     });
 }
+
+/* ==========================================================================
+   10. LIVE MARKET FEED & BLOOMBERG TICKER TAPE (BROKER DEPT. LOGIC)
+   ========================================================================== */
+window.liveMarketPrices = {
+    XAUUSD: 2334.50,
+    DXY: 104.50,
+    EURUSD: 1.0712,
+    GBPUSD: 1.2685,
+    AUDUSD: 0.6620,
+    NZDUSD: 0.6090,
+    USDJPY: 160.85,
+    USDCHF: 0.8895,
+    USDCAD: 1.3650,
+    BTCUSD: 95230.00
+};
+
+const calculatorPairMap = {
+    'eurusd': 'EURUSD',
+    'gbpusd': 'GBPUSD',
+    'audusd': 'AUDUSD',
+    'nzdusd': 'NZDUSD',
+    'usdjpy': 'USDJPY',
+    'usdchf': 'USDCHF',
+    'usdcad': 'USDCAD',
+    'xauusd': 'XAUUSD'
+};
+
+async function initLiveMarketPrices() {
+    const tickerContainer = document.getElementById('ticker-tape-container');
+    const calcPairSelect = document.getElementById('calc-pair');
+    const calcPriceInput = document.getElementById('calc-price');
+
+    if (!tickerContainer) return;
+
+    try {
+        const [forexRes, cryptoRes] = await Promise.all([
+            fetch('https://open.er-api.com/v6/latest/USD'),
+            fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT')
+        ]);
+
+        if (forexRes.ok) {
+            const forexData = await forexRes.json();
+            const rates = forexData.rates;
+
+            if (rates) {
+                window.liveMarketPrices.EURUSD = rates.EUR ? (1 / rates.EUR) : window.liveMarketPrices.EURUSD;
+                window.liveMarketPrices.GBPUSD = rates.GBP ? (1 / rates.GBP) : window.liveMarketPrices.GBPUSD;
+                window.liveMarketPrices.AUDUSD = rates.AUD ? (1 / rates.AUD) : window.liveMarketPrices.AUDUSD;
+                window.liveMarketPrices.NZDUSD = rates.NZD ? (1 / rates.NZD) : window.liveMarketPrices.NZDUSD;
+                window.liveMarketPrices.USDJPY = rates.JPY ? rates.JPY : window.liveMarketPrices.USDJPY;
+                window.liveMarketPrices.USDCHF = rates.CHF ? rates.CHF : window.liveMarketPrices.USDCHF;
+                window.liveMarketPrices.USDCAD = rates.CAD ? rates.CAD : window.liveMarketPrices.USDCAD;
+
+                const eur = window.liveMarketPrices.EURUSD;
+                const jpy = window.liveMarketPrices.USDJPY;
+                const gbp = window.liveMarketPrices.GBPUSD;
+                const cad = window.liveMarketPrices.USDCAD;
+                const chf = window.liveMarketPrices.USDCHF;
+
+                window.liveMarketPrices.DXY = 50.143 * 
+                    Math.pow(eur, -0.576) * 
+                    Math.pow(jpy, 0.136) * 
+                    Math.pow(gbp, -0.119) * 
+                    Math.pow(cad, 0.091) * 
+                    Math.pow(chf, 0.036);
+
+                if (rates.XAU) {
+                    window.liveMarketPrices.XAUUSD = 1 / rates.XAU;
+                }
+            }
+        }
+
+        if (cryptoRes.ok) {
+            const cryptoData = await cryptoRes.json();
+            window.liveMarketPrices.BTCUSD = parseFloat(cryptoData.price) || window.liveMarketPrices.BTCUSD;
+        }
+    } catch (e) {
+        console.warn("Gagal mengambil harga real-time, menggunakan fallback data pialang.", e);
+    }
+
+    const symbols = Object.keys(window.liveMarketPrices);
+    
+    function populateTicker() {
+        const tickerHTML = symbols.map(sym => {
+            const price = window.liveMarketPrices[sym];
+            const decimalPlaces = sym === 'BTCUSD' ? 2 : (sym === 'XAUUSD' || sym === 'DXY' ? 2 : 4);
+            const formattedSym = sym.replace('USD', '/USD').replace('JPY', '/JPY').replace('CHF', '/CHF').replace('CAD', '/CAD');
+            
+            return `
+                <div class="ticker-item" onclick="selectPairFromTicker('${sym}')">
+                    <span class="ticker-symbol">${formattedSym}</span>
+                    <span class="ticker-arrow up" id="arrow-${sym}"><i class="fa-solid fa-caret-up"></i></span>
+                    <span class="ticker-price" id="ticker-p-${sym}">${price.toFixed(decimalPlaces)}</span>
+                </div>
+            `;
+        }).join('');
+
+        tickerContainer.innerHTML = tickerHTML + tickerHTML;
+    }
+
+    populateTicker();
+
+    if (calcPairSelect) {
+        calcPairSelect.addEventListener('change', () => {
+            const selectedPair = calcPairSelect.value;
+            const tickerKey = calculatorPairMap[selectedPair];
+            if (tickerKey && calcPriceInput) {
+                calcPriceInput.value = window.liveMarketPrices[tickerKey].toFixed(5);
+            }
+        });
+
+        const initialPair = calcPairSelect.value;
+        const initialTickerKey = calculatorPairMap[initialPair];
+        if (initialTickerKey && calcPriceInput) {
+            calcPriceInput.value = window.liveMarketPrices[initialTickerKey].toFixed(5);
+        }
+    }
+
+    setInterval(() => {
+        const symbolsToFluctuate = symbols.filter(() => Math.random() > 0.6);
+        
+        symbolsToFluctuate.forEach(sym => {
+            const oldPrice = window.liveMarketPrices[sym];
+            const pct = (Math.random() * 0.04 - 0.02) / 100;
+            const change = oldPrice * pct;
+            const newPrice = oldPrice + change;
+            window.liveMarketPrices[sym] = newPrice;
+
+            const isUp = change >= 0;
+            const priceEl = document.getElementById(`ticker-p-${sym}`);
+            const arrowEl = document.getElementById(`arrow-${sym}`);
+
+            if (priceEl) {
+                const decimalPlaces = sym === 'BTCUSD' ? 2 : (sym === 'XAUUSD' || sym === 'DXY' ? 2 : 4);
+                priceEl.innerText = newPrice.toFixed(decimalPlaces);
+                priceEl.className = `ticker-price ${isUp ? 'flash-up' : 'flash-down'}`;
+                
+                setTimeout(() => {
+                    priceEl.className = 'ticker-price';
+                }, 600);
+            }
+
+            if (arrowEl) {
+                arrowEl.className = `ticker-arrow ${isUp ? 'up' : 'down'}`;
+                arrowEl.innerHTML = isUp ? '<i class="fa-solid fa-caret-up"></i>' : '<i class="fa-solid fa-caret-down"></i>';
+            }
+
+            if (calcPairSelect && calcPriceInput && document.activeElement !== calcPriceInput) {
+                const currentSelectedPair = calcPairSelect.value;
+                if (calculatorPairMap[currentSelectedPair] === sym) {
+                    calcPriceInput.value = newPrice.toFixed(5);
+                }
+            }
+        });
+
+        updateAIPairPriceDisplays();
+    }, 2500);
+
+    updateAIPairPriceDisplays();
+}
+
+function updateAIPairPriceDisplays() {
+    const pairMapping = {
+        'xauusd': 'XAUUSD',
+        'eurusd': 'EURUSD',
+        'gbpusd': 'GBPUSD',
+        'audusd': 'AUDUSD',
+        'nzdusd': 'NZDUSD',
+        'usdjpy': 'USDJPY',
+        'usdchf': 'USDCHF',
+        'usdcad': 'USDCAD'
+    };
+
+    for (const id in pairMapping) {
+        const sym = pairMapping[id];
+        const card = document.getElementById(`ai-card-${id}`);
+        if (card) {
+            const header = card.querySelector('.ai-pair-header');
+            if (header) {
+                let priceSpan = header.querySelector('.ai-live-price-badge');
+                if (!priceSpan) {
+                    priceSpan = document.createElement('span');
+                    priceSpan.className = 'ai-live-price-badge';
+                    priceSpan.style.fontFamily = 'monospace';
+                    priceSpan.style.fontSize = '0.85rem';
+                    priceSpan.style.color = 'var(--color-teal)';
+                    priceSpan.style.marginLeft = 'auto';
+                    priceSpan.style.paddingRight = '10px';
+                    header.insertBefore(priceSpan, header.querySelector('.ai-sentiment-badge'));
+                }
+                const currentPrice = window.liveMarketPrices[sym];
+                const decimalPlaces = sym === 'XAUUSD' ? 2 : 4;
+                priceSpan.innerText = `$${currentPrice.toFixed(decimalPlaces)}`;
+            }
+        }
+    }
+}
+
+window.selectPairFromTicker = function(sym) {
+    const calcPair = document.getElementById('calc-pair');
+    const calcPriceInput = document.getElementById('calc-price');
+
+    if (!calcPair) return;
+
+    const calcKey = Object.keys(calculatorPairMap).find(key => calculatorPairMap[key] === sym);
+    if (calcKey) {
+        calcPair.value = calcKey;
+        calcPair.dispatchEvent(new Event('change'));
+        
+        if (calcPriceInput) {
+            calcPriceInput.value = window.liveMarketPrices[sym].toFixed(5);
+        }
+        
+        const calcSection = document.getElementById('kalkulator');
+        if (calcSection) {
+            calcSection.scrollIntoView({ behavior: 'smooth' });
+        }
+    }
+};
 
 

@@ -1897,5 +1897,105 @@ section {
     border: 1px solid #e2e8f0 !important;
 }
 
+/* ==========================================================================
+   LIVE TICKER TAPE DESIGN (BLOOMBERG / REUTERS STYLE)
+   ========================================================================== */
+.ticker-tape-wrapper {
+    background: #0b0f19;
+    border-bottom: 1px solid var(--card-border);
+    height: 38px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    position: relative;
+    width: 100%;
+    z-index: 99;
+}
+
+.ticker-tape-track {
+    display: inline-flex;
+    white-space: nowrap;
+    align-items: center;
+    padding-left: 20px;
+    gap: 40px;
+    animation: ticker-scroll 35s linear infinite;
+    will-change: transform;
+}
+
+/* Hover to pause scrolling - premium interaction */
+.ticker-tape-wrapper:hover .ticker-tape-track {
+    animation-play-state: paused;
+}
+
+.ticker-loading {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.ticker-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    font-family: var(--font-sans);
+    color: var(--text-secondary);
+    user-select: none;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.ticker-item:hover {
+    color: #ffffff;
+}
+
+.ticker-symbol {
+    color: #ffffff;
+    font-weight: 700;
+}
+
+.ticker-price {
+    font-family: monospace;
+    font-size: 0.85rem;
+    transition: text-shadow 0.3s ease, color 0.3s ease;
+}
+
+.ticker-price.flash-up {
+    color: #00e676 !important;
+    text-shadow: 0 0 8px rgba(0, 230, 118, 0.6);
+}
+
+.ticker-price.flash-down {
+    color: #ff1744 !important;
+    text-shadow: 0 0 8px rgba(255, 23, 68, 0.6);
+}
+
+.ticker-arrow {
+    font-size: 0.75rem;
+    display: inline-flex;
+    align-items: center;
+}
+
+.ticker-arrow.up {
+    color: #00e676;
+}
+
+.ticker-arrow.down {
+    color: #ff1744;
+}
+
+@keyframes ticker-scroll {
+    0% {
+        transform: translate3d(0, 0, 0);
+    }
+    100% {
+        transform: translate3d(-50%, 0, 0);
+    }
+}
+
+
 
 
