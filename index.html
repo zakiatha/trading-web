@@ -19,6 +19,9 @@
     <!-- Chart.js for Journal Analytics -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
+    <!-- html2pdf.js for Daily AI Report Download -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    
     <!-- Custom Stylesheet -->
     <link rel="stylesheet" href="style.css">
 </head>
@@ -214,7 +217,12 @@
                     </div>
                     <h3 class="ai-overview-title">Market Sentiment & Macro Outlook</h3>
                     <p id="ai-macro-outlook" class="ai-overview-text">Memuat analisis makro...</p>
-                    <div class="ai-source-credit">Source: AI Synthesis (Reuters, Bloomberg & Technical feeds)</div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; border-top: 1px solid var(--card-border); padding-top: 15px; margin-top: auto;">
+                        <span class="ai-source-credit" style="border: none; padding: 0; margin: 0;">Source: AI Synthesis (Reuters, Bloomberg & Technical feeds)</span>
+                        <button id="btn-download-ai-pdf" class="btn btn-accent btn-sm" style="padding: 6px 14px; font-size: 0.8rem; border-radius: var(--radius-sm); cursor: pointer; display: inline-flex; align-items: center; gap: 6px; margin: 0;">
+                            <i class="fa-solid fa-file-pdf"></i> Unduh PDF Laporan
+                        </button>
+                    </div>
                 </div>
 
                 <!-- AI Pair Projections -->
@@ -551,7 +559,12 @@
                 <!-- Market News (FXStreet Style) -->
                 <div class="news-list-container">
                     <div class="news-tabs-header">
-                        <h3 class="news-group-title text-accent-border">Market News</h3>
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <h3 class="news-group-title text-accent-border" style="margin: 0; padding-left: 12px;">Market News</h3>
+                            <button id="btn-refresh-news" class="btn-refresh" title="Refresh Berita">
+                                <i class="fa-solid fa-arrows-rotate"></i>
+                            </button>
+                        </div>
                         <div class="news-tabs">
                             <button class="news-tab-btn active" data-category="forex">Forex</button>
                             <button class="news-tab-btn" data-category="crypto">Crypto</button>

@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initTradingJournal();
     initTradingPlan();
     initAISentiment();
+    initNewsRefresh();
 });
 
 /* ==========================================================================
@@ -954,19 +955,16 @@ function initAISentiment() {
     
     const sentXau = document.getElementById('ai-sent-xauusd');
     const projXau = document.getElementById('ai-proj-xauusd');
-    const cardXau = document.getElementById('ai-card-xauusd');
 
     const sentEur = document.getElementById('ai-sent-eurusd');
     const projEur = document.getElementById('ai-proj-eurusd');
-    const cardEur = document.getElementById('ai-card-eurusd');
 
     const sentGbp = document.getElementById('ai-sent-gbpusd');
     const projGbp = document.getElementById('ai-proj-gbpusd');
-    const cardGbp = document.getElementById('ai-card-gbpusd');
 
     if (!aiMacro) return;
 
-    // Format current date in Indonesian
+    // Format tanggal saat ini ke bahasa Indonesia
     const today = new Date();
     const formattedDate = today.toLocaleDateString('id-ID', {
         day: 'numeric',
@@ -975,67 +973,84 @@ function initAISentiment() {
     });
     aiDate.innerText = formattedDate;
 
-    // Curated dynamic macro outlooks based on day of week to simulate real harian updates
-    const dayOfWeek = today.getDay(); // 0 = Sunday, 1 = Monday, etc.
+    const dayOfWeek = today.getDay(); // 0 = Minggu, 1 = Senin, dst.
     
     let macroText = "";
     let xauSentiment = "BULLISH", xauProj = "";
     let eurSentiment = "BEARISH", eurProj = "";
     let gbpSentiment = "NEUTRAL", gbpProj = "";
 
-    // Generate dynamic sentiment text based on day of week
-    if (dayOfWeek === 1) { // Monday
-        macroText = "Sesi awal pekan menunjukkan penguatan tipis Dolar AS (DXY) di area 104.50. Pasar bersiap menghadapi rilis data ekonomi krusial di pertengahan pekan. Likuiditas masih cenderung moderat di sesi Asia dan Eropa.";
+    // Membuat rangkuman panjang 3 paragraf per hari
+    if (dayOfWeek === 1) { // Senin
+        macroText = `**[TINJAUAN MAKRO & FUNDAMENTAL]** Sesi pembukaan awal pekan ini diwarnai oleh kehati-hatian tingkat tinggi dari pelaku pasar global. Indeks Dolar AS (DXY) merayap naik ke area 104.50, didukung oleh ekspektasi pasar yang realistis terhadap keberlanjutan suku bunga acuan 'higher for longer' oleh Federal Reserve. Volume perdagangan pada sesi Asia terpantau moderat menjelang rilis data manufaktur (PMI) dari Zona Euro dan Inggris yang dijadwalkan hari ini. Gejolak geopolitik di Timur Tengah juga masih memberikan sentimen protektif pada mata uang komoditas dan aset safe haven.\n\n` +
+                    `**[STRUKTUR TEKNIKAL & LIQUIDITY]** Secara teknikal, pergerakan chart mayoritas pair utama menunjukkan pola konsolidasi pasca closing market pekan lalu. Area Fair Value Gap (FVG) pada timeframe H4 menjadi zona krusial yang dipantau ketat untuk peluang re-entry. XAU/USD berhasil mempertahankan posisi di atas level support dinamis EMA 50 H4, sementara EUR/USD tertahan tepat di bawah zona suplai 1.0720. Indikator momentum RSI menunjukkan area netral, mengisyaratkan tidak adanya dorongan overbought maupun oversold sebelum breakout rentang harian terjadi.\n\n` +
+                    `**[MANAJEMEN RISIKO & STRATEGI]** Mengingat likuiditas awal pekan yang biasanya belum terisi penuh hingga sesi New York terbuka, disarankan untuk membatasi risiko per trade maksimal sebesar 0.5% - 1% dari total ekuitas. Hindari mengambil keputusan entry terburu-buru sebelum pukul 14:00 WIB (sesi London mulai aktif). Pantau rilis data makro minor pada sore hari, dan pastikan tidak menahan posisi open tanpa Stop Loss yang terukur guna mengantisipasi volatilitas mendadak akibat ketidakseimbangan aliran dana awal pekan.`;
+        
         xauSentiment = "BULLISH";
-        xauProj = "Emas berkonsolidasi di atas area $2,320. Menunggu konfirmasi breakout di level $2,340 untuk target berikutnya menuju $2,365.";
+        xauProj = "Emas berkonsolidasi kokoh di atas area support psikologis $2,320. Penembusan dan penutupan candle di atas resisten $2,340 akan membuka jalan menuju target supply berikutnya di kisaran $2,365 - $2,380.";
         eurSentiment = "BEARISH";
-        eurProj = "EUR/USD tertekan di bawah level resisten 1.0720. Proyeksi pergerakan mengarah ke uji level support psikologis di 1.0650.";
+        eurProj = "EUR/USD tertekan di bawah garis resisten tren turun 1.0720. Selama zona ini gagal ditembus ke atas, bias pergerakan harian tetap mengarah ke uji ulang support psikologis di 1.0650.";
         gbpSentiment = "NEUTRAL";
-        gbpProj = "GBP/USD tertahan di range sempit 1.2630 - 1.2690. Disarankan menunggu pola rejection di batas range sebelum mengambil posisi.";
-    } else if (dayOfWeek === 2) { // Tuesday
-        macroText = "Dolar AS bergerak variatif setelah pernyataan bernada hawkish dari anggota bank sentral. Pasar obligasi menunjukkan kenaikan yield Treasury 10-tahun ke 4.25%, menekan aset non-yielding.";
+        gbpProj = "GBP/USD terjebak di dalam range sempit 1.2630 hingga 1.2690. Trader disarankan menunggu konfirmasi rejection yang jelas pada batas atas/bawah range tersebut sebelum mengambil keputusan entry.";
+    } else if (dayOfWeek === 2) { // Selasa
+        macroText = `**[TINJAUAN MAKRO & FUNDAMENTAL]** Dolar AS menunjukkan pergerakan variatif menyusul serangkaian pernyataan bernada hawkish dari beberapa pejabat bank sentral Federal Reserve. Pasar obligasi merespons langsung dengan kenaikan yield US Treasury 10-tahun ke level 4.25%, yang secara otomatis menekan aset-aset tanpa imbal hasil (non-yielding assets). Investor saat ini juga sedang menakar prospek perlambatan ekonomi global akibat kebijakan suku bunga ketat yang tampaknya akan bertahan lebih lama dari perkiraan semula.\n\n` +
+                    `**[STRUKTUR TEKNIKAL & LIQUIDITY]** Dari perspektif teknikal, pergerakan instrumen XAU/USD terindikasi sedang membentuk pola akumulasi beli di dekat area support harian. Struktur pasar pada timeframe M15 dan H1 memperlihatkan pembentukan order block bullish yang cukup valid. Sementara itu, indeks ekuitas global mengalami tekanan korektif tipis, mencerminkan peralihan likuiditas dari pasar saham menuju pasar obligasi pemerintah yang menawarkan imbal hasil lebih aman dan menarik.\n\n` +
+                    `**[MANAJEMEN RISIKO & STRATEGI]** Fokus transaksi hari ini disarankan untuk lebih memprioritaskan setup scalping atau intraday cepat pada instrumen mayor. Selalu gunakan rasio Risk to Reward (R:R) minimal 1:2 untuk memastikan portofolio tetap sehat dalam jangka panjang. Sesi New York pukul 19:30 WIB diperkirakan akan menjadi puncak volatilitas harian, sehingga sangat direkomendasikan untuk mengamankan profit sebagian (partial take profit) atau memindahkan Stop Loss ke titik Break Even (BE) sebelum jam krusial tersebut.`;
+        
         xauSentiment = "NEUTRAL";
-        xauProj = "XAU/USD terjebak di range $2,310 - $2,335. Adanya indikasi akumulasi beli di area support. Rebound jangka pendek berpotensi terjadi.";
+        xauProj = "XAU/USD bergerak di kisaran $2,310 - $2,335. Adanya rejection berulang pada support harian mengindikasikan potensi rebound jangka pendek menuju batas atas rentang konsolidasi di $2,345.";
         eurSentiment = "BEARISH";
-        eurProj = "Pelemahan data manufaktur Zona Euro memperkuat sentimen bearish. Penurunan di bawah 1.0680 akan membuka jalan menuju support 1.0620.";
+        eurProj = "Rilis data ekonomi Zona Euro yang mengecewakan kembali membebani mata uang tunggal. Peluang penjualan harian dapat dicari di sekitar area pullback 1.0680 dengan target support di 1.0620.";
         gbpSentiment = "BULLISH";
-        gbpProj = "Data ketenagakerjaan Inggris yang solid menopang Sterling. GBP/USD menguji resisten 1.2700, potensi breakout ke 1.2750.";
-    } else if (dayOfWeek === 3) { // Wednesday
-        macroText = "Hari ini perhatian tertuju pada rilis inflasi AS (CPI). Angka yang lebih tinggi dari estimasi akan memperkuat narasi 'higher for longer' The Fed, sementara kejutan penurunan akan memicu reli aset berisiko.";
+        gbpProj = "Kekuatan data tenaga kerja domestik Inggris memberikan dorongan positif bagi Sterling. GBP/USD sedang menguji level resisten 1.2700, potensi breakout kuat menuju area target 1.2750.";
+    } else if (dayOfWeek === 3) { // Rabu
+        macroText = `**[TINJAUAN MAKRO & FUNDAMENTAL]** Hari ini seluruh fokus pasar finansial global tertuju sepenuhnya pada rilis data inflasi konsumen (CPI) Amerika Serikat yang akan diumumkan nanti malam. Data ini merupakan katalisator utama yang sangat dinanti oleh pelaku pasar karena akan memberikan sinyal terkuat mengenai langkah The Fed berikutnya dalam menentukan suku bunga acuan. Ketegangan geopolitik baru di wilayah Eropa Timur turut meningkatkan permintaan terhadap aset safe-haven secara signifikan menjelang berita makro dirilis.\n\n` +
+                    `**[STRUKTUR TEKNIKAL & LIQUIDITY]** Struktur pergerakan harga pada grafik mayor pair memperlihatkan kompresi harga yang sangat ketat, sebuah pola klasik yang menandakan akumulasi energi sebelum pergerakan eksplosif (breakout). Level Likuiditas (Buy-side Liquidity dan Sell-side Liquidity) bertumpuk jelas di atas batas-batas range harian. Emas membentuk pola double bottom terkonfirmasi di timeframe H1, sementara indeks saham AS bergerak datar mendekati area all-time high.\n\n` +
+                    `**[MANAJEMEN RISIKO & STRATEGI]** Ini adalah hari dengan risiko volatilitas ekstrem. Aturan manajemen risiko emas wajib diterapkan secara ketat: kurangi ukuran lot (position sizing) hingga setengah dari ukuran normal untuk mengompensasi potensi slippage (loncatan harga). Sangat disarankan untuk tidak membuka posisi baru dalam waktu 30 menit sebelum dan sesudah rilis data CPI pada pukul 19:30 WIB, melainkan menunggu konfirmasi arah pergerakan pasar setelah berita dirilis secara resmi.`;
+        
         xauSentiment = "BULLISH";
-        xauProj = "Emas mendapatkan traksi aman (safe haven) akibat ketegangan geopolitik baru. Target kenaikan terdekat di $2,350 dengan proteksi ketat di bawah $2,315.";
+        xauProj = "Permintaan safe haven mendorong harga emas menguat dengan target jangka menengah menuju $2,350. Proteksi ketat wajib diletakkan di bawah swing low terakhir pada level $2,315.";
         eurSentiment = "NEUTRAL";
-        eurProj = "Pasar EUR/USD bersikap 'wait-and-see' menjelang rilis CPI malam ini. Rentang perdagangan diperkirakan terbatas pada 1.0680 - 1.0740.";
+        eurProj = "EUR/USD bergerak sideways dalam pola wait-and-see. Diperkirakan fluktuasi harga akan terbatas pada area 1.0680 hingga 1.0740 sebelum rilis data CPI menggerakkan tren secara masif.";
         gbpSentiment = "BEARISH";
-        gbpProj = "Pola teknikal menunjukkan sinyal bearish engulfing di chart H4. GBP/USD berpotensi turun menuju 1.2600 jika resisten 1.2680 gagal ditembus.";
-    } else if (dayOfWeek === 4) { // Thursday
-        macroText = "Pasca rilis data ekonomi kemarin, Dolar AS melemah menyusul inflasi yang melambat sesuai ekspektasi. Sentimen pasar beralih ke mode 'Risk-On' dengan pasar saham global mencatat kenaikan.";
+        gbpProj = "Secara teknikal terlihat pola bearish engulfing yang cukup dominan pada chart H4. GBP/USD berpotensi mengalami koreksi turun menuju area 1.2600 jika level resisten harian di 1.2680 gagal ditembus.";
+    } else if (dayOfWeek === 4) { // Kamis
+        macroText = `**[TINJAUAN MAKRO & FUNDAMENTAL]** Mengikuti rilis data inflasi kemarin yang menunjukkan perlambatan sesuai ekspektasi pasar, tekanan terhadap Dolar AS mulai mereda. Kebijakan moneter global saat ini diproyeksikan akan perlahan melonggar di akhir tahun, memicu sentimen positif di pasar modal (Risk-On). Aksi beli kembali (bargain hunting) mendominasi pergerakan saham-sektor teknologi, sedangkan komoditas mineral berharga mendapat dukungan kuat dari pelemahan yield obligasi pemerintah AS.\n\n` +
+                    `**[STRUKTUR TEKNIKAL & LIQUIDITY]** Secara teknikal, penembusan level resisten utama pada beberapa pasangan mata uang telah menggeser bias tren jangka pendek dari bearish menjadi bullish. Area yang sebelumnya bertindak sebagai resisten kuat kini bertransformasi menjadi support kritis (Resistance Become Support). Terjadi imbalance harga yang cukup lebar pada grafik pergerakan kemarin, yang diperkirakan akan menjadi target pengisian (retest) sebelum harga melanjutkan reli kenaikannya.\n\n` +
+                    `**[MANAJEMEN RISIKO & STRATEGI]** Strategi terbaik untuk perdagangan hari ini adalah membeli saat terjadi koreksi (Buy on Pullback) di area-area support terdekat atau di batas diskon FVG. Manfaatkan overlapping sesi perdagangan Eropa dan Amerika untuk mencari setup dengan probabilitas keberhasilan tinggi. Pastikan target take profit ditentukan secara realistis pada level-level resistance terdekat, dan pertahankan kedisiplinan eksekusi agar tidak terjebak fomo pasca pergerakan besar kemarin.`;
+        
         xauSentiment = "BULLISH";
-        xauProj = "Gold berhasil menembus resisten kuat $2,340 dan sekarang menjadikannya sebagai support baru. Proyeksi kenaikan berlanjut hingga area $2,370.";
+        xauProj = "Emas sukses menembus resisten kuat di $2,340. Zona ini kini bertindak sebagai support baru. Proyeksi kenaikan diproyeksikan akan terus berlanjut dengan target jangka pendek menuju area $2,370.";
         eurSentiment = "BULLISH";
-        eurProj = "EUR/USD berhasil rebound dari support kuat 1.0660 dan saat ini mengincar level 1.0760. Bias harian berubah menjadi bullish.";
+        eurProj = "EUR/USD berhasil bangkit dari support kuat 1.0660 dan saat ini menargetkan pengujian level 1.0760. Struktur harga menunjukkan pergeseran tren harian menjadi bullish terstruktur.";
         gbpSentiment = "BULLISH";
-        gbpProj = "Sterling memimpin penguatan terhadap USD. GBP/USD bersiap menguji level tertinggi mingguan di 1.2780 dengan support terdekat di 1.2690.";
-    } else if (dayOfWeek === 5) { // Friday
-        macroText = "Menjelang penutupan pekan, aksi profit-taking mendominasi pergerakan pasar. Rilis data retail sales hari ini akan menjadi katalis akhir yang menentukan arah penutupan candle mingguan.";
+        gbpProj = "Mata uang Sterling memimpin reli penguatan terhadap USD. GBP/USD berpotensi besar menguji kembali level tertinggi mingguan di kisaran 1.2780, dengan batas support terdekat di area 1.2690.";
+    } else if (dayOfWeek === 5) { // Jumat
+        macroText = `**[TINJAUAN MAKRO & FUNDAMENTAL]** Memasuki sesi penutupan perdagangan akhir pekan, sentimen pasar terpantau bergerak dalam pola defensif yang didominasi oleh aksi profit-taking dari para institusi besar. Rilis data penjualan ritel (Retail Sales) AS sore nanti akan menjadi katalisator penggerak volume perdagangan terakhir yang menentukan bentuk candle mingguan. Ketidakpastian politik di Eropa Barat juga turut membatasi pergerakan agresif pada instrumen mata uang Euro.\n\n` +
+                    `**[STRUKTUR TEKNIKAL & LIQUIDITY]** Struktur pergerakan pasar pada hari Jumat cenderung menampilkan pelebaran range palsu (fakeout) karena likuiditas yang perlahan menipis menjelang penutupan market. Pola pembentukan harga harian sering kali membentuk range konsolidasi di sesi akhir Amerika. Penutupan candle mingguan di atas level-level penting akan sangat menentukan bias pergerakan arah tren pada pembukaan hari Senin mendatang.\n\n` +
+                    `**[MANAJEMEN RISIKO & STRATEGI]** Perdagangan di hari Jumat menuntut disiplin ekstra tinggi untuk menghindari 'overtrading' dan 'revenge trading' akibat akumulasi hasil sepekan. Sangat disarankan untuk mengakhiri sesi perdagangan lebih awal (sebelum pertengahan sesi New York) dan mengamankan seluruh posisi berjalan guna menghindari risiko gap harga pada saat pembukaan pasar di hari Senin awal pekan depan.`;
+        
         xauSentiment = "NEUTRAL";
-        xauProj = "Gold diperkirakan bergerak dalam pola konsolidasi akhir pekan di kisaran $2,330 - $2,355. Berbahaya untuk entry di tengah range.";
+        xauProj = "Emas diperkirakan akan bergerak dalam rentang konsolidasi akhir pekan di kisaran harga $2,330 - $2,355. Sangat berisiko untuk memaksakan entri baru di area tengah range.";
         eurSentiment = "BEARISH";
-        eurProj = "Kegagalan menembus 1.0750 memicu penolakan teknikal. EUR/USD berpotensi terkoreksi turun kembali ke area 1.0700 di sesi New York.";
+        eurProj = "Penolakan teknikal terjadi setelah harga gagal menembus level 1.0750. EUR/USD berpotensi mengalami koreksi turun kembali menuju support psikologis 1.0700 menjelang penutupan sesi New York.";
         gbpSentiment = "NEUTRAL";
-        gbpProj = "GBP/USD tertahan tepat di bawah resisten psikologis 1.2750. Aksi konsolidasi diperkirakan mendominasi hingga penutupan pasar.";
-    } else { // Weekend (Saturday & Sunday)
-        macroText = "Pasar ditutup. Analisis mingguan menunjukkan Dolar AS menyelesaikan pekan dengan pelemahan tipis. Para trader mempersiapkan rencana trading untuk pekan depan dengan memantau rilis kalender ekonomi utama.";
+        gbpProj = "GBP/USD tertahan tepat di bawah level resisten kuat 1.2750. Pola konsolidasi harian diperkirakan akan mendominasi pergerakan hingga penutupan pasar akhir pekan.";
+    } else { // Akhir Pekan (Sabtu & Minggu)
+        macroText = `**[TINJAUAN MAKRO & FUNDAMENTAL]** Pasar finansial global saat ini sedang ditutup untuk libur akhir pekan. Rekapitulasi pergerakan sepekan kemarin menunjukkan pelemahan moderat pada indeks Dolar AS yang didorong oleh rilis data inflasi yang melambat. Para pelaku pasar dan institusi keuangan global saat ini tengah melakukan evaluasi portofolio investasi serta menyusun ulang rencana perdagangan untuk mengantisipasi rilis kalender ekonomi penting di pekan depan.\n\n` +
+                    `**[STRUKTUR TEKNIKAL & LIQUIDITY]** Analisis pada grafik mingguan (weekly chart) memperlihatkan retensi struktur bullish yang kokoh pada instrumen Emas, sementara beberapa pasangan mata uang mayor terpantau sedang menguji batas bawah dari pola konsolidasi jangka menengah mereka. Analisis penutupan harga hari Jumat kemarin memberikan petunjuk penting bahwa likuiditas pembelian masih mendominasi di area-area diskon struktural.\n\n` +
+                    `**[MANAJEMEN RISIKO & STRATEGI]** Akhir pekan adalah waktu terbaik untuk beristirahat secara mental dan melakukan evaluasi mendalam terhadap jurnal transaksi mingguan Anda. Analisis kesalahan emosional seperti FOMO atau keserakahan (Greedy) yang tercatat selama sepekan untuk dijadikan pembelajaran penting. Persiapkan skenario analisis teknikal dan buatlah rencana trading (trading plan) yang matang sebelum pasar kembali dibuka di hari Senin pagi.`;
+        
         xauSentiment = "BULLISH";
-        xauProj = "Secara mingguan, struktur market Gold tetap bullish di atas level support kritis $2,300. Proyeksi pekan depan tetap mencari peluang buy.";
+        xauProj = "Secara struktural tren mingguan, bias XAU/USD tetap bullish kuat selama harga bertahan di atas level kritis $2,300. Rencana perdagangan pekan depan difokuskan untuk mencari peluang beli pada area support terdekat.";
         eurSentiment = "BEARISH";
-        eurProj = "Tren jangka menengah EUR/USD masih didominasi bearish terarah. Setiap kenaikan mendekati 1.0780 dianggap sebagai area sell yang ideal.";
+        eurProj = "Tren jangka menengah EUR/USD masih dikuasai oleh bias bearish terarah. Rencana aksi jual (sell setup) yang ideal diproyeksikan berada di dekat area penolakan suplai di kisaran level 1.0780.";
         gbpSentiment = "NEUTRAL";
-        gbpProj = "GBP/USD ditutup di level 1.2685. Menunjukkan ketidakpastian tren jangka panjang. Area kunci yang dipantau adalah 1.2600 dan 1.2800.";
+        gbpProj = "GBP/USD menutup sesi perdagangan akhir pekan di level 1.2685, mencerminkan ketidakpastian arah tren jangka panjang. Level kunci harian yang wajib dipantau pekan depan adalah 1.2600 dan 1.2800.";
     }
 
-    // Set UI values
-    aiMacro.innerText = macroText;
+    // Mengisi konten makro
+    aiMacro.innerHTML = macroText.replace(/\n/g, '<br>');
 
     // XAUUSD
     sentXau.innerText = xauSentiment;
@@ -1051,6 +1066,169 @@ function initAISentiment() {
     sentGbp.innerText = gbpSentiment;
     sentGbp.className = `ai-sentiment-badge ${gbpSentiment.toLowerCase()}`;
     projGbp.innerText = gbpProj;
+
+    // PDF Download handler
+    const downloadBtn = document.getElementById('btn-download-ai-pdf');
+    if (downloadBtn) {
+        downloadBtn.addEventListener('click', () => {
+            const element = document.getElementById('ai-intel');
+            if (typeof html2pdf === 'undefined') {
+                alert("Library PDF belum termuat sepenuhnya. Silakan tunggu beberapa saat atau muat ulang halaman.");
+                return;
+            }
+
+            // Gunakan efek disable sementara untuk feedback premium
+            const originalText = downloadBtn.innerHTML;
+            downloadBtn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> Memproses PDF...';
+            downloadBtn.disabled = true;
+
+            // Membuat clone elemen untuk dicetak dengan gaya print white paper
+            const clone = element.cloneNode(true);
+            clone.classList.add('pdf-print-theme');
+            
+            // Masukkan sementara ke document body untuk rendering yang valid
+            document.body.appendChild(clone);
+
+            const opt = {
+                margin:       10,
+                filename:     `Laporan_AI_Market_Today_${formattedDate.replace(/ /g, '_')}.pdf`,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true, letterRendering: true },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            html2pdf().from(clone).set(opt).save().then(() => {
+                document.body.removeChild(clone);
+                downloadBtn.innerHTML = '<i class="fa-solid fa-circle-check"></i> Selesai!';
+                downloadBtn.style.background = 'var(--color-bullish)';
+                setTimeout(() => {
+                    downloadBtn.innerHTML = originalText;
+                    downloadBtn.style.background = '';
+                    downloadBtn.disabled = false;
+                }, 1500);
+            }).catch(err => {
+                console.error("PDF export error:", err);
+                document.body.removeChild(clone);
+                downloadBtn.innerHTML = '<i class="fa-solid fa-circle-xmark"></i> Gagal';
+                downloadBtn.style.background = 'var(--color-bearish)';
+                setTimeout(() => {
+                    downloadBtn.innerHTML = originalText;
+                    downloadBtn.style.background = '';
+                    downloadBtn.disabled = false;
+                }, 1500);
+            });
+        });
+    }
+}
+
+/* ==========================================================================
+   9. MARKET NEWS REFRESH LOGIC (DYNAMICAL SIMULATION WITH POOL)
+   ========================================================================== */
+function initNewsRefresh() {
+    const refreshBtn = document.getElementById('btn-refresh-news');
+    if (!refreshBtn) return;
+
+    // Database pool berita untuk variasi simulasi harian
+    const newsPool = {
+        forex: [
+            { title: "Dolar AS Melemah Jelang Rilis Data CPI Inti", excerpt: "Para pelaku pasar berhati-hati menjelang rilis inflasi yang dapat menentukan arah kebijakan The Fed selanjutnya.", meta: "10 Menit lalu", source: "FXStreet", url: "https://www.fxstreet.com" },
+            { title: "GBP/USD Stabil di Atas 1.2650 Pasca Data Tenaga Kerja", excerpt: "Perekonomian Inggris menunjukkan ketahanan dengan tingkat pengangguran yang tetap stabil, mendukung penguatan sterling.", meta: "1 Jam lalu", source: "FXStreet", url: "https://www.fxstreet.com" },
+            { title: "Analisis EUR/USD: Tekanan Jual Masih Dominan di Sesi Eropa", excerpt: "Data PMI manufaktur Jerman yang mengecewakan kembali membebani mata uang tunggal Euro hari ini.", meta: "3 Jam lalu", source: "FXStreet", url: "https://www.fxstreet.com" },
+            { title: "Yen Jepang Menguat Tajam Pasca Dugaan Intervensi BOJ Kedua", excerpt: "Otoritas keuangan Tokyo terpantau melakukan aksi beli Yen secara masif untuk menahan depresiasi di atas level 160.", meta: "Baru saja", source: "Bloomberg", url: "https://www.bloomberg.com" },
+            { title: "Aussie Tertahan di Support Harian Menjelang Laporan RBA", excerpt: "Sentimen wait-and-see menyelimuti pasangan AUD/USD karena pelaku pasar bersiap menghadapi arah suku bunga domestik.", meta: "5 Menit lalu", source: "Reuters", url: "https://www.reuters.com" }
+        ],
+        crypto: [
+            { title: "Bitcoin (BTC) Tembus $95,000 Didorong Arus Masuk ETF", excerpt: "Minat institusional terus meningkat dengan rekor pembelian bersih harian baru pada produk ETF Spot Bitcoin.", meta: "30 Menit lalu", source: "Cointelegraph", url: "https://cointelegraph.com" },
+            { title: "Ethereum (ETH) Menguji Area $3,200 Saat Gas Fee Turun", excerpt: "Pembaruan layer-2 berhasil menurunkan biaya transaksi jaringan, memicu lonjakan aktivitas smart contract.", meta: "2 Jam lalu", source: "CoinDesk", url: "https://www.coindesk.com" },
+            { title: "Solana Memimpin Reli Altcoin dengan Kenaikan 12%", excerpt: "Volume transaksi DEX di jaringan Solana melampaui Ethereum dalam basis mingguan, didorong antusiasme pasar.", meta: "4 Jam lalu", source: "Decrypt", url: "https://decrypt.co" },
+            { title: "SEC Tunda Lagi Keputusan Opsi ETF Ethereum Spot", excerpt: "Komisi sekuritas AS mengajukan masa perpanjangan untuk meninjau potensi dampak likuiditas di pasar derivatif.", meta: "12 Menit lalu", source: "CoinDesk", url: "https://www.coindesk.com" },
+            { title: "Volume Transaksi L2 Mencapai Rekor Tertinggi Baru", excerpt: "Penerapan pembaruan Dencun sukses memotong biaya transaksi hingga 90%, mendongkrak utilitas jaringan.", meta: "1 Jam lalu", source: "Cointelegraph", url: "https://cointelegraph.com" }
+        ],
+        index: [
+            { title: "IHSG Ditutup Menguat ke Level 7,300 Didorong Sektor Perbankan", excerpt: "Saham-saham bank papan atas seperti BBRI, BMRI, dan BBCA memimpin penguatan indeks di sesi perdagangan sore.", meta: "45 Menit lalu", source: "CNBC Indonesia", url: "https://www.cnbcindonesia.com" },
+            { title: "Rupiah Menguat Terhadap Dolar AS Pasca Keputusan BI-Rate", excerpt: "Bank Indonesia memutuskan untuk menahan suku bunga acuan, memberikan sentimen positif bagi stabilitas nilai tukar rupiah.", meta: "2 Jam lalu", source: "Kontan", url: "https://www.kontan.co.id" },
+            { title: "Saham BBRI dan BMRI Catat Net Buy Asing Tertinggi Pekan Ini", excerpt: "Investor asing kembali masuk ke pasar saham Indonesia dengan akumulasi nilai transaksi bersih yang signifikan.", meta: "5 Jam lalu", source: "Bisnis Indonesia", url: "https://www.bisnis.com" },
+            { title: "Indeks Nikkei 225 Jepang Turun 1.8% Ikuti Koreksi Sektor Teknologi AS", excerpt: "Tekanan jual masif melanda saham raksasa chip semikonduktor di Tokyo pasca koreksi Nasdaq kemarin malam.", meta: "15 Menit lalu", source: "Reuters", url: "https://www.reuters.com" },
+            { title: "Dow Jones Berjangka Menguat Menanti Rilis Klaim Pengangguran", excerpt: "Kontrak berjangka saham AS naik tipis mengisyaratkan pembukaan sesi New York yang cenderung positif stabil.", meta: "30 Menit lalu", source: "Bloomberg", url: "https://www.bloomberg.com" }
+        ],
+        commodities: [
+            { title: "Harga Emas (XAU/USD) Tertahan di Resisten $2,050", excerpt: "Ketegangan geopolitik mereda sementara, membuat Emas kesulitan menembus area resisten krusial mingguan.", meta: "1 Jam lalu", source: "Reuters", url: "https://www.reuters.com" },
+            { title: "Minyak Mentah Brent Turun ke $78 Per Barel", excerpt: "Kenaikan cadangan minyak mentah komersial di Amerika Serikat memicu kekhawatiran kelebihan pasokan global.", meta: "2 Jam lalu", source: "Bloomberg", url: "https://www.bloomberg.com" },
+            { title: "Harga Tembaga Melonjak Didorong Permintaan Industri Global", excerpt: "Optimisme atas pulihnya aktivitas manufaktur di Asia dan Amerika Utara mendorong lonjakan harga logam industri.", meta: "6 Jam lalu", source: "Investing.com", url: "https://www.investing.com" },
+            { title: "Gas Alam Eropa Kembali Menguat Akibat Gangguan Jalur Pipa Gas", excerpt: "Kerusakan teknis tidak terencana di kilang gas Norwegia memicu lonjakan harga acuan TTF sebesar 4.5%.", meta: "3 Menit lalu", source: "Bloomberg", url: "https://www.bloomberg.com" },
+            { title: "Harga Perak (XAG/USD) Menguji Resisten Utama $29.50", excerpt: "Logam perak melacak kenaikan harga emas harian dengan potensi pembentukan pola kelanjutan tren naik (bullish flag).", meta: "10 Menit lalu", source: "Reuters", url: "https://www.reuters.com" }
+        ]
+    };
+
+    // Helper untuk mengacak/shuffle array
+    function shuffleArray(array) {
+        const arr = [...array];
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+    }
+
+    refreshBtn.addEventListener('click', () => {
+        // Efek putaran pada ikon tombol refresh
+        refreshBtn.classList.add('spinning');
+        refreshBtn.disabled = true;
+
+        // Kosongkan dan buat efek loading skeleton di semua stack berita
+        const stacks = document.querySelectorAll('.news-cards-stack');
+        stacks.forEach(stack => {
+            stack.innerHTML = `
+                <div class="no-data" style="padding: 30px 10px;">
+                    <i class="fa-solid fa-arrows-rotate animate-spin" style="font-size: 1.5rem; color: var(--color-accent); margin-bottom: 8px;"></i>
+                    <p style="font-size: 0.85rem;">Mengambil berita harian ter-update...</p>
+                </div>
+            `;
+        });
+
+        // Simulasi latensi API 800ms
+        setTimeout(() => {
+            // Render ulang semua kategori dengan urutan berita yang diacak
+            for (const category in newsPool) {
+                const targetStack = document.getElementById(`news-${category}`);
+                if (!targetStack) continue;
+
+                const shuffledNews = shuffleArray(newsPool[category]).slice(0, 3); // Ambil 3 berita teratas acak
+
+                targetStack.innerHTML = shuffledNews.map(news => {
+                    const isBreaking = news.title.includes("AS") || news.title.includes("BTC") || news.title.includes("IHSG") || news.title.includes("Emas");
+                    const badgeText = category === 'forex' ? (isBreaking ? 'BREAKING' : 'UPDATE') :
+                                      category === 'crypto' ? 'HOT' :
+                                      category === 'index' ? 'INDEX' : 'KOMODITAS';
+                    const iconName = category === 'forex' ? 'fa-bolt' :
+                                     category === 'crypto' ? 'fa-fire' :
+                                     category === 'index' ? 'fa-chart-line' : 'fa-leaf';
+                    const badgeClass = category === 'forex' ? 'news-badge-breaking' :
+                                       category === 'crypto' ? 'news-badge-breaking' : 'news-badge-breaking';
+
+                    return `
+                        <a href="${news.url}" target="_blank" class="news-card">
+                            <div class="news-badge-container">
+                                <span class="${badgeClass}">
+                                    <i class="fa-solid ${iconName} ${category === 'crypto' ? 'animate-pulse' : ''}"></i> ${badgeText}
+                                </span>
+                            </div>
+                            <h4 class="news-card-title">${news.title}</h4>
+                            <p class="news-card-excerpt">${news.excerpt}</p>
+                            <div class="news-card-meta">
+                                <span><i class="fa-regular fa-clock"></i> ${news.meta}</span>
+                                <span>via ${news.source}</span>
+                            </div>
+                        </a>
+                    `;
+                }).join('');
+            }
+
+            // Hentikan putaran animasi refresh dan aktifkan kembali tombol
+            refreshBtn.classList.remove('spinning');
+            refreshBtn.disabled = false;
+        }, 800);
+    });
 }
 
 

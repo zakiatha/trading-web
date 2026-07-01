@@ -1732,4 +1732,164 @@ section {
     text-decoration: underline;
 }
 
+/* ==========================================================================
+   REFRESH BUTTON & SPIN ANIMATION
+   ========================================================================== */
+.btn-refresh {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--card-border);
+    color: var(--text-secondary);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--transition-smooth);
+}
+
+.btn-refresh:hover {
+    background: rgba(59, 130, 246, 0.15);
+    color: var(--color-accent);
+    border-color: var(--color-accent);
+}
+
+.btn-refresh i {
+    font-size: 0.85rem;
+    transition: transform 0.3s ease;
+}
+
+.btn-refresh.spinning i {
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* ==========================================================================
+   PDF EXPORT REPORT LAYOUT (WHITE PRINT TEMPLATE FOR PDF)
+   ========================================================================== */
+.pdf-print-theme {
+    background: #ffffff !important;
+    color: #2c3e50 !important;
+    padding: 30px !important;
+    border-radius: 8px !important;
+    font-family: var(--font-sans) !important;
+}
+
+.pdf-print-theme .section-header {
+    margin-bottom: 24px !important;
+    border-bottom: 2px solid #3b82f6 !important;
+    padding-bottom: 12px !important;
+}
+
+.pdf-print-theme .section-title {
+    color: #1e3a8a !important;
+    font-size: 1.8rem !important;
+    margin: 0 !important;
+}
+
+.pdf-print-theme .section-subtitle {
+    color: #64748b !important;
+    font-size: 0.9rem !important;
+}
+
+.pdf-print-theme .ai-intel-grid {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 20px !important;
+}
+
+.pdf-print-theme .ai-overview-card {
+    background: #f8fafc !important;
+    border: 1px solid #e2e8f0 !important;
+    border-left: 5px solid #3b82f6 !important;
+    color: #334155 !important;
+    padding: 20px !important;
+    box-shadow: none !important;
+    border-radius: 6px !important;
+}
+
+.pdf-print-theme .ai-card-header {
+    border-bottom: 1px solid #e2e8f0 !important;
+    padding-bottom: 8px !important;
+    margin-bottom: 12px !important;
+}
+
+.pdf-print-theme .ai-date-badge {
+    background: #dbeafe !important;
+    color: #1e40af !important;
+}
+
+.pdf-print-theme .ai-overview-title {
+    color: #1e293b !important;
+    font-size: 1.2rem !important;
+}
+
+.pdf-print-theme .ai-overview-text {
+    color: #475569 !important;
+    font-size: 0.95rem !important;
+    line-height: 1.6 !important;
+}
+
+.pdf-print-theme .ai-source-credit {
+    color: #94a3b8 !important;
+}
+
+.pdf-print-theme .btn-accent {
+    display: none !important; /* Hide PDF button inside PDF download */
+}
+
+.pdf-print-theme .ai-pairs-grid {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 15px !important;
+}
+
+@media (max-width: 600px) {
+    .pdf-print-theme .ai-pairs-grid {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+.pdf-print-theme .ai-pair-card {
+    background: #f8fafc !important;
+    border: 1px solid #e2e8f0 !important;
+    padding: 15px !important;
+    box-shadow: none !important;
+    border-radius: 6px !important;
+}
+
+.pdf-print-theme .ai-pair-name {
+    color: #1e293b !important;
+    font-size: 0.95rem !important;
+}
+
+.pdf-print-theme .ai-pair-projection {
+    color: #475569 !important;
+    font-size: 0.85rem !important;
+}
+
+.pdf-print-theme .ai-sentiment-badge.bullish {
+    background: #dcfce7 !important;
+    color: #15803d !important;
+    border: 1px solid #bbf7d0 !important;
+}
+
+.pdf-print-theme .ai-sentiment-badge.bearish {
+    background: #fee2e2 !important;
+    color: #b91c1c !important;
+    border: 1px solid #fca5a5 !important;
+}
+
+.pdf-print-theme .ai-sentiment-badge.neutral {
+    background: #f1f5f9 !important;
+    color: #475569 !important;
+    border: 1px solid #e2e8f0 !important;
+}
+
+
 
