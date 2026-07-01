@@ -221,7 +221,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding-top: 118px; /* Navbar + Ticker */
+    padding-top: 146px; /* Navbar (72) + Ticker (74) */
     position: relative;
 }
 
@@ -791,11 +791,14 @@ section {
 }
 
 .sentiment-card {
-    height: 440px;
+    height: 500px;
     background: rgba(17, 22, 32, 0.4);
     border-radius: var(--radius-md);
     border: 1px solid var(--card-border);
     transition: var(--transition-smooth);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 }
 
 .sentiment-card:hover {
@@ -998,9 +1001,26 @@ section {
     .footer-container {
         grid-template-columns: 1fr;
     }
-    
+
     .footer-risk {
         grid-column: span 1;
+    }
+
+    /* Compact ticker status rail on mobile */
+    .ticker-tape-wrapper {
+        height: 66px;
+    }
+
+    .ticker-status-rail {
+        padding: 3px 12px;
+    }
+
+    .ticker-last-updated {
+        display: none;
+    }
+
+    .sentiment-card {
+        height: 460px;
     }
 }
 
@@ -1903,13 +1923,60 @@ section {
 .ticker-tape-wrapper {
     background: #0b0f19;
     border-bottom: 1px solid var(--card-border);
-    height: 38px;
+    height: 74px;
     overflow: hidden;
     display: flex;
-    align-items: center;
+    flex-direction: column;
     position: relative;
     width: 100%;
     z-index: 99;
+}
+
+/* Top status rail: LIVE/DEMO badge + last-updated time */
+.ticker-status-rail {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 16px;
+    height: 24px;
+    background: rgba(0, 0, 0, 0.3);
+    border-bottom: 1px solid var(--card-border);
+    flex-shrink: 0;
+}
+
+.data-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.6px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    text-transform: uppercase;
+}
+
+.data-status-badge.live {
+    color: var(--color-bullish);
+    background: rgba(0, 230, 118, 0.12);
+    border: 1px solid rgba(0, 230, 118, 0.25);
+}
+
+.data-status-badge.demo {
+    color: #ffd600;
+    background: rgba(255, 214, 0, 0.1);
+    border: 1px solid rgba(255, 214, 0, 0.25);
+}
+
+.data-status-badge .pulse-dot {
+    width: 6px;
+    height: 6px;
+}
+
+.ticker-last-updated {
+    font-size: 0.68rem;
+    color: var(--text-muted);
+    font-family: monospace;
 }
 
 .ticker-tape-track {
@@ -1918,8 +1985,10 @@ section {
     align-items: center;
     padding-left: 20px;
     gap: 40px;
+    height: 50px;
     animation: ticker-scroll 35s linear infinite;
     will-change: transform;
+    flex: 1;
 }
 
 /* Hover to pause scrolling - premium interaction */
@@ -1995,6 +2064,125 @@ section {
         transform: translate3d(-50%, 0, 0);
     }
 }
+
+/* ==========================================================================
+   AI LIVE PRICE BADGE (on AI pair cards)
+   ========================================================================== */
+.ai-live-price-badge {
+    font-family: 'Space Grotesk', monospace;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--color-teal);
+    margin-left: auto;
+    padding: 3px 10px;
+    border-radius: var(--radius-sm);
+    background: rgba(0, 245, 160, 0.08);
+    border: 1px solid rgba(0, 245, 160, 0.15);
+    white-space: nowrap;
+}
+
+/* ==========================================================================
+   INDICATOR / SENTIMENT LIVE PRICE HEADER
+   ========================================================================== */
+
+.indicator-live-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--card-border);
+    background: rgba(8, 10, 15, 0.5);
+    flex-shrink: 0;
+}
+
+.indicator-live-pair {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: #ffffff;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.indicator-live-pair i {
+    color: var(--color-accent);
+    font-size: 0.85rem;
+}
+
+.indicator-live-quote {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.indicator-live-price {
+    font-family: 'Space Grotesk', monospace;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.indicator-change {
+    font-size: 0.72rem;
+    font-weight: 700;
+    font-family: monospace;
+    padding: 2px 7px;
+    border-radius: 4px;
+    color: var(--text-muted);
+    background: rgba(148, 163, 184, 0.1);
+}
+
+.indicator-change.up {
+    color: var(--color-bullish);
+    background: rgba(0, 230, 118, 0.12);
+}
+
+.indicator-change.down {
+    color: var(--color-bearish);
+    background: rgba(255, 23, 68, 0.12);
+}
+
+/* Push the TradingView widget to fill the remaining card height */
+.sentiment-card .tradingview-widget-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.sentiment-card .tradingview-widget-container__widget {
+    flex: 1;
+}
+
+/* ==========================================================================
+   TICKER REFINEMENTS (cleaner alignment of symbol / arrow / price)
+   ========================================================================== */
+.ticker-item {
+    padding: 4px 6px;
+    border-radius: 6px;
+}
+
+.ticker-symbol {
+    letter-spacing: 0.3px;
+}
+
+.ticker-price {
+    font-family: 'Space Grotesk', monospace;
+}
+
+.ticker-loading {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Skeleton shimmer for the initial loading state */
+.ticker-loading i {
+    color: var(--color-accent);
+}
+
 
 
 

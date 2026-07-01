@@ -1486,20 +1486,32 @@ function initNewsRefresh() {
 }
 
 /* ==========================================================================
-   10. LIVE MARKET FEED & BLOOMBERG TICKER TAPE (BROKER DEPT. LOGIC)
+   10. LIVE MARKET FEED & BLOOMBERG TICKER TAPE (REAL-TIME API POLLING)
+   Sources (all CORS-enabled, free, no API key):
+     - Gold/Metals:  https://api.gold-api.com/price/XAU
+     - Forex majors: https://open.er-api.com/v6/latest/USD
+     - Crypto:       https://api.coingecko.com/api/v3/simple/price
    ========================================================================== */
+
+// Start empty -> UI shows "loading" until real data arrives. No stale hardcoded values.
 window.liveMarketPrices = {
-    XAUUSD: 2334.50,
-    DXY: 104.50,
-    EURUSD: 1.0712,
-    GBPUSD: 1.2685,
-    AUDUSD: 0.6620,
-    NZDUSD: 0.6090,
-    USDJPY: 160.85,
-    USDCHF: 0.8895,
-    USDCAD: 1.3650,
-    BTCUSD: 95230.00
+    XAUUSD: null,
+    DXY: null,
+    EURUSD: null,
+    GBPUSD: null,
+    AUDUSD: null,
+    NZDUSD: null,
+    USDJPY: null,
+    USDCHF: null,
+    USDCAD: null,
+    BTCUSD: null
 };
+
+// "Open" prices captured on the first successful fetch per session -> drives REAL change %.
+window.priceOpenBaseline = {};
+// Timestamp of the last successful live fetch (for "last updated" label & LIVE/DEMO status).
+window.priceLastUpdated = null;
+window.priceLiveSource = false; // true once at least one real API responded
 
 const calculatorPairMap = {
     'eurusd': 'EURUSD',
@@ -1512,6 +1524,36 @@ const calculatorPairMap = {
     'xauusd': 'XAUUSD'
 };
 
+// All symbols shown in the ticker, in display order.
+const TICKER_SYMBOLS = ['XAUUSD', 'EURUSD', 'GBPUSD', 'USDJPY', 'AUDUSD', 'NZDUSD', 'USDCHF', 'USDCAD', 'DXY', 'BTCUSD'];
+
+// Decimal places per symbol for consistent formatting across the whole app.
+function decimalsFor(sym) {
+    if (sym === 'BTCUSD') return 0;       // 58,666
+    if (sym === 'XAUUSD' || sym === 'DXY') return 2; // 3988.30
+    if (sym === 'USDJPY') return 2;       // 162.50
+    return 4;                              // EUR/USD 1.0712
+}
+
+// Display symbol with slash, e.g. XAUUSD -> XAU/USD, DXY -> DXY
+function displaySymbol(sym) {
+    if (sym === 'DXY') return 'DXY';
+    if (sym === 'BTCUSD') return 'BTC/USD';
+    return sym.replace('USD', '/USD').replace('JPY', '/JPY').replace('CHF', '/CHF').replace('CAD', '/CAD');
+}
+
+// Thousand-separated formatted price (e.g. 3988.30, 58,666, 1.0712)
+function formatPrice(sym, price) {
+    if (price === null || price === undefined || isNaN(price)) return '—';
+    const d = decimalsFor(sym);
+    const fixed = price.toFixed(d);
+    if (sym === 'BTCUSD') {
+        // integer part with thousands separators, no decimals
+        return Number(price).toLocaleString('en-US', { maximumFractionDigits: 0 });
+    }
+    return fixed;
+}
+
 async function initLiveMarketPrices() {
     const tickerContainer = document.getElementById('ticker-tape-container');
     const calcPairSelect = document.getElementById('calc-pair');
@@ -1519,133 +1561,181 @@ async function initLiveMarketPrices() {
 
     if (!tickerContainer) return;
 
-    try {
-        const [forexRes, cryptoRes] = await Promise.all([
-            fetch('https://open.er-api.com/v6/latest/USD'),
-            fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT')
-        ]);
-
-        if (forexRes.ok) {
-            const forexData = await forexRes.json();
-            const rates = forexData.rates;
-
-            if (rates) {
-                window.liveMarketPrices.EURUSD = rates.EUR ? (1 / rates.EUR) : window.liveMarketPrices.EURUSD;
-                window.liveMarketPrices.GBPUSD = rates.GBP ? (1 / rates.GBP) : window.liveMarketPrices.GBPUSD;
-                window.liveMarketPrices.AUDUSD = rates.AUD ? (1 / rates.AUD) : window.liveMarketPrices.AUDUSD;
-                window.liveMarketPrices.NZDUSD = rates.NZD ? (1 / rates.NZD) : window.liveMarketPrices.NZDUSD;
-                window.liveMarketPrices.USDJPY = rates.JPY ? rates.JPY : window.liveMarketPrices.USDJPY;
-                window.liveMarketPrices.USDCHF = rates.CHF ? rates.CHF : window.liveMarketPrices.USDCHF;
-                window.liveMarketPrices.USDCAD = rates.CAD ? rates.CAD : window.liveMarketPrices.USDCAD;
-
-                const eur = window.liveMarketPrices.EURUSD;
-                const jpy = window.liveMarketPrices.USDJPY;
-                const gbp = window.liveMarketPrices.GBPUSD;
-                const cad = window.liveMarketPrices.USDCAD;
-                const chf = window.liveMarketPrices.USDCHF;
-
-                window.liveMarketPrices.DXY = 50.143 * 
-                    Math.pow(eur, -0.576) * 
-                    Math.pow(jpy, 0.136) * 
-                    Math.pow(gbp, -0.119) * 
-                    Math.pow(cad, 0.091) * 
-                    Math.pow(chf, 0.036);
-
-                if (rates.XAU) {
-                    window.liveMarketPrices.XAUUSD = 1 / rates.XAU;
-                }
-            }
-        }
-
-        if (cryptoRes.ok) {
-            const cryptoData = await cryptoRes.json();
-            window.liveMarketPrices.BTCUSD = parseFloat(cryptoData.price) || window.liveMarketPrices.BTCUSD;
-        }
-    } catch (e) {
-        console.warn("Gagal mengambil harga real-time, menggunakan fallback data pialang.", e);
-    }
-
-    const symbols = Object.keys(window.liveMarketPrices);
-    
-    function populateTicker() {
-        const tickerHTML = symbols.map(sym => {
-            const price = window.liveMarketPrices[sym];
-            const decimalPlaces = sym === 'BTCUSD' ? 2 : (sym === 'XAUUSD' || sym === 'DXY' ? 2 : 4);
-            const formattedSym = sym.replace('USD', '/USD').replace('JPY', '/JPY').replace('CHF', '/CHF').replace('CAD', '/CAD');
-            
-            return `
-                <div class="ticker-item" onclick="selectPairFromTicker('${sym}')">
-                    <span class="ticker-symbol">${formattedSym}</span>
-                    <span class="ticker-arrow up" id="arrow-${sym}"><i class="fa-solid fa-caret-up"></i></span>
-                    <span class="ticker-price" id="ticker-p-${sym}">${price.toFixed(decimalPlaces)}</span>
-                </div>
-            `;
-        }).join('');
-
-        tickerContainer.innerHTML = tickerHTML + tickerHTML;
-    }
-
+    // Render the (empty/loading) ticker shell first so the tape is never blank.
     populateTicker();
 
     if (calcPairSelect) {
         calcPairSelect.addEventListener('change', () => {
             const selectedPair = calcPairSelect.value;
             const tickerKey = calculatorPairMap[selectedPair];
-            if (tickerKey && calcPriceInput) {
+            if (tickerKey && calcPriceInput && window.liveMarketPrices[tickerKey] != null) {
                 calcPriceInput.value = window.liveMarketPrices[tickerKey].toFixed(5);
             }
         });
+    }
 
-        const initialPair = calcPairSelect.value;
-        const initialTickerKey = calculatorPairMap[initialPair];
-        if (initialTickerKey && calcPriceInput) {
-            calcPriceInput.value = window.liveMarketPrices[initialTickerKey].toFixed(5);
+    // Initial fetch + start the real polling loop.
+    await fetchLivePrices();
+    applyPricesToUI(true);
+    setInterval(fetchLivePrices, 60000); // poll every 60s
+}
+
+// Fetch from all 3 sources in parallel; resilient: one failure doesn't break the others.
+async function fetchLivePrices() {
+    const results = await Promise.allSettled([
+        fetch('https://api.gold-api.com/price/XAU').then(r => r.json()),
+        fetch('https://open.er-api.com/v6/latest/USD').then(r => r.json()),
+        fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd').then(r => r.json())
+    ]);
+
+    let anyLive = false;
+
+    // --- Gold (gold-api.com) ---
+    if (results[0].status === 'fulfilled' && results[0].value && typeof results[0].value.price === 'number') {
+        window.liveMarketPrices.XAUUSD = results[0].value.price;
+        anyLive = true;
+    }
+
+    // --- Forex majors (open.er-api.com) ---
+    if (results[1].status === 'fulfilled' && results[1].value && results[1].value.rates) {
+        const rates = results[1].value.rates;
+        if (rates.EUR)  window.liveMarketPrices.EURUSD = 1 / rates.EUR;
+        if (rates.GBP)  window.liveMarketPrices.GBPUSD = 1 / rates.GBP;
+        if (rates.AUD)  window.liveMarketPrices.AUDUSD = 1 / rates.AUD;
+        if (rates.NZD)  window.liveMarketPrices.NZDUSD = 1 / rates.NZD;
+        if (rates.JPY)  window.liveMarketPrices.USDJPY = rates.JPY;
+        if (rates.CHF)  window.liveMarketPrices.USDCHF = rates.CHF;
+        if (rates.CAD)  window.liveMarketPrices.USDCAD = rates.CAD;
+
+        // DXY from the Fed basket formula (derived, never from a single quote).
+        const eur = window.liveMarketPrices.EURUSD;
+        const jpy = window.liveMarketPrices.USDJPY;
+        const gbp = window.liveMarketPrices.GBPUSD;
+        const cad = window.liveMarketPrices.USDCAD;
+        const chf = window.liveMarketPrices.USDCHF;
+        if (eur && jpy && gbp && cad && chf) {
+            window.liveMarketPrices.DXY = 50.14348112 *
+                Math.pow(eur, -0.576) *
+                Math.pow(jpy, 0.136) *
+                Math.pow(gbp, -0.119) *
+                Math.pow(cad, 0.091) *
+                Math.pow(chf, 0.036);
+        }
+        anyLive = true;
+    }
+
+    // --- Crypto (CoinGecko) ---
+    if (results[2].status === 'fulfilled' && results[2].value && results[2].value.bitcoin) {
+        window.liveMarketPrices.BTCUSD = results[2].value.bitcoin.usd;
+        anyLive = true;
+    }
+
+    if (anyLive) {
+        window.priceLiveSource = true;
+        window.priceLastUpdated = new Date();
+        // Capture the baseline (session "open") only on the very first successful fetch,
+        // so the change % reflects movement since we started watching.
+        if (Object.keys(window.priceOpenBaseline).length === 0) {
+            for (const sym of TICKER_SYMBOLS) {
+                if (window.liveMarketPrices[sym] != null) {
+                    window.priceOpenBaseline[sym] = window.liveMarketPrices[sym];
+                }
+            }
+        }
+        updateDataStatusIndicator(true);
+    } else {
+        updateDataStatusIndicator(false);
+    }
+
+    applyPricesToUI(false);
+}
+
+// Push current prices into every UI surface (ticker, calculator, AI cards, indicators).
+function applyPricesToUI(isInitial) {
+    const calcPairSelect = document.getElementById('calc-pair');
+    const calcPriceInput = document.getElementById('calc-price');
+
+    TICKER_SYMBOLS.forEach(sym => {
+        const newPrice = window.liveMarketPrices[sym];
+        const openPrice = window.priceOpenBaseline[sym];
+        const priceEl = document.getElementById(`ticker-p-${sym}`);
+        const arrowEl = document.getElementById(`arrow-${sym}`);
+
+        if (priceEl) {
+            const prevText = priceEl.getAttribute('data-price');
+            const newText = formatPrice(sym, newPrice);
+            priceEl.innerText = newText;
+            priceEl.setAttribute('data-price', newText);
+
+            // Flash green/red ONLY when the real price actually moved vs the last tick.
+            if (!isInitial && prevText && prevText !== '—' && newText !== '—' && prevText !== newText) {
+                const movedUp = parseFloat(newText) >= parseFloat(prevText);
+                priceEl.className = `ticker-price ${movedUp ? 'flash-up' : 'flash-down'}`;
+                setTimeout(() => { priceEl.className = 'ticker-price'; }, 700);
+            }
+        }
+
+        // Arrow direction is based on the REAL change vs session open (not random).
+        if (arrowEl) {
+            let isUp = true;
+            if (openPrice && newPrice) {
+                isUp = newPrice >= openPrice;
+            }
+            arrowEl.className = `ticker-arrow ${isUp ? 'up' : 'down'}`;
+            arrowEl.innerHTML = isUp ? '<i class="fa-solid fa-caret-up"></i>' : '<i class="fa-solid fa-caret-down"></i>';
+        }
+    });
+
+    // Auto-fill calculator price for USD-base pairs.
+    if (calcPairSelect && calcPriceInput && document.activeElement !== calcPriceInput) {
+        const currentSelectedPair = calcPairSelect.value;
+        const tickerKey = calculatorPairMap[currentSelectedPair];
+        if (tickerKey && window.liveMarketPrices[tickerKey] != null) {
+            calcPriceInput.value = window.liveMarketPrices[tickerKey].toFixed(5);
         }
     }
 
-    setInterval(() => {
-        const symbolsToFluctuate = symbols.filter(() => Math.random() > 0.6);
-        
-        symbolsToFluctuate.forEach(sym => {
-            const oldPrice = window.liveMarketPrices[sym];
-            const pct = (Math.random() * 0.04 - 0.02) / 100;
-            const change = oldPrice * pct;
-            const newPrice = oldPrice + change;
-            window.liveMarketPrices[sym] = newPrice;
-
-            const isUp = change >= 0;
-            const priceEl = document.getElementById(`ticker-p-${sym}`);
-            const arrowEl = document.getElementById(`arrow-${sym}`);
-
-            if (priceEl) {
-                const decimalPlaces = sym === 'BTCUSD' ? 2 : (sym === 'XAUUSD' || sym === 'DXY' ? 2 : 4);
-                priceEl.innerText = newPrice.toFixed(decimalPlaces);
-                priceEl.className = `ticker-price ${isUp ? 'flash-up' : 'flash-down'}`;
-                
-                setTimeout(() => {
-                    priceEl.className = 'ticker-price';
-                }, 600);
-            }
-
-            if (arrowEl) {
-                arrowEl.className = `ticker-arrow ${isUp ? 'up' : 'down'}`;
-                arrowEl.innerHTML = isUp ? '<i class="fa-solid fa-caret-up"></i>' : '<i class="fa-solid fa-caret-down"></i>';
-            }
-
-            if (calcPairSelect && calcPriceInput && document.activeElement !== calcPriceInput) {
-                const currentSelectedPair = calcPairSelect.value;
-                if (calculatorPairMap[currentSelectedPair] === sym) {
-                    calcPriceInput.value = newPrice.toFixed(5);
-                }
-            }
-        });
-
-        updateAIPairPriceDisplays();
-    }, 2500);
-
     updateAIPairPriceDisplays();
+    updateIndicatorLivePrices();
+    updateLastUpdatedLabel();
 }
 
+function populateTicker() {
+    const tickerContainer = document.getElementById('ticker-tape-container');
+    const tickerHTML = TICKER_SYMBOLS.map(sym => {
+        return `
+            <div class="ticker-item" onclick="selectPairFromTicker('${sym}')">
+                <span class="ticker-symbol">${displaySymbol(sym)}</span>
+                <span class="ticker-arrow up" id="arrow-${sym}"><i class="fa-solid fa-caret-up"></i></span>
+                <span class="ticker-price" id="ticker-p-${sym}" data-price="—">—</span>
+            </div>
+        `;
+    }).join('');
+    // Duplicate content so the marquee loop is seamless.
+    tickerContainer.innerHTML = tickerHTML + tickerHTML;
+}
+
+// LIVE / DEMO status badge near the ticker.
+function updateDataStatusIndicator(isLive) {
+    const statusEl = document.getElementById('data-status-badge');
+    if (!statusEl) return;
+    if (isLive) {
+        statusEl.className = 'data-status-badge live';
+        statusEl.innerHTML = '<span class="pulse-dot"></span> LIVE';
+    } else {
+        statusEl.className = 'data-status-badge demo';
+        statusEl.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> DEMO';
+    }
+}
+
+function updateLastUpdatedLabel() {
+    const el = document.getElementById('ticker-last-updated');
+    if (!el || !window.priceLastUpdated) return;
+    const t = window.priceLastUpdated.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    el.innerText = `Diperbarui ${t} WIB`;
+}
+
+// Live price badges on the AI pair cards.
 function updateAIPairPriceDisplays() {
     const pairMapping = {
         'xauusd': 'XAUUSD',
@@ -1661,26 +1751,26 @@ function updateAIPairPriceDisplays() {
     for (const id in pairMapping) {
         const sym = pairMapping[id];
         const card = document.getElementById(`ai-card-${id}`);
-        if (card) {
-            const header = card.querySelector('.ai-pair-header');
-            if (header) {
-                let priceSpan = header.querySelector('.ai-live-price-badge');
-                if (!priceSpan) {
-                    priceSpan = document.createElement('span');
-                    priceSpan.className = 'ai-live-price-badge';
-                    priceSpan.style.fontFamily = 'monospace';
-                    priceSpan.style.fontSize = '0.85rem';
-                    priceSpan.style.color = 'var(--color-teal)';
-                    priceSpan.style.marginLeft = 'auto';
-                    priceSpan.style.paddingRight = '10px';
-                    header.insertBefore(priceSpan, header.querySelector('.ai-sentiment-badge'));
-                }
-                const currentPrice = window.liveMarketPrices[sym];
-                const decimalPlaces = sym === 'XAUUSD' ? 2 : 4;
-                priceSpan.innerText = `$${currentPrice.toFixed(decimalPlaces)}`;
-            }
+        if (!card) continue;
+        const header = card.querySelector('.ai-pair-header');
+        if (!header) continue;
+
+        let priceSpan = header.querySelector('.ai-live-price-badge');
+        if (!priceSpan) {
+            priceSpan = document.createElement('span');
+            priceSpan.className = 'ai-live-price-badge';
+            header.insertBefore(priceSpan, header.querySelector('.ai-sentiment-badge'));
+        }
+        const currentPrice = window.liveMarketPrices[sym];
+        if (currentPrice != null) {
+            priceSpan.innerText = `$${formatPrice(sym, currentPrice)}`;
+        } else {
+            priceSpan.innerText = '—';
         }
     }
+
+    // Keep the AI projection text levels consistent with live prices.
+    updateAIProjectionPrices();
 }
 
 window.selectPairFromTicker = function(sym) {
@@ -1693,11 +1783,11 @@ window.selectPairFromTicker = function(sym) {
     if (calcKey) {
         calcPair.value = calcKey;
         calcPair.dispatchEvent(new Event('change'));
-        
-        if (calcPriceInput) {
+
+        if (calcPriceInput && window.liveMarketPrices[sym] != null) {
             calcPriceInput.value = window.liveMarketPrices[sym].toFixed(5);
         }
-        
+
         const calcSection = document.getElementById('kalkulator');
         if (calcSection) {
             calcSection.scrollIntoView({ behavior: 'smooth' });
@@ -1705,4 +1795,91 @@ window.selectPairFromTicker = function(sym) {
     }
 };
 
+/* ==========================================================================
+   10b. SYNC AI PROJECTION TEXT LEVELS WITH LIVE PRICES
+   Replaces hardcoded price levels inside the AI projection paragraphs
+   (e.g. "$2,340", "1.0720") with live values so the summary, news context
+   and indicators always agree on the same real price.
+   ========================================================================== */
+function updateAIProjectionPrices() {
+    const p = window.liveMarketPrices;
+    const pairs = {
+        'ai-proj-xauusd': p.XAUUSD,
+        'ai-proj-eurusd': p.EURUSD,
+        'ai-proj-gbpusd': p.GBPUSD,
+        'ai-proj-audusd': p.AUDUSD,
+        'ai-proj-nzdusd': p.NZDUSD,
+        'ai-proj-usdjpy': p.USDJPY,
+        'ai-proj-usdchf': p.USDCHF,
+        'ai-proj-usdcad': p.USDCAD
+    };
+
+    for (const id in pairs) {
+        const el = document.getElementById(id);
+        const live = pairs[id];
+        if (!el || live == null) continue;
+
+        // Use the original (first-loaded) text as the source of truth so we never drift.
+        const baseText = el.getAttribute('data-base-text') || el.innerText;
+        if (!el.getAttribute('data-base-text')) {
+            el.setAttribute('data-base-text', baseText);
+        }
+
+        // Replace currency-formatted price tokens: $2,340 / $2320 / $2.340
+        const replaced = baseText.replace(/\$\s?\d{1,3}(?:[.,]\d{3})*(?:[.,]\d+)?/g, (match) => {
+            // XAUUSD projections talk in gold dollars ($2,3xx)
+            if (id === 'ai-proj-xauusd') return `$${Number(live.toFixed(0)).toLocaleString('en-US')}`;
+            return match; // leave forex token replacement below
+        });
+
+        // Replace plain decimal levels for forex pairs (1.0720, 1.2680, 0.6620 ...)
+        if (id !== 'ai-proj-xauusd') {
+            const dec = (live < 10) ? 4 : 2;
+            const liveStr = live.toFixed(dec).slice(0, 6);
+            const livePrev = (live * 0.998).toFixed(dec).slice(0, 6); // a nearby "support" level
+            // Swap the first decimal level found with the live value for context.
+            const updated = replaced.replace(/\b\d\.\d{3,4}\b/, liveStr);
+            el.innerText = updated;
+        } else {
+            el.innerText = replaced;
+        }
+    }
+}
+
+/* ==========================================================================
+   10c. LIVE PRICE HEADER ON INDICATOR / SENTIMENT CARDS
+   ========================================================================== */
+function updateIndicatorLivePrices() {
+    const cardMap = {
+        'indicator-xauusd': 'XAUUSD',
+        'indicator-eurusd': 'EURUSD',
+        'indicator-gbpusd': 'GBPUSD',
+        'indicator-usdjpy': 'USDJPY'
+    };
+
+    for (const id in cardMap) {
+        const sym = cardMap[id];
+        const priceEl = document.getElementById(`${id}-price`);
+        const changeEl = document.getElementById(`${id}-change`);
+        if (!priceEl) continue;
+
+        const price = window.liveMarketPrices[sym];
+        const open = window.priceOpenBaseline[sym];
+        if (price != null) {
+            priceEl.innerText = formatPrice(sym, price);
+        } else {
+            priceEl.innerText = '—';
+        }
+
+        if (changeEl && price != null && open != null) {
+            const pct = ((price - open) / open) * 100;
+            const isUp = pct >= 0;
+            changeEl.innerText = `${isUp ? '+' : ''}${pct.toFixed(2)}%`;
+            changeEl.className = `indicator-change ${isUp ? 'up' : 'down'}`;
+        } else if (changeEl) {
+            changeEl.innerText = '—';
+            changeEl.className = 'indicator-change';
+        }
+    }
+}
 

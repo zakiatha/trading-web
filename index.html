@@ -56,9 +56,13 @@
 
     <!-- Ticker Tape Running Prices (Custom Live Bloomberg Style) -->
     <div class="ticker-tape-wrapper">
+        <div class="ticker-status-rail">
+            <span id="data-status-badge" class="data-status-badge demo"><span class="pulse-dot"></span> MENYAMBUNG...</span>
+            <span id="ticker-last-updated" class="ticker-last-updated">Memuat...</span>
+        </div>
         <div class="ticker-tape-track" id="ticker-tape-container">
             <div class="ticker-loading">
-                <i class="fa-solid fa-spinner animate-spin"></i> Menghubungkan ke server TradingView & live exchange feeds...
+                <i class="fa-solid fa-spinner animate-spin"></i> Mengambil harga pasar real-time...
             </div>
         </div>
     </div>
@@ -802,6 +806,13 @@
                 
                 <!-- XAUUSD Widget -->
                 <div class="card sentiment-card">
+                    <div class="indicator-live-header">
+                        <span class="indicator-live-pair"><i class="fa-solid fa-coins"></i> XAU/USD</span>
+                        <div class="indicator-live-quote">
+                            <span class="indicator-live-price" id="indicator-xauusd-price">—</span>
+                            <span class="indicator-change" id="indicator-xauusd-change">—</span>
+                        </div>
+                    </div>
                     <div class="tradingview-widget-container">
                         <div class="tradingview-widget-container__widget"></div>
                         <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-technical-analysis.js" async>
@@ -821,6 +832,13 @@
 
                 <!-- EURUSD Widget -->
                 <div class="card sentiment-card">
+                    <div class="indicator-live-header">
+                        <span class="indicator-live-pair"><i class="fa-solid fa-euro-sign"></i> EUR/USD</span>
+                        <div class="indicator-live-quote">
+                            <span class="indicator-live-price" id="indicator-eurusd-price">—</span>
+                            <span class="indicator-change" id="indicator-eurusd-change">—</span>
+                        </div>
+                    </div>
                     <div class="tradingview-widget-container">
                         <div class="tradingview-widget-container__widget"></div>
                         <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-technical-analysis.js" async>
@@ -840,6 +858,13 @@
 
                 <!-- GBPUSD Widget -->
                 <div class="card sentiment-card">
+                    <div class="indicator-live-header">
+                        <span class="indicator-live-pair"><i class="fa-solid fa-pound-sign"></i> GBP/USD</span>
+                        <div class="indicator-live-quote">
+                            <span class="indicator-live-price" id="indicator-gbpusd-price">—</span>
+                            <span class="indicator-change" id="indicator-gbpusd-change">—</span>
+                        </div>
+                    </div>
                     <div class="tradingview-widget-container">
                         <div class="tradingview-widget-container__widget"></div>
                         <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-technical-analysis.js" async>
@@ -859,6 +884,13 @@
 
                 <!-- USDJPY Widget -->
                 <div class="card sentiment-card">
+                    <div class="indicator-live-header">
+                        <span class="indicator-live-pair"><i class="fa-solid fa-yen-sign"></i> USD/JPY</span>
+                        <div class="indicator-live-quote">
+                            <span class="indicator-live-price" id="indicator-usdjpy-price">—</span>
+                            <span class="indicator-change" id="indicator-usdjpy-change">—</span>
+                        </div>
+                    </div>
                     <div class="tradingview-widget-container">
                         <div class="tradingview-widget-container__widget"></div>
                         <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-technical-analysis.js" async>
