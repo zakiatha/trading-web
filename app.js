@@ -381,11 +381,37 @@ function initTradingPlan() {
 
     if (!planForm) return;
 
-    // Load existing plan
+    // Default plan from trade.pdf
+    const defaultRules = `1. Percayai sistem. Dengan mengatur RR 1:3 yang konstan, 1 kali kemenangan langsung menutup 3 kali kekalahan.
+2. Jangan memodifikasi aturan atau 'Rule Hopping' walau baru saja terkena SL.
+3. Sistem tidak memiliki win rate 100%. Kemungkinan menghadapi drawdowns (fase loss beruntun) sangat mungkin terjadi.`;
+
+    const defaultSetup = `ENTRY MODEL: PWH & PWL (SMC)
+1. Persiapan Awal (Weekly & Daily Bias):
+   - Tandai PWH (Previous Weekly High) sebagai target sell-side (Buyside Liquidity).
+   - Tandai PWL (Previous Weekly Low) sebagai target buy-side (Sellside Liquidity).
+   - Perhatikan POI di Daily/H4 seperti FVG atau BPR di sekitar PWH/PWL.
+2. Konfirmasi Sapuan (Liquidity Sweep):
+   - Setup Sell: Harga menyapu PWH, lalu rejection (wick panjang) di H1/H4.
+   - Setup Buy: Harga menyapu PWL, lalu merespon dengan pantulan kuat ke atas.
+   * Tanpa adanya sweep likuiditas, DILARANG KERAS ENTRY!
+3. Konfirmasi Struktur di LTF (Market Structure Shift):
+   - Turun ke M15 atau H1 pada jam aktif bursa (London / New York Session).
+   - Tunggu MSS (patahnya swing low terakhir untuk sell, atau swing high terakhir untuk buy).
+4. Area Eksekusi (Optimal Trade Entry & FVG):
+   - Tarik Fib Retracement dari Swing High ke Swing Low pembentuk MSS.
+   - Tempatkan Entry Limit pada area OTE (diskon 62% - 79%).
+   - WAJIB ADA CONFLUENCE: Level entry 62% harus sejajar dengan FVG di M15/H1 (Sweet Spot).`;
+
+    const defaultExit = `1. Stop Loss (SL): Tempatkan sedikit di atas Swing High absolut (untuk sell) atau di bawah Swing Low absolut (untuk buy). SL harus aman dari pergerakan harga buangan.
+2. Take Profit (TP): Target minimum & utama adalah rasio Risk-to-Reward (RR) statis 1:3. Target area tertuju pada ERL berlawanan (misal target PWL jika entry di PWH) atau Internal Liquidity terdekat.
+3. Rencana Exit & Manajemen: Jika market lambat/sideways, tahan posisi selama struktur belum gagal, tutup parsial jika perlu, tapi selalu kejar objektif akhir RR 1:3.`;
+
+    // Load existing plan or use defaults
     const savedPlan = JSON.parse(localStorage.getItem('tradevision_plan')) || {
-        rules: '',
-        setup: '',
-        exit: ''
+        rules: defaultRules,
+        setup: defaultSetup,
+        exit: defaultExit
     };
 
     // Fill form
@@ -454,6 +480,15 @@ function initTradingJournal() {
     let currentFilter = 'ALL';
 
     if (!journalForm) return;
+
+    // Template SMC PWH/PWL dari trade.pdf
+    const btnTemplateSMC = document.getElementById('btn-template-smc');
+    const journalReason = document.getElementById('journal-reason');
+    if (btnTemplateSMC && journalReason) {
+        btnTemplateSMC.addEventListener('click', () => {
+            journalReason.value = `[Sweep PWH/PWL]: Ya/Tidak\n[MSS LTF M15/H1]: Ya/Tidak\n[FVG Tap @ OTE 62%-79%]: Ya/Tidak\nDetail POI & Konfluens: `;
+        });
+    }
 
     // Helper to get local ISO string (YYYY-MM-DDTHH:MM)
     function getLocalISOString(date = new Date()) {
