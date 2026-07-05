@@ -221,7 +221,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding-top: 146px; /* Navbar (72) + Ticker (74) */
+    padding-top: 148px; /* Navbar (72) + Ticker (76) */
     position: relative;
 }
 
@@ -1923,13 +1923,16 @@ section {
 .ticker-tape-wrapper {
     background: #0b0f19;
     border-bottom: 1px solid var(--card-border);
-    height: 74px;
+    height: auto;
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    position: relative;
+    position: fixed;
+    top: 72px;
+    left: 0;
     width: 100%;
     z-index: 99;
+    padding: 0;
 }
 
 /* Top status rail: LIVE/DEMO badge + last-updated time */

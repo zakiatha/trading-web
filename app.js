@@ -1378,58 +1378,238 @@ function debounce(func, timeout = 300) {
 /* ==========================================================================
    9. MARKET NEWS REFRESH LOGIC (DYNAMICAL SIMULATION WITH POOL)
    ========================================================================== */
+// Database pool berita untuk variasi simulasi harian (Fallback)
+const newsPool = {
+    forex: [
+        { title: "Dolar AS Melemah Jelang Rilis Data CPI Inti", excerpt: "Para pelaku pasar berhati-hati menjelang rilis inflasi yang dapat menentukan arah kebijakan The Fed selanjutnya.", meta: "10 Menit lalu", source: "FXStreet", url: "https://www.fxstreet.com" },
+        { title: "GBP/USD Stabil di Atas 1.2650 Pasca Data Tenaga Kerja", excerpt: "Perekonomian Inggris menunjukkan ketahanan dengan tingkat pengangguran yang tetap stabil, mendukung penguatan sterling.", meta: "1 Jam lalu", source: "FXStreet", url: "https://www.fxstreet.com" },
+        { title: "Analisis EUR/USD: Tekanan Jual Masih Dominan di Sesi Eropa", excerpt: "Data PMI manufaktur Jerman yang mengecewakan kembali membebani mata uang tunggal Euro hari ini.", meta: "3 Jam lalu", source: "FXStreet", url: "https://www.fxstreet.com" },
+        { title: "Yen Jepang Menguat Tajam Pasca Dugaan Intervensi BOJ Kedua", excerpt: "Otoritas keuangan Tokyo terpantau melakukan aksi beli Yen secara masif untuk menahan depresiasi di atas level 160.", meta: "Baru saja", source: "Bloomberg", url: "https://www.bloomberg.com" },
+        { title: "Aussie Tertahan di Support Harian Menjelang Laporan RBA", excerpt: "Sentimen wait-and-see menyelimuti pasangan AUD/USD karena pelaku pasar bersiap menghadapi arah suku bunga domestik.", meta: "5 Menit lalu", source: "Reuters", url: "https://www.reuters.com" }
+    ],
+    crypto: [
+        { title: "Bitcoin (BTC) Tembus $95,000 Didorong Arus Masuk ETF", excerpt: "Minat institusional terus meningkat dengan rekor pembelian bersih harian baru pada produk ETF Spot Bitcoin.", meta: "30 Menit lalu", source: "Cointelegraph", url: "https://cointelegraph.com" },
+        { title: "Ethereum (ETH) Menguji Area $3,200 Saat Gas Fee Turun", excerpt: "Pembaruan layer-2 berhasil menurunkan biaya transaksi jaringan, memicu lonjakan aktivitas smart contract.", meta: "2 Jam lalu", source: "CoinDesk", url: "https://www.coindesk.com" },
+        { title: "Solana Memimpin Reli Altcoin dengan Kenaikan 12%", excerpt: "Volume transaksi DEX di jaringan Solana melampaui Ethereum dalam basis mingguan, didorong antusiasme pasar.", meta: "4 Jam lalu", source: "Decrypt", url: "https://decrypt.co" },
+        { title: "SEC Tunda Lagi Keputusan Opsi ETF Ethereum Spot", excerpt: "Komisi sekuritas AS mengajukan masa perpanjangan untuk meninjau potensi dampak likuiditas di pasar derivatif.", meta: "12 Menit lalu", source: "CoinDesk", url: "https://www.coindesk.com" },
+        { title: "Volume Transaksi L2 Mencapai Rekor Tertinggi Baru", excerpt: "Penerapan pembaruan Dencun sukses memotong biaya transaksi hingga 90%, mendongkrak utilitas jaringan.", meta: "1 Jam lalu", source: "Cointelegraph", url: "https://cointelegraph.com" }
+    ],
+    index: [
+        { title: "IHSG Ditutup Menguat ke Level 7,300 Didorong Sektor Perbankan", excerpt: "Saham-saham bank papan atas seperti BBRI, BMRI, dan BBCA memimpin penguatan indeks di sesi perdagangan sore.", meta: "45 Menit lalu", source: "CNBC Indonesia", url: "https://www.cnbcindonesia.com" },
+        { title: "Rupiah Menguat Terhadap Dolar AS Pasca Keputusan BI-Rate", excerpt: "Bank Indonesia memutuskan untuk menahan suku bunga acuan, memberikan sentimen positif bagi stabilitas nilai tukar rupiah.", meta: "2 Jam lalu", source: "Kontan", url: "https://www.kontan.co.id" },
+        { title: "Saham BBRI dan BMRI Catat Net Buy Asing Tertinggi Pekan Ini", excerpt: "Investor asing kembali masuk ke pasar saham Indonesia dengan akumulasi nilai transaksi bersih yang signifikan.", meta: "5 Jam lalu", source: "Bisnis Indonesia", url: "https://www.bisnis.com" },
+        { title: "Indeks Nikkei 225 Jepang Turun 1.8% Ikuti Koreksi Sektor Teknologi AS", excerpt: "Tekanan jual masif melanda saham raksasa chip semikonduktor di Tokyo pasca koreksi Nasdaq kemarin malam.", meta: "15 Menit lalu", source: "Reuters", url: "https://www.reuters.com" },
+        { title: "Dow Jones Berjangka Menguat Menanti Rilis Klaim Pengangguran", excerpt: "Kontrak berjangka saham AS naik tipis mengisyaratkan pembukaan sesi New York yang cenderung positif stabil.", meta: "30 Menit lalu", source: "Bloomberg", url: "https://www.bloomberg.com" }
+    ],
+    commodities: [
+        { title: "Harga Emas (XAU/USD) Tertahan di Resisten $2,050", excerpt: "Ketegangan geopolitik mereda sementara, membuat Emas kesulitan menembus area resisten krusial mingguan.", meta: "1 Jam lalu", source: "Reuters", url: "https://www.reuters.com" },
+        { title: "Minyak Mentah Brent Turun ke $78 Per Barel", excerpt: "Kenaikan cadangan minyak mentah komersial di Amerika Serikat memicu kekhawatiran kelebihan pasokan global.", meta: "2 Jam lalu", source: "Bloomberg", url: "https://www.bloomberg.com" },
+        { title: "Harga Tembaga Melonjak Didorong Permintaan Industri Global", excerpt: "Optimisme atas pulihnya aktivitas manufaktur di Asia dan Amerika Utara mendorong lonjakan harga logam industri.", meta: "6 Jam lalu", source: "Investing.com", url: "https://www.investing.com" },
+        { title: "Gas Alam Eropa Kembali Menguat Akibat Gangguan Jalur Pipa Gas", excerpt: "Kerusakan teknis tidak terencana di kilang gas Norwegia memicu lonjakan harga acuan TTF sebesar 4.5%.", meta: "3 Menit lalu", source: "Bloomberg", url: "https://www.bloomberg.com" },
+        { title: "Harga Perak (XAG/USD) Menguji Resisten Utama $29.50", excerpt: "Logam perak melacak kenaikan harga emas harian dengan potensi pembentukan pola kelanjutan tren naik (bullish flag).", meta: "10 Menit lalu", source: "Reuters", url: "https://www.reuters.com" }
+    ]
+};
+
+// Helper untuk mengacak/shuffle array
+function shuffleArray(array) {
+    const arr = [...array];
+    for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+}
+
+function fallbackToLocalNews() {
+    for (const category in newsPool) {
+        const targetStack = document.getElementById(`news-${category}`);
+        if (!targetStack) continue;
+        const shuffledNews = shuffleArray(newsPool[category]).slice(0, 3);
+        renderNewsStack(targetStack, shuffledNews, category);
+    }
+}
+
+async function fetchRealNews() {
+    const stacks = {
+        forex: document.getElementById('news-forex'),
+        crypto: document.getElementById('news-crypto'),
+        index: document.getElementById('news-index'),
+        commodities: document.getElementById('news-commodities')
+    };
+
+    try {
+        // Fetch global news from ok.surf (CORS enabled)
+        const globalNewsRes = await fetch('https://ok.surf/api/v1/cors/news-feed');
+        if (!globalNewsRes.ok) throw new Error('Global news fetch failed');
+        const globalNewsData = await globalNewsRes.json();
+
+        // Fetch local Indonesian index news from CNBC Indonesia RSS via AllOrigins
+        let cnbcNews = [];
+        try {
+            const localNewsRes = await fetch('https://api.allorigins.win/get?url=' + encodeURIComponent('https://www.cnbcindonesia.com/market/rss'));
+            if (localNewsRes.ok) {
+                const localNewsData = await localNewsRes.json();
+                const parser = new DOMParser();
+                const xmlDoc = parser.parseFromString(localNewsData.contents, 'text/xml');
+                const items = xmlDoc.querySelectorAll('item');
+                cnbcNews = Array.from(items).map(item => {
+                    const title = item.querySelector('title')?.textContent || '';
+                    const link = item.querySelector('link')?.textContent || '';
+                    const description = item.querySelector('description')?.textContent || '';
+                    const pubDate = item.querySelector('pubDate')?.textContent || '';
+                    
+                    let dateStr = 'Update hari ini';
+                    if (pubDate) {
+                        try {
+                            const d = new Date(pubDate);
+                            dateStr = d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' WIB';
+                        } catch (e) {}
+                    }
+                    return {
+                        title: title,
+                        excerpt: description.replace(/<[^>]*>/g, '').slice(0, 110) + '...',
+                        url: link,
+                        meta: dateStr,
+                        source: 'CNBC Indonesia'
+                    };
+                });
+            }
+        } catch (e) {
+            console.warn('CNBC Indonesia feed failed, falling back to local business news:', e);
+        }
+
+        // 1. Forex News (Business Category)
+        if (stacks.forex && globalNewsData.Business) {
+            const forexNews = globalNewsData.Business.slice(0, 3).map(item => ({
+                title: item.title,
+                excerpt: `Klik untuk membaca selengkapnya dari ${item.source}. Berita pasar global dan tren ekonomi makro ter-update.`,
+                url: item.link,
+                meta: 'Baru saja',
+                source: item.source,
+                image: item.og
+            }));
+            renderNewsStack(stacks.forex, forexNews, 'forex');
+        }
+
+        // 2. Crypto News (Filter Technology & Business for Crypto keywords)
+        if (stacks.crypto) {
+            const allTechBusiness = [...(globalNewsData.Technology || []), ...(globalNewsData.Business || [])];
+            const cryptoKeywords = ['bitcoin', 'crypto', 'ethereum', 'coin', 'token', 'blockchain', 'solana', 'sec', 'etf', 'btc', 'eth', 'binance', 'crypto'];
+            const cryptoFiltered = allTechBusiness.filter(item => {
+                const titleLower = item.title.toLowerCase();
+                return cryptoKeywords.some(kw => titleLower.includes(kw));
+            });
+            const finalCrypto = (cryptoFiltered.length > 0 ? cryptoFiltered : (globalNewsData.Technology || [])).slice(0, 3).map(item => ({
+                title: item.title,
+                excerpt: `Laporan ter-update mengenai pasar teknologi dan aset digital via ${item.source}.`,
+                url: item.link,
+                meta: 'HOT',
+                source: item.source,
+                image: item.og
+            }));
+            renderNewsStack(stacks.crypto, finalCrypto, 'crypto');
+        }
+
+        // 3. Index Lokal News (CNBC Indonesia RSS with fallback)
+        if (stacks.index) {
+            if (cnbcNews.length > 0) {
+                renderNewsStack(stacks.index, cnbcNews.slice(0, 3), 'index');
+            } else {
+                const fallbackLocal = (globalNewsData.Business || []).slice(4, 7).map(item => ({
+                    title: item.title,
+                    excerpt: `Analisis pasar dan pergerakan indeks saham global melalui ${item.source}.`,
+                    url: item.link,
+                    meta: 'Market Update',
+                    source: item.source,
+                    image: item.og
+                }));
+                renderNewsStack(stacks.index, fallbackLocal, 'index');
+            }
+        }
+
+        // 4. Commodities News (Filter Business & World for commodity terms)
+        if (stacks.commodities) {
+            const allCommoditySources = [...(globalNewsData.Business || []), ...(globalNewsData.World || [])];
+            const commodityKeywords = ['gold', 'oil', 'brent', 'gas', 'copper', 'silver', 'metal', 'emas', 'minyak', 'batu bara', 'komoditas'];
+            const commodityFiltered = allCommoditySources.filter(item => {
+                const titleLower = item.title.toLowerCase();
+                return commodityKeywords.some(kw => titleLower.includes(kw));
+            });
+            const finalCommodities = (commodityFiltered.length > 0 ? commodityFiltered : (globalNewsData.World || [])).slice(0, 3).map(item => ({
+                title: item.title,
+                excerpt: `Harga komoditas energi, logam mulia, dan ketahanan suplai logistik global.`,
+                url: item.link,
+                meta: 'Komoditas',
+                source: item.source,
+                image: item.og
+            }));
+            renderNewsStack(stacks.commodities, finalCommodities, 'commodities');
+        }
+
+    } catch (error) {
+        console.error('Failed to fetch real-time news, falling back to local pool:', error);
+        fallbackToLocalNews();
+    }
+}
+
+function renderNewsStack(container, articles, category) {
+    if (!container) return;
+    if (articles.length === 0) {
+        container.innerHTML = `
+            <div class="no-data" style="padding: 30px 10px;">
+                <p style="font-size: 0.85rem; color: var(--text-muted);">Tidak ada berita terbaru saat ini.</p>
+            </div>
+        `;
+        return;
+    }
+
+    container.innerHTML = articles.map(news => {
+        const hasImage = news.image && news.image.startsWith('http');
+        const imgHTML = hasImage ? `
+            <div class="news-card-thumbnail" style="width: 80px; height: 60px; border-radius: var(--radius-sm); overflow: hidden; flex-shrink: 0; border: 1px solid var(--card-border);">
+                <img src="${news.image}" alt="news thumbnail" style="width: 100%; height: 100%; object-fit: cover;">
+            </div>
+        ` : '';
+
+        const badgeText = category === 'forex' ? 'UPDATE' :
+                          category === 'crypto' ? 'HOT' :
+                          category === 'index' ? 'INDEX LOKAL' : 'KOMODITAS';
+        const iconName = category === 'forex' ? 'fa-bolt' :
+                         category === 'crypto' ? 'fa-fire' :
+                         category === 'index' ? 'fa-chart-line' : 'fa-leaf';
+
+        return `
+            <a href="${news.url}" target="_blank" class="news-card" style="display: flex; gap: 16px; align-items: flex-start; justify-content: space-between;">
+                <div style="flex-grow: 1; padding-right: 8px;">
+                    <div class="news-badge-container">
+                        <span class="news-badge-breaking">
+                            <i class="fa-solid ${iconName}"></i> ${badgeText}
+                        </span>
+                    </div>
+                    <h4 class="news-card-title">${news.title}</h4>
+                    <p class="news-card-excerpt">${news.excerpt || 'Klik untuk membaca selengkapnya.'}</p>
+                    <div class="news-card-meta">
+                        <span><i class="fa-regular fa-clock"></i> ${news.meta}</span>
+                        <span>via ${news.source}</span>
+                    </div>
+                </div>
+                ${imgHTML}
+            </a>
+        `;
+    }).join('');
+}
+
 function initNewsRefresh() {
     const refreshBtn = document.getElementById('btn-refresh-news');
     if (!refreshBtn) return;
 
-    // Database pool berita untuk variasi simulasi harian
-    const newsPool = {
-        forex: [
-            { title: "Dolar AS Melemah Jelang Rilis Data CPI Inti", excerpt: "Para pelaku pasar berhati-hati menjelang rilis inflasi yang dapat menentukan arah kebijakan The Fed selanjutnya.", meta: "10 Menit lalu", source: "FXStreet", url: "https://www.fxstreet.com" },
-            { title: "GBP/USD Stabil di Atas 1.2650 Pasca Data Tenaga Kerja", excerpt: "Perekonomian Inggris menunjukkan ketahanan dengan tingkat pengangguran yang tetap stabil, mendukung penguatan sterling.", meta: "1 Jam lalu", source: "FXStreet", url: "https://www.fxstreet.com" },
-            { title: "Analisis EUR/USD: Tekanan Jual Masih Dominan di Sesi Eropa", excerpt: "Data PMI manufaktur Jerman yang mengecewakan kembali membebani mata uang tunggal Euro hari ini.", meta: "3 Jam lalu", source: "FXStreet", url: "https://www.fxstreet.com" },
-            { title: "Yen Jepang Menguat Tajam Pasca Dugaan Intervensi BOJ Kedua", excerpt: "Otoritas keuangan Tokyo terpantau melakukan aksi beli Yen secara masif untuk menahan depresiasi di atas level 160.", meta: "Baru saja", source: "Bloomberg", url: "https://www.bloomberg.com" },
-            { title: "Aussie Tertahan di Support Harian Menjelang Laporan RBA", excerpt: "Sentimen wait-and-see menyelimuti pasangan AUD/USD karena pelaku pasar bersiap menghadapi arah suku bunga domestik.", meta: "5 Menit lalu", source: "Reuters", url: "https://www.reuters.com" }
-        ],
-        crypto: [
-            { title: "Bitcoin (BTC) Tembus $95,000 Didorong Arus Masuk ETF", excerpt: "Minat institusional terus meningkat dengan rekor pembelian bersih harian baru pada produk ETF Spot Bitcoin.", meta: "30 Menit lalu", source: "Cointelegraph", url: "https://cointelegraph.com" },
-            { title: "Ethereum (ETH) Menguji Area $3,200 Saat Gas Fee Turun", excerpt: "Pembaruan layer-2 berhasil menurunkan biaya transaksi jaringan, memicu lonjakan aktivitas smart contract.", meta: "2 Jam lalu", source: "CoinDesk", url: "https://www.coindesk.com" },
-            { title: "Solana Memimpin Reli Altcoin dengan Kenaikan 12%", excerpt: "Volume transaksi DEX di jaringan Solana melampaui Ethereum dalam basis mingguan, didorong antusiasme pasar.", meta: "4 Jam lalu", source: "Decrypt", url: "https://decrypt.co" },
-            { title: "SEC Tunda Lagi Keputusan Opsi ETF Ethereum Spot", excerpt: "Komisi sekuritas AS mengajukan masa perpanjangan untuk meninjau potensi dampak likuiditas di pasar derivatif.", meta: "12 Menit lalu", source: "CoinDesk", url: "https://www.coindesk.com" },
-            { title: "Volume Transaksi L2 Mencapai Rekor Tertinggi Baru", excerpt: "Penerapan pembaruan Dencun sukses memotong biaya transaksi hingga 90%, mendongkrak utilitas jaringan.", meta: "1 Jam lalu", source: "Cointelegraph", url: "https://cointelegraph.com" }
-        ],
-        index: [
-            { title: "IHSG Ditutup Menguat ke Level 7,300 Didorong Sektor Perbankan", excerpt: "Saham-saham bank papan atas seperti BBRI, BMRI, dan BBCA memimpin penguatan indeks di sesi perdagangan sore.", meta: "45 Menit lalu", source: "CNBC Indonesia", url: "https://www.cnbcindonesia.com" },
-            { title: "Rupiah Menguat Terhadap Dolar AS Pasca Keputusan BI-Rate", excerpt: "Bank Indonesia memutuskan untuk menahan suku bunga acuan, memberikan sentimen positif bagi stabilitas nilai tukar rupiah.", meta: "2 Jam lalu", source: "Kontan", url: "https://www.kontan.co.id" },
-            { title: "Saham BBRI dan BMRI Catat Net Buy Asing Tertinggi Pekan Ini", excerpt: "Investor asing kembali masuk ke pasar saham Indonesia dengan akumulasi nilai transaksi bersih yang signifikan.", meta: "5 Jam lalu", source: "Bisnis Indonesia", url: "https://www.bisnis.com" },
-            { title: "Indeks Nikkei 225 Jepang Turun 1.8% Ikuti Koreksi Sektor Teknologi AS", excerpt: "Tekanan jual masif melanda saham raksasa chip semikonduktor di Tokyo pasca koreksi Nasdaq kemarin malam.", meta: "15 Menit lalu", source: "Reuters", url: "https://www.reuters.com" },
-            { title: "Dow Jones Berjangka Menguat Menanti Rilis Klaim Pengangguran", excerpt: "Kontrak berjangka saham AS naik tipis mengisyaratkan pembukaan sesi New York yang cenderung positif stabil.", meta: "30 Menit lalu", source: "Bloomberg", url: "https://www.bloomberg.com" }
-        ],
-        commodities: [
-            { title: "Harga Emas (XAU/USD) Tertahan di Resisten $2,050", excerpt: "Ketegangan geopolitik mereda sementara, membuat Emas kesulitan menembus area resisten krusial mingguan.", meta: "1 Jam lalu", source: "Reuters", url: "https://www.reuters.com" },
-            { title: "Minyak Mentah Brent Turun ke $78 Per Barel", excerpt: "Kenaikan cadangan minyak mentah komersial di Amerika Serikat memicu kekhawatiran kelebihan pasokan global.", meta: "2 Jam lalu", source: "Bloomberg", url: "https://www.bloomberg.com" },
-            { title: "Harga Tembaga Melonjak Didorong Permintaan Industri Global", excerpt: "Optimisme atas pulihnya aktivitas manufaktur di Asia dan Amerika Utara mendorong lonjakan harga logam industri.", meta: "6 Jam lalu", source: "Investing.com", url: "https://www.investing.com" },
-            { title: "Gas Alam Eropa Kembali Menguat Akibat Gangguan Jalur Pipa Gas", excerpt: "Kerusakan teknis tidak terencana di kilang gas Norwegia memicu lonjakan harga acuan TTF sebesar 4.5%.", meta: "3 Menit lalu", source: "Bloomberg", url: "https://www.bloomberg.com" },
-            { title: "Harga Perak (XAG/USD) Menguji Resisten Utama $29.50", excerpt: "Logam perak melacak kenaikan harga emas harian dengan potensi pembentukan pola kelanjutan tren naik (bullish flag).", meta: "10 Menit lalu", source: "Reuters", url: "https://www.reuters.com" }
-        ]
-    };
-
-    // Helper untuk mengacak/shuffle array
-    function shuffleArray(array) {
-        const arr = [...array];
-        for (let i = arr.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [arr[i], arr[j]] = [arr[j], arr[i]];
-        }
-        return arr;
-    }
+    // Trigger initial fetch of real news
+    fetchRealNews();
 
     refreshBtn.addEventListener('click', () => {
-        // Efek putaran pada ikon tombol refresh
         refreshBtn.classList.add('spinning');
         refreshBtn.disabled = true;
 
-        // Kosongkan dan buat efek loading skeleton di semua stack berita
         const stacks = document.querySelectorAll('.news-cards-stack');
         stacks.forEach(stack => {
             stack.innerHTML = `
@@ -1440,50 +1620,13 @@ function initNewsRefresh() {
             `;
         });
 
-        // Simulasi latensi API 800ms
-        setTimeout(() => {
-            // Render ulang semua kategori dengan urutan berita yang diacak
-            for (const category in newsPool) {
-                const targetStack = document.getElementById(`news-${category}`);
-                if (!targetStack) continue;
-
-                const shuffledNews = shuffleArray(newsPool[category]).slice(0, 3); // Ambil 3 berita teratas acak
-
-                targetStack.innerHTML = shuffledNews.map(news => {
-                    const isBreaking = news.title.includes("AS") || news.title.includes("BTC") || news.title.includes("IHSG") || news.title.includes("Emas");
-                    const badgeText = category === 'forex' ? (isBreaking ? 'BREAKING' : 'UPDATE') :
-                                      category === 'crypto' ? 'HOT' :
-                                      category === 'index' ? 'INDEX' : 'KOMODITAS';
-                    const iconName = category === 'forex' ? 'fa-bolt' :
-                                     category === 'crypto' ? 'fa-fire' :
-                                     category === 'index' ? 'fa-chart-line' : 'fa-leaf';
-                    const badgeClass = category === 'forex' ? 'news-badge-breaking' :
-                                       category === 'crypto' ? 'news-badge-breaking' : 'news-badge-breaking';
-
-                    return `
-                        <a href="${news.url}" target="_blank" class="news-card">
-                            <div class="news-badge-container">
-                                <span class="${badgeClass}">
-                                    <i class="fa-solid ${iconName} ${category === 'crypto' ? 'animate-pulse' : ''}"></i> ${badgeText}
-                                </span>
-                            </div>
-                            <h4 class="news-card-title">${news.title}</h4>
-                            <p class="news-card-excerpt">${news.excerpt}</p>
-                            <div class="news-card-meta">
-                                <span><i class="fa-regular fa-clock"></i> ${news.meta}</span>
-                                <span>via ${news.source}</span>
-                            </div>
-                        </a>
-                    `;
-                }).join('');
-            }
-
-            // Hentikan putaran animasi refresh dan aktifkan kembali tombol
+        fetchRealNews().finally(() => {
             refreshBtn.classList.remove('spinning');
             refreshBtn.disabled = false;
-        }, 800);
+        });
     });
 }
+
 
 /* ==========================================================================
    10. LIVE MARKET FEED & BLOOMBERG TICKER TAPE (REAL-TIME API POLLING)
@@ -1559,10 +1702,10 @@ async function initLiveMarketPrices() {
     const calcPairSelect = document.getElementById('calc-pair');
     const calcPriceInput = document.getElementById('calc-price');
 
-    if (!tickerContainer) return;
-
-    // Render the (empty/loading) ticker shell first so the tape is never blank.
-    populateTicker();
+    // Render the (empty/loading) ticker shell first if container exists
+    if (tickerContainer) {
+        populateTicker();
+    }
 
     if (calcPairSelect) {
         calcPairSelect.addEventListener('change', () => {
