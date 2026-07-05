@@ -1,7 +1,2 @@
 chat.md
-node_modules/
-.env
-.agents/
-skills-lock.json
-package.json
-package-lock.json
+
