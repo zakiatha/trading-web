@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initNewsRefresh();
     initCOTReport();
     initLiveMarketPrices();
+    initNetworkMonitor();
 });
 
 /* ==========================================================================
@@ -2024,5 +2025,169 @@ function updateIndicatorLivePrices() {
             changeEl.className = 'indicator-change';
         }
     }
+}
+
+/* ==========================================================================
+   14. NETWORK TUNNELING MONITOR LOGIC
+   ========================================================================== */
+function initNetworkMonitor() {
+    const pfStatus = document.getElementById('pf-status');
+    const pfRequests = document.getElementById('pf-requests');
+    const pfLatency = document.getElementById('pf-latency');
+    const pfLoss = document.getElementById('pf-loss');
+    
+    const cfStatus = document.getElementById('cf-status');
+    const cfRequests = document.getElementById('cf-requests');
+    const cfLatency = document.getElementById('cf-latency');
+    const cfLoss = document.getElementById('cf-loss');
+    
+    const nmapLastScan = document.getElementById('nmap-last-scan');
+    const pfExposedList = document.getElementById('pf-exposed-list');
+    const cfExposedList = document.getElementById('cf-exposed-list');
+    const btnReset = document.getElementById('btn-reset-network-stats');
+    
+    const ctx = document.getElementById('network-latency-chart');
+    if (!ctx) return;
+    
+    // Initialize Chart.js
+    const latencyChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: [], // Request index labels
+            datasets: [
+                {
+                    label: 'Port Forwarding RTT (ms)',
+                    data: [],
+                    borderColor: '#ff1744', // color-bearish
+                    backgroundColor: 'rgba(255, 23, 68, 0.05)',
+                    borderWidth: 2,
+                    tension: 0.2,
+                    pointRadius: 1
+                },
+                {
+                    label: 'Cloudflare Tunnel RTT (ms)',
+                    data: [],
+                    borderColor: '#00f5a0', // color-teal
+                    backgroundColor: 'rgba(0, 245, 160, 0.05)',
+                    borderWidth: 2,
+                    tension: 0.2,
+                    pointRadius: 1
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                    ticks: { color: '#94a3b8' }
+                },
+                x: {
+                    grid: { display: false },
+                    ticks: { display: false }
+                }
+            },
+            plugins: {
+                legend: {
+                    labels: { color: '#ffffff', font: { family: 'Inter' } }
+                }
+            }
+        }
+    });
+
+    async function fetchStats() {
+        try {
+            const res = await fetch('http://localhost:3001/stats');
+            if (!res.ok) throw new Error('Offline');
+            const data = await res.json();
+            
+            // Port Forwarding Stats
+            pfStatus.innerHTML = '<span class="pulse-dot" style="background-color: var(--color-bullish); display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; box-shadow: 0 0 8px var(--color-bullish);"></span> ONLINE';
+            pfStatus.style.background = 'rgba(0, 230, 118, 0.1)';
+            pfStatus.style.color = 'var(--color-bullish)';
+            pfStatus.style.borderColor = 'rgba(0, 230, 118, 0.2)';
+            
+            pfRequests.innerText = data.port_forward.requests;
+            const pfLats = data.port_forward.latencies;
+            const pfAvg = pfLats.length > 0 ? Math.round(pfLats.reduce((a,b)=>a+b, 0) / pfLats.length) : 0;
+            pfLatency.innerText = `${pfAvg} ms`;
+            
+            // Calculate packet loss (requests that timed out in simulation)
+            const pfTimeouts = pfLats.filter(l => l > 800).length;
+            const pfLossPercent = pfLats.length > 0 ? ((pfTimeouts / pfLats.length) * 100).toFixed(1) : '0.0';
+            pfLoss.innerText = `${pfLossPercent}%`;
+            pfLoss.style.color = pfLossPercent > 2 ? 'var(--color-bearish)' : 'var(--text-secondary)';
+            
+            // Cloudflare Stats
+            cfStatus.innerHTML = '<span class="pulse-dot" style="background-color: var(--color-bullish); display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; box-shadow: 0 0 8px var(--color-bullish);"></span> ONLINE';
+            cfStatus.style.background = 'rgba(0, 230, 118, 0.1)';
+            cfStatus.style.color = 'var(--color-bullish)';
+            cfStatus.style.borderColor = 'rgba(0, 230, 118, 0.2)';
+            
+            cfRequests.innerText = data.cloudflare_tunnel.requests;
+            const cfLats = data.cloudflare_tunnel.latencies;
+            const cfAvg = cfLats.length > 0 ? Math.round(cfLats.reduce((a,b)=>a+b, 0) / cfLats.length) : 0;
+            cfLatency.innerText = `${cfAvg} ms`;
+            
+            const cfTimeouts = cfLats.filter(l => l > 800).length;
+            const cfLossPercent = cfLats.length > 0 ? ((cfTimeouts / cfLats.length) * 100).toFixed(1) : '0.0';
+            cfLoss.innerText = `${cfLossPercent}%`;
+            cfLoss.style.color = cfLossPercent > 2 ? 'var(--color-bearish)' : 'var(--text-secondary)';
+            
+            // Nmap results
+            if (data.nmap_scan && data.nmap_scan.last_scan) {
+                const scanTime = new Date(data.nmap_scan.last_scan).toLocaleTimeString();
+                nmapLastScan.innerText = `Hari ini pukul ${scanTime}`;
+                
+                const pfExposed = data.nmap_scan.exposed_ports.port_forward || [];
+                pfExposedList.innerHTML = pfExposed.map(p => `<div style="margin-bottom: 2px;"><i class="fa-solid fa-triangle-exclamation" style="color: var(--color-bearish);"></i> ${p}</div>`).join('') || 'Aman / Tidak ada port';
+                
+                const cfExposed = data.nmap_scan.exposed_ports.cloudflare_tunnel || [];
+                cfExposedList.innerHTML = cfExposed.map(p => `<div style="margin-bottom: 2px;"><i class="fa-solid fa-circle-check" style="color: var(--color-teal);"></i> ${p}</div>`).join('') || 'Aman';
+            } else {
+                nmapLastScan.innerText = 'Belum pernah dijalankan';
+                pfExposedList.innerText = 'Scan belum dijalankan.';
+                cfExposedList.innerText = 'Scan belum dijalankan.';
+            }
+            
+            // Update Latency Chart
+            const maxLength = Math.max(pfLats.length, cfLats.length);
+            const labels = Array.from({length: maxLength}, (_, i) => i + 1);
+            
+            latencyChart.data.labels = labels;
+            // Clean up visual presentation of timeouts to avoid visual scale breaking
+            latencyChart.data.datasets[0].data = pfLats.map(l => l > 800 ? null : l);
+            latencyChart.data.datasets[1].data = cfLats.map(l => l > 800 ? null : l);
+            latencyChart.update('none'); // silent update
+            
+        } catch (err) {
+            // Set offline indicators
+            pfStatus.innerHTML = '<span class="pulse-dot" style="background-color: var(--color-bearish); display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; box-shadow: 0 0 8px var(--color-bearish);"></span> OFFLINE';
+            pfStatus.style.background = 'rgba(255, 23, 68, 0.1)';
+            pfStatus.style.color = 'var(--color-bearish)';
+            pfStatus.style.borderColor = 'rgba(255, 23, 68, 0.2)';
+            
+            cfStatus.innerHTML = '<span class="pulse-dot" style="background-color: var(--color-bearish); display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; box-shadow: 0 0 8px var(--color-bearish);"></span> OFFLINE';
+            cfStatus.style.background = 'rgba(255, 23, 68, 0.1)';
+            cfStatus.style.color = 'var(--color-bearish)';
+            cfStatus.style.borderColor = 'rgba(255, 23, 68, 0.2)';
+        }
+    }
+    
+    // Set up reset listener
+    if (btnReset) {
+        btnReset.addEventListener('click', async () => {
+            try {
+                await fetch('http://localhost:3001/reset', { method: 'POST' });
+                fetchStats();
+            } catch(e) {}
+        });
+    }
+    
+    // Poll stats every 1 second
+    setInterval(fetchStats, 1000);
+    fetchStats();
 }
 

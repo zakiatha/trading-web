@@ -44,7 +44,7 @@
                 <a href="#jurnal" class="nav-link">Jurnal</a>
                 <a href="#myplan" class="nav-link">My Plan</a>
                 <a href="#news" class="nav-link">News</a>
-                <a href="#ship-tracker" class="nav-link">Ship Tracker</a>
+                <a href="#network-monitor" class="nav-link">Network Monitor</a>
                 <a href="#indikator" class="nav-link">Indikator</a>
             </nav>
             
@@ -830,16 +830,86 @@
         </div>
     </section>
 
-    <!-- SECTION 3.1: GLOBAL SHIP TRACKER -->
-    <section id="ship-tracker" class="ship-tracker-section" style="padding: 60px 0; border-top: 1px solid var(--card-border);">
+    <!-- SECTION 3.1: NETWORK & TUNNELING MONITOR -->
+    <section id="network-monitor" class="network-monitor-section" style="padding: 60px 0; border-top: 1px solid var(--card-border);">
         <div class="section-container">
             <div class="section-header">
-                <h2 class="section-title"><i class="fa-solid fa-ship text-accent"></i> Global Live <span class="gradient-text">Ship Tracker</span></h2>
-                <p class="section-subtitle">Pelacakan lalu lintas kapal niaga, tanker, kargo, dan logistik perdagangan laut dunia secara real-time.</p>
+                <h2 class="section-title"><i class="fa-solid fa-network-wired text-accent"></i> Network <span class="gradient-text">Tunneling Monitor</span></h2>
+                <p class="section-subtitle">Analisis Perbandingan Performa Latensi Webhook dan Audit Keamanan Trading Node secara real-time.</p>
             </div>
 
-            <div class="card glass-card ship-map-card" style="padding: 0; overflow: hidden; border-radius: var(--radius-lg); height: 500px; position: relative;">
-                <iframe src="https://www.vesselfinder.com/aismap?zoom=3&lat=0&lon=0&width=100%&height=500&names=false&clicktoact=false" width="100%" height="100%" frameborder="0" allowtransparency="true" loading="lazy" style="border: none;"></iframe>
+            <!-- Stats Grid -->
+            <div class="calculator-grid" style="margin-bottom: 30px; display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
+                <!-- Port Forwarding Card -->
+                <div class="card glass-card" style="border-top: 4px solid var(--color-bearish); padding: 20px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <h3 style="font-family: var(--font-heading); font-size: 1.2rem; color: var(--text-primary); margin: 0;">Port Forwarding</h3>
+                        <span id="pf-status" class="data-status-badge demo" style="background: rgba(255, 23, 68, 0.1); color: var(--color-bearish); border-color: rgba(255, 23, 68, 0.2); padding: 4px 8px; border-radius: var(--radius-sm); font-size: 0.8rem; font-weight: 600;"><span class="pulse-dot" style="background-color: var(--color-bearish); display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; box-shadow: 0 0 8px var(--color-bearish);"></span> OFFLINE</span>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 10px;">
+                        <div style="display: flex; justify-content: space-between;"><span style="color: var(--text-secondary);">Total Request:</span> <span id="pf-requests" style="font-weight: 600; color: var(--text-primary);">0</span></div>
+                        <div style="display: flex; justify-content: space-between;"><span style="color: var(--text-secondary);">Avg RTT Latency:</span> <span id="pf-latency" style="font-weight: 600; color: var(--text-primary);">0 ms</span></div>
+                        <div style="display: flex; justify-content: space-between;"><span style="color: var(--text-secondary);">Packet Loss:</span> <span id="pf-loss" style="font-weight: 600; color: var(--color-bearish);">0.0%</span></div>
+                    </div>
+                </div>
+
+                <!-- Cloudflare Tunnel Card -->
+                <div class="card glass-card" style="border-top: 4px solid var(--color-teal); padding: 20px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <h3 style="font-family: var(--font-heading); font-size: 1.2rem; color: var(--text-primary); margin: 0;">Cloudflare Tunnel</h3>
+                        <span id="cf-status" class="data-status-badge demo" style="background: rgba(0, 245, 160, 0.1); color: var(--color-teal); border-color: rgba(0, 245, 160, 0.2); padding: 4px 8px; border-radius: var(--radius-sm); font-size: 0.8rem; font-weight: 600;"><span class="pulse-dot" style="background-color: var(--color-teal); display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; box-shadow: 0 0 8px var(--color-teal);"></span> OFFLINE</span>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 10px;">
+                        <div style="display: flex; justify-content: space-between;"><span style="color: var(--text-secondary);">Total Request:</span> <span id="cf-requests" style="font-weight: 600; color: var(--text-primary);">0</span></div>
+                        <div style="display: flex; justify-content: space-between;"><span style="color: var(--text-secondary);">Avg RTT Latency:</span> <span id="cf-latency" style="font-weight: 600; color: var(--text-primary);">0 ms</span></div>
+                        <div style="display: flex; justify-content: space-between;"><span style="color: var(--text-secondary);">Packet Loss:</span> <span id="cf-loss" style="font-weight: 600; color: var(--color-teal);">0.0%</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts & Security Grid -->
+            <div style="display: grid; grid-template-columns: 1.6fr 1fr; gap: 24px; margin-bottom: 30px; align-items: start;">
+                <!-- Latency Chart Card -->
+                <div class="card glass-card" style="padding: 20px; height: 380px; display: flex; flex-direction: column;">
+                    <h3 style="font-family: var(--font-heading); font-size: 1.1rem; margin-bottom: 15px; margin-top: 0;"><i class="fa-solid fa-chart-area text-accent"></i> RTT Latency History (ms)</h3>
+                    <div style="flex-grow: 1; position: relative;">
+                        <canvas id="network-latency-chart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Security Nmap Results Card -->
+                <div class="card glass-card" style="padding: 20px; height: 380px; display: flex; flex-direction: column; justify-content: space-between;">
+                    <div>
+                        <h3 style="font-family: var(--font-heading); font-size: 1.1rem; margin-bottom: 15px; margin-top: 0;"><i class="fa-solid fa-shield-halved text-accent"></i> Nmap Security Scan Audit</h3>
+                        
+                        <div style="margin-bottom: 15px;">
+                            <span style="font-size: 0.85rem; color: var(--text-secondary);">Last Scan:</span> 
+                            <span id="nmap-last-scan" style="font-size: 0.85rem; color: var(--text-primary); font-weight: 500;">Belum pernah dijalankan</span>
+                        </div>
+
+                        <!-- Scan results comparisons -->
+                        <div style="display: flex; flex-direction: column; gap: 12px;">
+                            <div>
+                                <span style="font-size: 0.9rem; font-weight: 600; color: var(--color-bearish); display: block; margin-bottom: 4px;">Port Forwarding exposed ports:</span>
+                                <div id="pf-exposed-list" style="font-family: monospace; font-size: 0.85rem; background: rgba(0,0,0,0.3); padding: 8px; border-radius: var(--radius-sm); color: var(--text-secondary);">
+                                    Scan belum dijalankan.
+                                </div>
+                            </div>
+                            <div>
+                                <span style="font-size: 0.9rem; font-weight: 600; color: var(--color-teal); display: block; margin-bottom: 4px;">Cloudflare Tunnel exposed ports:</span>
+                                <div id="cf-exposed-list" style="font-family: monospace; font-size: 0.85rem; background: rgba(0,0,0,0.3); padding: 8px; border-radius: var(--radius-sm); color: var(--text-secondary);">
+                                    Scan belum dijalankan.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Instructions / Actions -->
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--card-border); padding-top: 15px; margin-top: 10px;">
+                        <button id="btn-reset-network-stats" class="btn btn-secondary" style="padding: 8px 16px; font-size: 0.85rem; border-radius: var(--radius-sm); background: rgba(255,255,255,0.05); color: var(--text-primary); border: 1px solid var(--card-border); cursor: pointer;"><i class="fa-solid fa-rotate-left"></i> Reset Stats</button>
+                        <span style="font-size: 0.75rem; color: var(--text-muted); text-align: right;">Jalankan <code>server.js</code> &amp; <code>benchmark.py</code> untuk menguji.</span>
+                    </div>
+                </div>
             </div>
         </div>
     </section>

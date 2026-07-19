@@ -1,2 +1,6 @@
 chat.md
-
+package.json
+package-lock.json
+.env
+*.env
+node_modules/
