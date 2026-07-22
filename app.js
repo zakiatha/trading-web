@@ -1373,8 +1373,8 @@ function initShipFinderLeafletMap() {
     if (!mapContainer || typeof L === 'undefined') return;
 
     shipMap = L.map('shipfinder-leaflet-map', {
-        center: [26.0, 55.0],
-        zoom: 7,
+        center: [15.0, 40.0],
+        zoom: 3,
         zoomControl: true
     });
 
@@ -1383,8 +1383,8 @@ function initShipFinderLeafletMap() {
 
     shipMarkersGroup = L.layerGroup().addTo(shipMap);
 
-    // Initial region ships render
-    loadShipRegionFleet('hormuz');
+    // Initial global fleet render (All vessels sailing worldwide)
+    loadShipRegionFleet('global');
 
     // Region Preset buttons handler
     const buttons = document.querySelectorAll('.ship-preset-btn');
@@ -1396,7 +1396,7 @@ function initShipFinderLeafletMap() {
             btn.classList.add('active', 'bg-teal-500/20', 'text-teal-300', 'border-teal-500/30');
             btn.classList.remove('bg-slate-800', 'text-slate-300');
 
-            const region = btn.getAttribute('data-region') || 'hormuz';
+            const region = btn.getAttribute('data-region') || 'global';
             const lat = parseFloat(btn.getAttribute('data-lat'));
             const lon = parseFloat(btn.getAttribute('data-lon'));
             const zoom = parseInt(btn.getAttribute('data-zoom'));
@@ -1434,9 +1434,18 @@ function initShipFinderLeafletMap() {
 }
 
 function loadShipRegionFleet(regionKey) {
-    const rawFleet = shipFleetDatabase[regionKey] || shipFleetDatabase['hormuz'];
-    // Deep clone fleet so live drift doesn't mutate base config
-    activeVesselsList = JSON.parse(JSON.stringify(rawFleet));
+    if (regionKey === 'global') {
+        let allFleet = [];
+        Object.keys(shipFleetDatabase).forEach(rk => {
+            if (rk !== 'global') {
+                allFleet = allFleet.concat(shipFleetDatabase[rk]);
+            }
+        });
+        activeVesselsList = JSON.parse(JSON.stringify(allFleet));
+    } else {
+        const rawFleet = shipFleetDatabase[regionKey] || shipFleetDatabase['hormuz'];
+        activeVesselsList = JSON.parse(JSON.stringify(rawFleet));
+    }
     renderShipMapAndTable();
 }
 
