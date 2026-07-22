@@ -926,9 +926,12 @@ function tickPrices() {
         label.innerText = `Update ${t} WIB`;
     }
 
-    // Synchronize Multi-Chart AI Signal cards with live price ticks
+    // Synchronize Multi-Chart AI Signal cards & AI Today Market Intel with live price ticks
     if (typeof updateActiveChartSignals === 'function') {
         updateActiveChartSignals();
+    }
+    if (typeof renderAIPairCards === 'function') {
+        renderAIPairCards();
     }
 }
 
@@ -1092,8 +1095,42 @@ function initAIMarketIntel06AM() {
     }, 30000);
 }
 
+function getDynamicMacroProjections() {
+    const pairKeys = [
+        { key: 'XAUUSD', name: 'XAU/USD (Gold)', sent: 'BULLISH', rPct: 0.0080, sPct: 0.0045, template: (price, res, sup) => `Harga live ${price}. Target kenaikan menuju resisten ${res} dengan support teruji di ${sup}.` },
+        { key: 'USDJPY', name: 'USD/JPY', sent: 'BULLISH', rPct: 0.0075, sPct: 0.0040, template: (price, res, sup) => `Harga live ${price}. Menguji resisten ${res} dengan potensi intervensi BOJ.` },
+        { key: 'USDCHF', name: 'USD/CHF', sent: 'BEARISH', rPct: 0.0050, sPct: 0.0078, template: (price, res, sup) => `Harga live ${price}. Tertekan di bawah support ${sup} sejalan dengan pelemahan DXY.` },
+        { key: 'USDCAD', name: 'USD/CAD', sent: 'BULLISH', rPct: 0.0062, sPct: 0.0035, template: (price, res, sup) => `Harga live ${price}. Rebound dari support ${sup} mengincar area supply ${res}.` },
+        { key: 'EURUSD', name: 'EUR/USD', sent: 'BEARISH', rPct: 0.0060, sPct: 0.0060, template: (price, res, sup) => `Harga live ${price}. Tekanan jual berlanjut menguji area support harian ${sup}.` },
+        { key: 'GBPUSD', name: 'GBP/USD', sent: 'NEUTRAL', rPct: 0.0055, sPct: 0.0055, template: (price, res, sup) => `Harga live ${price}. Konsolidasi di dalam range ${sup} hingga ${res}.` },
+        { key: 'AUDUSD', name: 'AUD/USD', sent: 'BULLISH', rPct: 0.0113, sPct: 0.0075, template: (price, res, sup) => `Harga live ${price}. Sikap RBA hawkish menopang harga di atas support ${sup}.` },
+        { key: 'NZDUSD', name: 'NZD/USD', sent: 'BEARISH', rPct: 0.0090, sPct: 0.0107, template: (price, res, sup) => `Harga live ${price}. Rejection resisten harian ${res} mengarahkan target ke ${sup}.` }
+    ];
+
+    return pairKeys.map(p => {
+        const livePrice = tickerPrices[p.key] || 100;
+        const resVal = p.sent === 'BEARISH' ? livePrice * (1 + p.rPct) : livePrice * (1 + p.rPct);
+        const supVal = p.sent === 'BEARISH' ? livePrice * (1 - p.sPct) : livePrice * (1 - p.sPct);
+
+        const priceStr = formatPrice(p.key, livePrice);
+        const resStr = formatPrice(p.key, resVal);
+        const supStr = formatPrice(p.key, supVal);
+
+        return {
+            key: p.key,
+            name: p.name,
+            sent: p.sent,
+            livePrice: priceStr,
+            res: resStr,
+            sup: supStr,
+            proj: p.template(priceStr, resStr, supStr)
+        };
+    });
+}
+
 function downloadAIPDFReport() {
     const reportDate = new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    const pairs = getDynamicMacroProjections();
     const element = document.createElement('div');
     element.style.padding = '30px';
     element.style.fontFamily = 'Arial, sans-serif';
@@ -1118,30 +1155,21 @@ function downloadAIPDFReport() {
             </p>
         </div>
 
-        <h3 style="font-size: 15px; font-weight: bold; color: #0f172a; margin-bottom: 12px;">🎯 Proyeksi & Bias Sinyal 8 Pair Utama</h3>
+        <h3 style="font-size: 15px; font-weight: bold; color: #0f172a; margin-bottom: 12px;">🎯 Proyeksi & Bias Sinyal 8 Pair Utama (Live Market Sync)</h3>
         <table style="width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 25px;">
             <thead>
                 <tr style="background-color: #f1f5f9; text-align: left; color: #334155;">
                     <th style="padding: 10px; border: 1px solid #cbd5e1;">Pair / Instrumen</th>
                     <th style="padding: 10px; border: 1px solid #cbd5e1;">Bias Sentimen</th>
-                    <th style="padding: 10px; border: 1px solid #cbd5e1;">Proyeksi Teknikal & Sinyal AI SMC</th>
+                    <th style="padding: 10px; border: 1px solid #cbd5e1;">Proyeksi Teknikal & Live Market Targets</th>
                 </tr>
             </thead>
             <tbody>
-                ${[
-                    { p: 'XAU/USD (Gold)', b: 'BULLISH', d: 'Target $2,370. Support $2,320. BOS M15 + FVG Tap H1.' },
-                    { p: 'USD/JPY', b: 'BULLISH', d: 'Resisten 161.00. Waspada potensi intervensi BOJ di 161.50.' },
-                    { p: 'USD/CHF', b: 'BEARISH', d: 'Tertekan di bawah 0.8870 sejalan dengan pelemahan DXY.' },
-                    { p: 'USD/CAD', b: 'BULLISH', d: 'Rebound dari support 1.3620 mengincar supply 1.3700.' },
-                    { p: 'EUR/USD', b: 'BEARISH', d: 'Tekanan jual berlanjut menguji support 1.0660.' },
-                    { p: 'GBP/USD', b: 'NEUTRAL', d: 'Konsolidasi di dalam range 1.2630 hingga 1.2720.' },
-                    { p: 'AUD/USD', b: 'BULLISH', d: 'RBA Hawkish menopang harga di atas support 0.6580.' },
-                    { p: 'NZD/USD', b: 'BEARISH', d: 'Rejection resisten harian mengarahkan target ke 0.6050.' }
-                ].map(item => `
+                ${pairs.map(item => `
                     <tr>
-                        <td style="padding: 10px; border: 1px solid #cbd5e1; font-weight: bold;">${item.p}</td>
-                        <td style="padding: 10px; border: 1px solid #cbd5e1; font-weight: bold; color: ${item.b === 'BULLISH' ? '#16a34a' : item.b === 'BEARISH' ? '#dc2626' : '#d97706'};">${item.b}</td>
-                        <td style="padding: 10px; border: 1px solid #cbd5e1;">${item.d}</td>
+                        <td style="padding: 10px; border: 1px solid #cbd5e1; font-weight: bold;">${item.name}</td>
+                        <td style="padding: 10px; border: 1px solid #cbd5e1; font-weight: bold; color: ${item.sent === 'BULLISH' ? '#16a34a' : item.sent === 'BEARISH' ? '#dc2626' : '#d97706'};">${item.sent}</td>
+                        <td style="padding: 10px; border: 1px solid #cbd5e1;">${item.proj}</td>
                     </tr>
                 `).join('')}
             </tbody>
@@ -1172,17 +1200,7 @@ function renderAIPairCards() {
     const container = document.getElementById('ai-pair-cards-container');
     if (!container) return;
 
-    // 8 Pairs requested by user
-    const pairs = [
-        { name: 'XAU/USD (Gold)', sent: 'BULLISH', proj: 'Target kenaikan menuju resisten $2,370 dengan support teruji di $2,320.' },
-        { name: 'USD/JPY', sent: 'BULLISH', proj: 'Menguji resisten 161.00 dengan potensi intervensi BOJ.' },
-        { name: 'USD/CHF', sent: 'BEARISH', proj: 'Tertekan di bawah support 0.8870 sejalan dengan pelemahan DXY.' },
-        { name: 'USD/CAD', sent: 'BULLISH', proj: 'Rebound dari support 1.3620 mengincar area supply 1.3700.' },
-        { name: 'EUR/USD', sent: 'BEARISH', proj: 'Tekanan jual berlanjut menguji area support harian 1.0660.' },
-        { name: 'GBP/USD', sent: 'NEUTRAL', proj: 'Konsolidasi di dalam range 1.2630 hingga 1.2720.' },
-        { name: 'AUD/USD', sent: 'BULLISH', proj: 'Sikap RBA hawkish menopang harga di atas support 0.6580.' },
-        { name: 'NZD/USD', sent: 'BEARISH', proj: 'Rejection resisten harian mengarahkan target ke 0.6050.' }
-    ];
+    const pairs = getDynamicMacroProjections();
 
     container.innerHTML = pairs.map(p => {
         const badgeColor = p.sent === 'BULLISH' ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' :
@@ -1201,9 +1219,10 @@ function renderAIPairCards() {
 
     const macroEl = document.getElementById('ai-macro-outlook');
     if (macroEl) {
+        const goldPrice = formatPrice('XAUUSD', tickerPrices.XAUUSD || 4117.23);
         macroEl.innerHTML = `
             <strong>[TINJAUAN MAKRO 8 PAIR ULTIMATE]</strong><br>
-            Pasar finansial global hari ini diwarnai oleh akumulasi likuiditas pada aset Emas (XAUUSD) & penguatan Dolar AS menjelang pidato The Fed. 8 Pair utama (XAUUSD, USDJPY, USDCHF, USDCAD, EURUSD, GBPUSD, AUDUSD, NZDUSD) telah diperbarui dengan proyeksi AI 5-menit. Manfaatkan rasio Risk to Reward minimal 1:2.
+            Pasar finansial global hari ini diwarnai oleh akumulasi likuiditas pada aset Emas (XAUUSD di level <strong>${goldPrice}</strong>) & penguatan Dolar AS menjelang pidato The Fed. 8 Pair utama (XAUUSD, USDJPY, USDCHF, USDCAD, EURUSD, GBPUSD, AUDUSD, NZDUSD) telah diperbarui secara live dengan proyeksi AI 5-menit. Manfaatkan rasio Risk to Reward minimal 1:2.
         `;
     }
 }
