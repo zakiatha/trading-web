@@ -80,6 +80,9 @@ function initThemeManager() {
             themeIcon.className = 'fa-solid fa-heart text-pink-400';
             themeLabel.innerText = 'Pastel 🌸';
         }
+        if (typeof updateMapTileForTheme === 'function') {
+            updateMapTileForTheme(theme);
+        }
     }
 }
 
@@ -892,24 +895,35 @@ window.sendAIChatMessage = function() {
    ========================================================================== */
 let shipMap = null;
 let shipMarkersGroup = null;
+let currentTileLayer = null;
+
+function updateMapTileForTheme(theme) {
+    if (!shipMap) return;
+    if (currentTileLayer) shipMap.removeLayer(currentTileLayer);
+
+    const tileUrl = (theme === 'light' || theme === 'pastel')
+        ? 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png'
+        : 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
+
+    currentTileLayer = L.tileLayer(tileUrl, {
+        attribution: '&copy; OpenStreetMap &copy; CARTO &copy; ShipFinder AIS',
+        subdomains: 'abcd',
+        maxZoom: 19
+    }).addTo(shipMap);
+}
 
 function initShipFinderLeafletMap() {
     const mapContainer = document.getElementById('shipfinder-leaflet-map');
     if (!mapContainer || typeof L === 'undefined') return;
 
-    // Default center: Selat Hormuz (26.0, 55.0)
     shipMap = L.map('shipfinder-leaflet-map', {
         center: [26.0, 55.0],
         zoom: 7,
         zoomControl: true
     });
 
-    // Dark CartoDB Tile Layer (100% Reliable, Fast, Zero 404)
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; OpenStreetMap &copy; CARTO &copy; ShipFinder AIS',
-        subdomains: 'abcd',
-        maxZoom: 19
-    }).addTo(shipMap);
+    const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+    updateMapTileForTheme(currentTheme);
 
     shipMarkersGroup = L.layerGroup().addTo(shipMap);
 
