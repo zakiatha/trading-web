@@ -12,7 +12,7 @@ body {
     transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* Light Mode Overrides */
+/* 1. Light Mode Overrides */
 [data-theme="light"] {
     background-color: #f8fafc !important;
     color: #0f172a !important;
@@ -48,10 +48,59 @@ body {
 }
 
 [data-theme="light"] select,
-[data-theme="light"] input {
+[data-theme="light"] input,
+[data-theme="light"] textarea {
     background-color: #f8fafc !important;
     color: #0f172a !important;
     border-color: #cbd5e1 !important;
+}
+
+/* 2. Pink Pastel Mode Overrides (Fitur Baru) */
+[data-theme="pastel"] {
+    background-color: #fff0f5 !important; /* Soft Lavender Blush */
+    color: #2d3748 !important;
+}
+
+[data-theme="pastel"] header {
+    background-color: rgba(255, 240, 245, 0.92) !important;
+    border-color: #f8bbd0 !important;
+}
+
+[data-theme="pastel"] .bg-slate-900 {
+    background-color: #ffffff !important;
+    border-color: #f48fb1 !important;
+    box-shadow: 0 6px 24px rgba(244, 143, 177, 0.15);
+}
+
+[data-theme="pastel"] .bg-slate-950 {
+    background-color: #fce4ec !important;
+    border-color: #f8bbd0 !important;
+}
+
+[data-theme="pastel"] .text-white {
+    color: #1a202c !important;
+}
+
+[data-theme="pastel"] .text-slate-200,
+[data-theme="pastel"] .text-slate-300 {
+    color: #2d3748 !important;
+}
+
+[data-theme="pastel"] .text-slate-400 {
+    color: #718096 !important;
+}
+
+[data-theme="pastel"] select,
+[data-theme="pastel"] input,
+[data-theme="pastel"] textarea {
+    background-color: #ffffff !important;
+    color: #1a202c !important;
+    border-color: #f48fb1 !important;
+}
+
+[data-theme="pastel"] .text-teal-400,
+[data-theme="pastel"] .text-teal-300 {
+    color: #d81b60 !important; /* Pastel Deep Pink */
 }
 
 /* Hide scrollbars for clean marquee */
@@ -94,28 +143,31 @@ body {
     100% { color: inherit; }
 }
 
-/* Custom Pulsing Badge */
-.animate-pulse-fast {
-    animation: pulseFast 1s infinite alternate;
-}
-
-@keyframes pulseFast {
-    0% { opacity: 0.6; }
-    100% { opacity: 1; }
-}
-
-/* Responsive iframe container */
-.chart-card-wrapper {
-    transition: all 0.3s ease;
-}
-
-.chart-card-wrapper:hover {
-    border-color: rgba(0, 245, 160, 0.3);
-}
-
-/* Ship preset button active states */
-.ship-preset-btn.active {
-    background-color: rgba(0, 245, 160, 0.15) !important;
+/* Active tab button styles */
+.news-tab-btn.active, .journal-filter-btn.active, .ship-preset-btn.active {
+    background-color: rgba(0, 245, 160, 0.2) !important;
     color: #00f5a0 !important;
     border-color: rgba(0, 245, 160, 0.35) !important;
+    font-weight: 700 !important;
+}
+
+[data-theme="pastel"] .news-tab-btn.active, 
+[data-theme="pastel"] .journal-filter-btn.active, 
+[data-theme="pastel"] .ship-preset-btn.active {
+    background-color: rgba(244, 143, 177, 0.3) !important;
+    color: #ad1457 !important;
+    border-color: #ec407a !important;
+}
+
+/* Leaflet Map Marker Styling for ShipFinder */
+.leaflet-popup-content-wrapper {
+    background-color: #0f172a !important;
+    color: #f8fafc !important;
+    border-radius: 12px !important;
+    border: 1px solid #334155 !important;
+    font-family: 'Inter', sans-serif !important;
+}
+
+.leaflet-popup-tip {
+    background-color: #0f172a !important;
 }
