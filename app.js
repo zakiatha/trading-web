@@ -249,193 +249,211 @@ let currentChartGridCount = 1;
 const activeChartSymbols = ['OANDA:XAUUSD', 'IDX:BBRI', 'BITSTAMP:BTCUSD', 'NASDAQ:NVDA'];
 
 // AI Scalping Signal Generator based on ZAM's Intermarket DXY Correlation & ICT/SMC Technicals
+function formatPrice(symKey, val) {
+    const isIndo = ['BBRI', 'BMRI', 'BBCA', 'TLKM'].includes(symKey);
+    const isForex = ['EURUSD', 'GBPUSD', 'USDCHF', 'USDCAD', 'AUDUSD', 'NZDUSD'].includes(symKey);
+    if (isIndo) {
+        return `Rp ${Math.round(val).toLocaleString('id-ID')}`;
+    }
+    if (isForex) {
+        return `$${val.toFixed(4)}`;
+    }
+    return `$${val.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
+
 function getAIScalpingSignal(symbol) {
     const symKey = symbol.replace('OANDA:', '').replace('FX:', '').replace('BITSTAMP:', '').replace('BINANCE:', '').replace('NASDAQ:', '').replace('IDX:', '').toUpperCase();
+    const livePrice = tickerPrices[symKey] || 100;
     
     const db = {
         'XAUUSD': {
             type: 'STRONG BUY 🟢',
             badgeClass: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
-            entry: '$2,342.50',
-            sl: '$2,328.00',
-            tp1: '$2,365.00',
-            tp2: '$2,382.00',
+            isBuy: true,
+            slPct: 0.0045,  // -0.45%
+            tp1Pct: 0.0080, // +0.80%
+            tp2Pct: 0.0149, // +1.49%
             winrate: '84%',
             rr: '1:2.8',
             dxy: 'DXY Bearish (-0.88) → Refleksi Akumulasi Emas',
-            reason: 'BOS M15 + Tap Fair Value Gap (FVG) H1 + Oversold RSI 32 + Retest Order Block Bullish.',
-            news: 'Emas melesat seiring ekspektasi penurunan suku bunga Fed & krisis geopolitik.',
-            trending: '🔥 High Volume Surge (XAU Liquidity Sweep)'
+            reason: 'BOS M15 + Tap Fair Value Gap (FVG) H1 + Oversold RSI 32 + Retest Order Block Bullish.'
         },
         'USDJPY': {
             type: 'STRONG BUY 🟢',
             badgeClass: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
-            entry: '160.15',
-            sl: '159.40',
-            tp1: '161.20',
-            tp2: '161.80',
+            isBuy: true,
+            slPct: 0.0040,
+            tp1Pct: 0.0075,
+            tp2Pct: 0.0135,
             winrate: '79%',
             rr: '1:2.4',
             dxy: 'DXY Bullish (+0.92) vs YEN Melemah',
-            reason: 'Breakout Resisten H4 + Retest Support Demand + Sinyal Bullish EMA 20/50 Crossover.',
-            news: 'Yen dalam pengawasan ketat BOJ pasca kelemahan kronis mata uang Jepang.',
-            trending: '⚡ High Volatility BOJ Intervention Range'
+            reason: 'Breakout Resisten H4 + Retest Support Demand + Sinyal Bullish EMA 20/50 Crossover.'
         },
         'USDCHF': {
             type: 'SELL 🔴',
             badgeClass: 'bg-rose-500/20 text-rose-400 border-rose-500/30',
-            entry: '0.8890',
-            sl: '0.8935',
-            tp1: '0.8820',
-            tp2: '0.8780',
+            isBuy: false,
+            slPct: 0.0040,
+            tp1Pct: 0.0078,
+            tp2Pct: 0.0130,
             winrate: '76%',
             rr: '1:2.2',
             dxy: 'DXY Bearish Divergence vs CHF Safe-Haven',
-            reason: 'Rejection Supply Zone H1 + Liquidity Sweep Equal Highs + MACD Bearish Crossover.',
-            news: 'CHF menguat sebagai safe-haven di pasar finansial Eropa.',
-            trending: '📉 Bearish Breakdown Channel'
+            reason: 'Rejection Supply Zone H1 + Liquidity Sweep Equal Highs + MACD Bearish Crossover.'
         },
         'USDCAD': {
             type: 'BUY 🟢',
             badgeClass: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
-            entry: '1.3640',
-            sl: '1.3590',
-            tp1: '1.3710',
-            tp2: '1.3760',
+            isBuy: true,
+            slPct: 0.0035,
+            tp1Pct: 0.0070,
+            tp2Pct: 0.0125,
             winrate: '81%',
             rr: '1:2.5',
             dxy: 'Korelasi Positif DXY & Harga Minyak Mentah',
-            reason: 'Tap Bullish Order Block M30 + FVG Imbalance Reclaim + RSI Momentum Shift.',
-            news: 'USDCAD pulih seiring penyesuaian rilis data inventaris minyak BOC.',
-            trending: '🎯 Demand Zone Rebound'
+            reason: 'Tap Bullish Order Block M30 + FVG Imbalance Reclaim + RSI Momentum Shift.'
         },
         'EURUSD': {
             type: 'SELL 🔴',
             badgeClass: 'bg-rose-500/20 text-rose-400 border-rose-500/30',
-            entry: '1.0715',
-            sl: '1.0760',
-            tp1: '1.0640',
-            tp2: '1.0590',
+            isBuy: false,
+            slPct: 0.0035,
+            tp1Pct: 0.0070,
+            tp2Pct: 0.0120,
             winrate: '77%',
             rr: '1:2.3',
             dxy: 'Korelasi Terbalik DXY Index (-0.95)',
-            reason: 'Bearish Structure Shift (CHoCH) H1 + Rejection Resisten Supply H4.',
-            news: 'EUR tertekan rilis proyeksi pertumbuhan ekonomi ECB yang melambat.',
-            trending: '🔴 Bearish Trend Continuation'
+            reason: 'Bearish Structure Shift (CHoCH) H1 + Rejection Resisten Supply H4.'
         },
         'GBPUSD': {
             type: 'SCALP BUY 🟢',
             badgeClass: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
-            entry: '1.2670',
-            sl: '1.2625',
-            tp1: '1.2740',
-            tp2: '1.2790',
+            isBuy: true,
+            slPct: 0.0035,
+            tp1Pct: 0.0068,
+            tp2Pct: 0.0118,
             winrate: '75%',
             rr: '1:2.1',
             dxy: 'DXY Sideways Range vs BOE Hawkish',
-            reason: 'Retest Lower Trendline Support + Bullish Divergence RSI 15M + SMC Inducement Sweep.',
-            news: 'Pounds menguat pasca rilis data pertumbuhan upah Inggris melebihi perkiraan.',
-            trending: '📈 Trendline Bounce Setup'
+            reason: 'Retest Lower Trendline Support + Bullish Divergence RSI 15M + SMC Inducement Sweep.'
         },
         'AUDUSD': {
             type: 'BUY 🟢',
             badgeClass: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
-            entry: '0.6610',
-            sl: '0.6570',
-            tp1: '0.6680',
-            tp2: '0.6720',
+            isBuy: true,
+            slPct: 0.0038,
+            tp1Pct: 0.0075,
+            tp2Pct: 0.0130,
             winrate: '80%',
             rr: '1:2.6',
             dxy: 'RBA Suku Bunga Hawkish vs DXY Softening',
-            reason: 'Bullish BOS M15 + Tap Liquidity Void + Support Akumulasi Harian.',
-            news: 'AUD terdorong pernyataan RBA yang siap menaikkan suku bunga jika inflasi memanas.',
-            trending: '✨ Hawkish Catalyst Surge'
+            reason: 'Bullish BOS M15 + Tap Liquidity Void + Support Akumulasi Harian.'
         },
         'NZDUSD': {
             type: 'SELL 🔴',
             badgeClass: 'bg-rose-500/20 text-rose-400 border-rose-500/30',
-            entry: '0.6080',
-            sl: '0.6120',
-            tp1: '0.6010',
-            tp2: '0.5970',
+            isBuy: false,
+            slPct: 0.0040,
+            tp1Pct: 0.0070,
+            tp2Pct: 0.0120,
             winrate: '74%',
             rr: '1:2.0',
             dxy: 'DXY Strength vs NZD Export Slowdown',
-            reason: 'Rejection Resisten Harian + Bearish FVG Fill M30 + Lower High Formation.',
-            news: 'NZD tertekan proyeksi ekspor susu dan komoditas Pasifik.',
-            trending: '📉 Resistance Rejection'
+            reason: 'Rejection Resisten Harian + Bearish FVG Fill M30 + Lower High Formation.'
         },
         'BBRI': {
             type: 'STRONG BUY 🟢',
             badgeClass: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
-            entry: 'Rp 5,200',
-            sl: 'Rp 5,050',
-            tp1: 'Rp 5,500',
-            tp2: 'Rp 5,800',
+            isBuy: true,
+            slPct: 0.015,
+            tp1Pct: 0.035,
+            tp2Pct: 0.065,
             winrate: '88%',
             rr: '1:3.0',
             dxy: 'Inflow Asing & Akumulasi Dividen IDX',
-            reason: 'Akumulasi Asing Net Buy + Support MA50 Harian + RSI Oversold Rebound.',
-            news: 'IHSG & Saham BBRI memimpin penguatan pasar modal Indonesia dengan net buy jumbo.',
-            trending: '🏛️ IDX Bluechip Foreign Net Buy'
+            reason: 'Akumulasi Asing Net Buy + Support MA50 Harian + RSI Oversold Rebound.'
         },
         'BMRI': {
             type: 'STRONG BUY 🟢',
             badgeClass: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
-            entry: 'Rp 6,400',
-            sl: 'Rp 6,200',
-            tp1: 'Rp 6,850',
-            tp2: 'Rp 7,150',
+            isBuy: true,
+            slPct: 0.015,
+            tp1Pct: 0.035,
+            tp2Pct: 0.060,
             winrate: '86%',
             rr: '1:2.8',
             dxy: 'Pertumbuhan Kinerja Perbankan Nasional',
-            reason: 'Breakout All-Time High Resistance + Volume Spike + Golden Cross MA20/100.',
-            news: 'Bank Mandiri (BMRI) catatkan rekor laba bersih kuartalan terbaru.',
-            trending: '🚀 High Volume Breakout'
+            reason: 'Breakout All-Time High Resistance + Volume Spike + Golden Cross MA20/100.'
         },
         'BTCUSD': {
             type: 'STRONG BUY 🟢',
             badgeClass: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
-            entry: '$95,200',
-            sl: '$93,500',
-            tp1: '$98,500',
-            tp2: '$102,000',
+            isBuy: true,
+            slPct: 0.012,
+            tp1Pct: 0.030,
+            tp2Pct: 0.055,
             winrate: '85%',
             rr: '1:3.2',
             dxy: 'Institutional ETF Inflow Acceleration',
-            reason: 'Breakout Consolidation Range + ETF Inflow Momentum + Bullish Flag Pattern M15.',
-            news: 'Arus masuk ETF Spot Bitcoin catatkan akumulasi harian tertinggi bulan ini.',
-            trending: '₿ Crypto Halving Bull Run'
+            reason: 'Breakout Consolidation Range + ETF Inflow Momentum + Bullish Flag Pattern M15.'
         },
         'NVDA': {
             type: 'STRONG BUY 🟢',
             badgeClass: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
-            entry: '$127.50',
-            sl: '$123.00',
-            tp1: '$135.00',
-            tp2: '$142.00',
+            isBuy: true,
+            slPct: 0.015,
+            tp1Pct: 0.035,
+            tp2Pct: 0.065,
             winrate: '87%',
             rr: '1:2.9',
             dxy: 'US Tech Rally & AI Demand Boom',
-            reason: 'Gap Up Breakout + Demand Zone Reclaim H1 + Earnings Surprise Momentum.',
-            news: 'Permintaan chip AI server Blackwell Nvidia melampaui estimasi analis Wall Street.',
-            trending: '📈 AI Tech Rally Leader'
+            reason: 'Gap Up Breakout + Demand Zone Reclaim H1 + Earnings Surprise Momentum.'
         }
     };
 
-    return db[symKey] || {
+    const cfg = db[symKey] || {
         type: 'BUY 🟢',
         badgeClass: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
-        entry: 'Auto Level',
-        sl: '-1.0%',
-        tp1: '+2.5%',
-        tp2: '+4.0%',
+        isBuy: true,
+        slPct: 0.005,
+        tp1Pct: 0.010,
+        tp2Pct: 0.020,
         winrate: '80%',
         rr: '1:2.5',
         dxy: 'DXY Intermarket Correlation Neutral',
-        reason: 'SMC Structure BOS + Retest Order Block Demand Zone.',
-        news: 'Analisis fundamental & indikator teknikal menunjukkan momentum positif.',
-        trending: '🔥 Active Market Momentum'
+        reason: 'SMC Structure BOS + Retest Order Block Demand Zone.'
+    };
+
+    let entryVal, slVal, tp1Val, tp2Val;
+    if (cfg.isBuy) {
+        entryVal = livePrice;
+        slVal = livePrice * (1 - cfg.slPct);
+        tp1Val = livePrice * (1 + cfg.tp1Pct);
+        tp2Val = livePrice * (1 + cfg.tp2Pct);
+    } else {
+        entryVal = livePrice;
+        slVal = livePrice * (1 + cfg.slPct);
+        tp1Val = livePrice * (1 - cfg.tp1Pct);
+        tp2Val = livePrice * (1 - cfg.tp2Pct);
+    }
+
+    return {
+        symKey,
+        type: cfg.type,
+        badgeClass: cfg.badgeClass,
+        livePriceFormatted: formatPrice(symKey, livePrice),
+        entry: formatPrice(symKey, entryVal),
+        sl: formatPrice(symKey, slVal),
+        tp1: formatPrice(symKey, tp1Val),
+        tp2: formatPrice(symKey, tp2Val),
+        slPctStr: `${(cfg.slPct * 100).toFixed(2)}%`,
+        tp1PctStr: `${(cfg.tp1Pct * 100).toFixed(2)}%`,
+        tp2PctStr: `${(cfg.tp2Pct * 100).toFixed(2)}%`,
+        winrate: cfg.winrate,
+        rr: cfg.rr,
+        dxy: cfg.dxy,
+        reason: cfg.reason
     };
 }
 
@@ -514,29 +532,34 @@ function renderMultiChartGrid() {
                     <iframe src="https://s.tradingview.com/widgetembed/?frameElementId=tradingview_${i}&symbol=${encodeURIComponent(symbol)}&interval=D&hidesidetoolbar=1&symboledit=1&saveimage=1&toolbarbg=f1f3f6&studies=%5B%5D&theme=dark&style=1&timezone=Asia%2FJakarta" width="100%" height="100%" frameborder="0" allowfullscreen></iframe>
                 </div>
 
-                <!-- Dynamic AI Scalping Signal & Technical Breakdown Box -->
+                <!-- Dynamic AI Scalping Signal & Realtime Price Sync Box -->
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2" id="ai-signal-card-${i}">
                     <div class="bg-slate-950/60 p-3 rounded-xl border border-slate-800 space-y-1.5">
                         <div class="flex justify-between items-center text-[10px]">
                             <span class="font-bold text-slate-400 uppercase">Sinyal AI Scalp</span>
                             <span class="px-1.5 py-0.5 rounded border text-[10px] font-bold ${signal.badgeClass}">${signal.type}</span>
                         </div>
-                        <div class="text-xs font-bold text-white flex justify-between pt-0.5">
-                            <span>TP1: <span class="text-emerald-400">${signal.tp1}</span></span>
+                        <div class="text-[11px] font-bold text-white flex justify-between pt-0.5">
+                            <span>Entry: <span class="text-teal-300">${signal.entry}</span></span>
                             <span>SL: <span class="text-rose-400">${signal.sl}</span></span>
                         </div>
-                        <div class="text-[10px] text-slate-400 flex justify-between">
+                        <div class="text-[10px] font-bold text-emerald-400 flex justify-between">
+                            <span>TP1: ${signal.tp1} (+${signal.tp1PctStr})</span>
+                            <span>TP2: ${signal.tp2} (+${signal.tp2PctStr})</span>
+                        </div>
+                        <div class="text-[9px] text-slate-400 flex justify-between pt-1 border-t border-slate-800/60">
                             <span>Winrate: <strong class="text-teal-300">${signal.winrate}</strong></span>
                             <span>RR: <strong class="text-amber-300">${signal.rr}</strong></span>
                         </div>
                     </div>
                     <div class="bg-slate-950/60 p-3 rounded-xl border border-slate-800 space-y-1">
                         <span class="text-[10px] font-bold text-slate-400 uppercase block">Konfirmasi Teknikal SMC</span>
-                        <h4 class="text-[11px] font-semibold text-slate-200 line-clamp-2">${signal.reason}</h4>
+                        <h4 class="text-[11px] font-semibold text-slate-200 line-clamp-3">${signal.reason}</h4>
                     </div>
                     <div class="bg-slate-950/60 p-3 rounded-xl border border-slate-800 space-y-1">
-                        <span class="text-[10px] font-bold text-slate-400 uppercase block">Korelasi DXY & Trend</span>
+                        <span class="text-[10px] font-bold text-slate-400 uppercase block">Korelasi DXY & Trend Live</span>
                         <span class="text-xs font-bold text-teal-300 block line-clamp-2"><i class="fa-solid fa-compass text-teal-400"></i> ${signal.dxy}</span>
+                        <span class="text-[10px] text-emerald-400 font-mono block pt-1"><i class="fa-solid fa-circle text-[7px] animate-pulse"></i> Live Sync: ${signal.livePriceFormatted}</span>
                     </div>
                 </div>
             </div>
@@ -555,35 +578,47 @@ window.updateChartInstrument = function(index, symbol) {
     }
 
     // Dynamic AI Signal Update for the switched chart
-    const signalCard = document.getElementById(`ai-signal-card-${index}`);
-    if (signalCard) {
-        const signal = getAIScalpingSignal(symbol);
-        signalCard.innerHTML = `
-            <div class="bg-slate-950/60 p-3 rounded-xl border border-slate-800 space-y-1.5">
-                <div class="flex justify-between items-center text-[10px]">
-                    <span class="font-bold text-slate-400 uppercase">Sinyal AI Scalp</span>
-                    <span class="px-1.5 py-0.5 rounded border text-[10px] font-bold ${signal.badgeClass}">${signal.type}</span>
-                </div>
-                <div class="text-xs font-bold text-white flex justify-between pt-0.5">
-                    <span>TP1: <span class="text-emerald-400">${signal.tp1}</span></span>
-                    <span>SL: <span class="text-rose-400">${signal.sl}</span></span>
-                </div>
-                <div class="text-[10px] text-slate-400 flex justify-between">
-                    <span>Winrate: <strong class="text-teal-300">${signal.winrate}</strong></span>
-                    <span>RR: <strong class="text-amber-300">${signal.rr}</strong></span>
-                </div>
-            </div>
-            <div class="bg-slate-950/60 p-3 rounded-xl border border-slate-800 space-y-1">
-                <span class="text-[10px] font-bold text-slate-400 uppercase block">Konfirmasi Teknikal SMC</span>
-                <h4 class="text-[11px] font-semibold text-slate-200 line-clamp-2">${signal.reason}</h4>
-            </div>
-            <div class="bg-slate-950/60 p-3 rounded-xl border border-slate-800 space-y-1">
-                <span class="text-[10px] font-bold text-slate-400 uppercase block">Korelasi DXY & Trend</span>
-                <span class="text-xs font-bold text-teal-300 block line-clamp-2"><i class="fa-solid fa-compass text-teal-400"></i> ${signal.dxy}</span>
-            </div>
-        `;
-    }
+    updateActiveChartSignals();
 };
+
+function updateActiveChartSignals() {
+    for (let i = 0; i < currentChartGridCount; i++) {
+        const symbol = activeChartSymbols[i] || activeChartSymbols[0];
+        const signalCard = document.getElementById(`ai-signal-card-${i}`);
+        if (signalCard) {
+            const signal = getAIScalpingSignal(symbol);
+            signalCard.innerHTML = `
+                <div class="bg-slate-950/60 p-3 rounded-xl border border-slate-800 space-y-1.5">
+                    <div class="flex justify-between items-center text-[10px]">
+                        <span class="font-bold text-slate-400 uppercase">Sinyal AI Scalp</span>
+                        <span class="px-1.5 py-0.5 rounded border text-[10px] font-bold ${signal.badgeClass}">${signal.type}</span>
+                    </div>
+                    <div class="text-[11px] font-bold text-white flex justify-between pt-0.5">
+                        <span>Entry: <span class="text-teal-300">${signal.entry}</span></span>
+                        <span>SL: <span class="text-rose-400">${signal.sl}</span></span>
+                    </div>
+                    <div class="text-[10px] font-bold text-emerald-400 flex justify-between">
+                        <span>TP1: ${signal.tp1} (+${signal.tp1PctStr})</span>
+                        <span>TP2: ${signal.tp2} (+${signal.tp2PctStr})</span>
+                    </div>
+                    <div class="text-[9px] text-slate-400 flex justify-between pt-1 border-t border-slate-800/60">
+                        <span>Winrate: <strong class="text-teal-300">${signal.winrate}</strong></span>
+                        <span>RR: <strong class="text-amber-300">${signal.rr}</strong></span>
+                    </div>
+                </div>
+                <div class="bg-slate-950/60 p-3 rounded-xl border border-slate-800 space-y-1">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase block">Konfirmasi Teknikal SMC</span>
+                    <h4 class="text-[11px] font-semibold text-slate-200 line-clamp-3">${signal.reason}</h4>
+                </div>
+                <div class="bg-slate-950/60 p-3 rounded-xl border border-slate-800 space-y-1">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase block">Korelasi DXY & Trend Live</span>
+                    <span class="text-xs font-bold text-teal-300 block line-clamp-2"><i class="fa-solid fa-compass text-teal-400"></i> ${signal.dxy}</span>
+                    <span class="text-[10px] text-emerald-400 font-mono block pt-1"><i class="fa-solid fa-circle text-[7px] animate-pulse"></i> Live Sync: ${signal.livePriceFormatted}</span>
+                </div>
+            `;
+        }
+    }
+}
 
 window.openInfoModalForCurrent = function(index) {
     const symbol = activeChartSymbols[index] || 'XAUUSD';
@@ -822,16 +857,24 @@ function updateJournalStats() {
    ========================================================================== */
 const tickerSymbols = ['XAUUSD', 'BBRI', 'BMRI', 'BTCUSD', 'NVDA', 'EURUSD', 'GBPUSD', 'USDJPY', 'ETHUSD', 'AAPL'];
 const tickerPrices = {
-    XAUUSD: 2345.50,
-    BBRI: 5250.00,
-    BMRI: 6450.00,
-    BTCUSD: 95420.00,
-    NVDA: 128.50,
+    XAUUSD: 4117.23,
+    USDJPY: 160.20,
+    USDCHF: 0.8890,
+    USDCAD: 1.3640,
     EURUSD: 1.0720,
     GBPUSD: 1.2680,
-    USDJPY: 160.20,
+    AUDUSD: 0.6610,
+    NZDUSD: 0.6080,
+    BBRI: 5250.00,
+    BMRI: 6450.00,
+    BBCA: 10150.00,
+    TLKM: 3120.00,
+    BTCUSD: 95420.00,
     ETHUSD: 3340.00,
-    AAPL: 224.30
+    SOLUSD: 145.20,
+    NVDA: 128.50,
+    AAPL: 224.30,
+    TSLA: 248.50
 };
 
 function initLiveTickerTape() {
@@ -881,6 +924,11 @@ function tickPrices() {
     if (label) {
         const t = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
         label.innerText = `Update ${t} WIB`;
+    }
+
+    // Synchronize Multi-Chart AI Signal cards with live price ticks
+    if (typeof updateActiveChartSignals === 'function') {
+        updateActiveChartSignals();
     }
 }
 
