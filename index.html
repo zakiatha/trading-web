@@ -169,14 +169,15 @@
 
     <!-- MAIN NAVBAR -->
     <header class="sticky top-0 z-40 bg-slate-950/85 backdrop-blur-xl border-b border-slate-800/80">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between py-3">
+        <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 flex items-center justify-between py-2 sm:py-3 gap-2">
             
             <!-- Logo -->
-            <a href="#home" class="flex items-center gap-2 text-xl font-bold tracking-tight text-white group">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-teal-400 to-cyan-500 flex items-center justify-center shadow-lg shadow-teal-500/20 group-hover:scale-105 transition">
-                    <i class="fa-solid fa-chart-line text-slate-950 text-lg"></i>
+            <a href="#home" class="flex items-center gap-1.5 sm:gap-2 text-base sm:text-xl font-bold tracking-tight text-white group shrink-0">
+                <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-gradient-to-tr from-teal-400 to-cyan-500 flex items-center justify-center shadow-lg shadow-teal-500/20 group-hover:scale-105 transition">
+                    <i class="fa-solid fa-chart-line text-slate-950 text-sm sm:text-lg"></i>
                 </div>
-                <span>Trade<span class="text-teal-400">Vision</span> <span class="text-xs px-2 py-0.5 rounded bg-teal-500/10 text-teal-300 border border-teal-500/20">PRO</span></span>
+                <span class="hidden min-[360px]:inline">Trade<span class="text-teal-400">Vision</span></span>
+                <span class="text-[10px] px-1.5 py-0.5 rounded bg-teal-500/10 text-teal-300 border border-teal-500/20 hidden sm:inline">PRO</span>
             </a>
 
             <!-- Nav Links (Desktop) -->
@@ -193,97 +194,100 @@
             </nav>
 
             <!-- Actions Right -->
-            <div class="flex items-center gap-2 sm:gap-3">
+            <div class="flex items-center gap-1.5 sm:gap-2">
                 <!-- Global Search Trigger -->
-                <button id="btn-open-search" class="p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white hover:border-slate-700 transition" title="Cari Instrumen (Ctrl+K)">
+                <button id="btn-open-search" class="p-2 sm:p-2.5 rounded-lg sm:rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white hover:border-slate-700 transition text-sm" title="Cari Instrumen (Ctrl+K)">
                     <i class="fa-solid fa-magnifying-glass"></i>
                 </button>
 
-                <!-- 3-Way Theme Switcher (Dark 🌙 / Light ☀️ / Pink Pastel 🌸) -->
-                <button id="theme-toggle-btn" class="px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-pink-400 hover:border-pink-500/30 transition text-xs font-semibold flex items-center gap-1.5" title="Ganti Mode Warna (Gelap / Terang / Pink Pastel)">
+                <!-- 3-Way Theme Switcher -->
+                <button id="theme-toggle-btn" class="p-2 sm:px-3 sm:py-2 rounded-lg sm:rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-pink-400 hover:border-pink-500/30 transition text-sm sm:text-xs font-semibold flex items-center gap-1.5" title="Ganti Mode Warna">
                     <i id="theme-icon" class="fa-solid fa-moon text-teal-400"></i>
-                    <span id="theme-label" class="hidden sm:inline">Dark</span>
+                    <span id="theme-label" class="hidden md:inline">Dark</span>
                 </button>
 
                 <!-- User Account Status Badge / Auth Modal Trigger -->
-                <div id="user-nav-status" class="flex items-center gap-2">
-                    <button onclick="openAuthModal('login')" class="hidden sm:inline-flex px-3.5 py-2 text-xs font-semibold text-slate-200 hover:text-white transition">Masuk</button>
-                    <button onclick="openAuthModal('register')" class="px-3.5 py-2 text-xs font-bold bg-gradient-to-r from-teal-400 to-cyan-500 text-slate-950 rounded-xl shadow-lg shadow-teal-500/20 hover:brightness-110 transition">Registrasi</button>
+                <div id="user-nav-status" class="flex items-center gap-1">
+                    <button onclick="openAuthModal('login')" class="hidden md:inline-flex px-3 py-2 text-xs font-semibold text-slate-200 hover:text-white transition">Masuk</button>
+                    <button onclick="openAuthModal('register')" class="px-2.5 py-1.5 sm:px-3.5 sm:py-2 text-[10px] sm:text-xs font-bold bg-gradient-to-r from-teal-400 to-cyan-500 text-slate-950 rounded-lg sm:rounded-xl shadow-lg shadow-teal-500/20 hover:brightness-110 transition">
+                        <span class="hidden sm:inline">Registrasi</span>
+                        <i class="fa-solid fa-user-plus sm:hidden"></i>
+                    </button>
                 </div>
 
                 <!-- Mobile Menu Button -->
-                <button id="mobile-menu-btn" class="lg:hidden p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white">
+                <button id="mobile-menu-btn" class="lg:hidden p-2 sm:p-2.5 rounded-lg sm:rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white text-sm">
                     <i class="fa-solid fa-bars"></i>
                 </button>
             </div>
         </div>
 
         <!-- Mobile Nav Menu dropdown -->
-        <div id="mobile-nav" class="hidden lg:hidden bg-slate-900/95 border-b border-slate-800 px-4 py-3 space-y-2 text-xs">
-            <a href="#home" class="block py-2 text-slate-200 hover:text-teal-400">Beranda</a>
-            <a href="#chart-hub" class="block py-2 text-slate-200 hover:text-teal-400">Multi-Chart Hub</a>
-            <a href="#jurnal" class="block py-2 text-amber-300 hover:text-amber-400 font-semibold"><i class="fa-solid fa-book-bookmark"></i> Jurnal Trading</a>
-            <a href="#news" class="block py-2 text-slate-200 hover:text-teal-400">News Live</a>
-            <a href="#ai-intel" class="block py-2 text-slate-200 hover:text-teal-400">AI Market Intel</a>
-            <a href="#ai-chat" class="block py-2 text-slate-200 hover:text-teal-400">AI Voice Assistant</a>
-            <a href="#shipfinder" class="block py-2 text-slate-200 hover:text-teal-400">ShipFinder Live</a>
-            <a href="#crypto" class="block py-2 text-slate-200 hover:text-teal-400">Crypto Dashboard</a>
-            <a href="#stock" class="block py-2 text-slate-200 hover:text-teal-400">Stock Dashboard</a>
+        <div id="mobile-nav" class="hidden lg:hidden bg-slate-900/95 backdrop-blur-xl border-b border-slate-800 px-4 py-3 space-y-1 text-sm">
+            <a href="#home" class="mobile-nav-link block py-2.5 px-3 rounded-xl text-slate-200 hover:text-teal-400 hover:bg-slate-800/60 transition"><i class="fa-solid fa-house w-5"></i> Beranda</a>
+            <a href="#chart-hub" class="mobile-nav-link block py-2.5 px-3 rounded-xl text-slate-200 hover:text-teal-400 hover:bg-slate-800/60 transition"><i class="fa-solid fa-chart-line w-5"></i> Multi-Chart Hub</a>
+            <a href="#jurnal" class="mobile-nav-link block py-2.5 px-3 rounded-xl text-amber-300 hover:text-amber-400 font-semibold hover:bg-amber-500/10 transition"><i class="fa-solid fa-book-bookmark w-5"></i> Jurnal Trading</a>
+            <a href="#news" class="mobile-nav-link block py-2.5 px-3 rounded-xl text-slate-200 hover:text-teal-400 hover:bg-slate-800/60 transition"><i class="fa-solid fa-newspaper w-5"></i> News Live</a>
+            <a href="#ai-intel" class="mobile-nav-link block py-2.5 px-3 rounded-xl text-slate-200 hover:text-teal-400 hover:bg-slate-800/60 transition"><i class="fa-solid fa-brain w-5"></i> AI Market Intel</a>
+            <a href="#ai-chat" class="mobile-nav-link block py-2.5 px-3 rounded-xl text-slate-200 hover:text-teal-400 hover:bg-slate-800/60 transition"><i class="fa-solid fa-comments w-5"></i> AI Voice Chat</a>
+            <a href="#shipfinder" class="mobile-nav-link block py-2.5 px-3 rounded-xl text-slate-200 hover:text-teal-400 hover:bg-slate-800/60 transition"><i class="fa-solid fa-ship w-5"></i> ShipFinder</a>
+            <a href="#crypto" class="mobile-nav-link block py-2.5 px-3 rounded-xl text-slate-200 hover:text-teal-400 hover:bg-slate-800/60 transition"><i class="fa-brands fa-bitcoin w-5"></i> Crypto</a>
+            <a href="#stock" class="mobile-nav-link block py-2.5 px-3 rounded-xl text-slate-200 hover:text-teal-400 hover:bg-slate-800/60 transition"><i class="fa-solid fa-arrow-trend-up w-5"></i> Stock</a>
         </div>
     </header>
 
     <!-- REAL-TIME TICKER TAPE BAR -->
-    <div class="bg-slate-900/90 border-b border-slate-800/80 py-2 px-4 flex justify-between items-center text-xs overflow-hidden">
-        <div class="flex items-center gap-3 shrink-0 mr-4">
-            <span id="data-status-badge" class="px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-semibold flex items-center gap-1.5">
-                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span> LIVE 1S TICK
+    <div class="bg-slate-900/90 border-b border-slate-800/80 py-1.5 sm:py-2 px-3 sm:px-4 flex items-center text-[10px] sm:text-xs overflow-hidden gap-2 sm:gap-4">
+        <div class="flex items-center gap-2 shrink-0">
+            <span id="data-status-badge" class="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-semibold flex items-center gap-1 whitespace-nowrap">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span> <span class="hidden min-[420px]:inline">LIVE</span> 1S
             </span>
-            <span id="ticker-last-updated" class="text-slate-400 hidden sm:inline">Memuat feed...</span>
+            <span id="ticker-last-updated" class="text-slate-400 hidden md:inline whitespace-nowrap">Memuat feed...</span>
         </div>
-        <div class="overflow-x-auto whitespace-nowrap scrollbar-none flex items-center gap-6 text-slate-300 font-mono" id="ticker-tape-container">
+        <div class="overflow-x-auto whitespace-nowrap scrollbar-none flex items-center gap-3 sm:gap-6 text-slate-300 font-mono flex-1 min-w-0" id="ticker-tape-container">
             <!-- Dynamic ticker items -->
         </div>
     </div>
 
     <!-- MAIN CONTENT WRAPPER -->
-    <main class="relative z-10 space-y-16 py-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <main class="relative z-10 space-y-8 sm:space-y-12 lg:space-y-16 py-4 sm:py-6 lg:py-8 max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
 
         <!-- HERO HEADER SECTION -->
-        <section id="home" class="relative rounded-3xl overflow-hidden bg-gradient-to-b from-slate-900/80 to-slate-950/80 border border-slate-800 p-8 sm:p-12 text-center space-y-6">
-            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-teal-500/10 border border-teal-500/20 text-teal-300 text-xs font-semibold">
-                <i class="fa-solid fa-sparkles"></i> Platform Trading Pro Berbasis AI, Analytics Live & Jurnal Presisi
+        <section id="home" class="relative rounded-2xl sm:rounded-3xl overflow-hidden bg-gradient-to-b from-slate-900/80 to-slate-950/80 border border-slate-800 p-5 sm:p-8 lg:p-12 text-center space-y-4 sm:space-y-6">
+            <div class="inline-flex items-center gap-2 px-3 sm:px-4 py-1 sm:py-1.5 rounded-full bg-teal-500/10 border border-teal-500/20 text-teal-300 text-[10px] sm:text-xs font-semibold">
+                <i class="fa-solid fa-sparkles"></i> <span class="hidden min-[420px]:inline">Platform Trading Pro Berbasis</span> AI<span class="hidden sm:inline">, Analytics Live & Jurnal Presisi</span>
             </div>
-            <h1 class="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-tight font-heading">
-                Navigasi Pasar & Logistik <br>Dengan <span class="bg-gradient-to-r from-teal-400 via-cyan-400 to-emerald-400 bg-clip-text text-transparent">Kecerdasan Presisi</span>
+            <h1 class="text-2xl sm:text-4xl lg:text-6xl font-extrabold tracking-tight text-white leading-tight font-heading">
+                Navigasi Pasar<span class="hidden sm:inline"> & Logistik</span> <br>Dengan <span class="bg-gradient-to-r from-teal-400 via-cyan-400 to-emerald-400 bg-clip-text text-transparent">Kecerdasan Presisi</span>
             </h1>
-            <p class="max-w-2xl mx-auto text-slate-400 text-sm sm:text-base leading-relaxed">
+            <p class="max-w-2xl mx-auto text-slate-400 text-xs sm:text-sm lg:text-base leading-relaxed">
                 Platform unggulan serba ada: Multi-chart fleksibel, sinyal rekomendasi AI, Jurnal Trading pribadi, notifikasi berita suara, AI voice assistant, dan pelacakan live maritim ShipFinder.
             </p>
-            <div class="flex flex-wrap items-center justify-center gap-4 pt-2">
-                <a href="#chart-hub" class="px-6 py-3 bg-gradient-to-r from-teal-400 to-cyan-500 text-slate-950 font-bold rounded-xl shadow-lg shadow-teal-500/25 hover:brightness-110 transition flex items-center gap-2">
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 pt-2">
+                <a href="#chart-hub" class="w-full sm:w-auto px-5 py-2.5 sm:px-6 sm:py-3 bg-gradient-to-r from-teal-400 to-cyan-500 text-slate-950 font-bold rounded-xl shadow-lg shadow-teal-500/25 hover:brightness-110 transition flex items-center justify-center gap-2 text-sm">
                     Buka Multi-Chart <i class="fa-solid fa-arrow-right"></i>
                 </a>
-                <a href="#jurnal" class="px-6 py-3 bg-amber-500/20 border border-amber-500/30 text-amber-300 font-semibold rounded-xl hover:bg-amber-500/30 transition flex items-center gap-2">
+                <a href="#jurnal" class="w-full sm:w-auto px-5 py-2.5 sm:px-6 sm:py-3 bg-amber-500/20 border border-amber-500/30 text-amber-300 font-semibold rounded-xl hover:bg-amber-500/30 transition flex items-center justify-center gap-2 text-sm">
                     <i class="fa-solid fa-book-bookmark"></i> Jurnal Trading Saya
                 </a>
             </div>
         </section>
 
         <!-- SECTION 1: MULTI-CHART HUB & INSTRUMENT SELECTOR -->
-        <section id="chart-hub" class="space-y-6">
-            <div class="flex flex-wrap items-center justify-between gap-4 pb-2 border-b border-slate-800">
+        <section id="chart-hub" class="space-y-4 sm:space-y-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 pb-2 border-b border-slate-800">
                 <div>
-                    <h2 class="text-2xl font-extrabold text-white flex items-center gap-2 font-heading">
+                    <h2 class="text-lg sm:text-2xl font-extrabold text-white flex items-center gap-2 font-heading">
                         <i class="fa-solid fa-chart-line text-teal-400"></i> Multi-Chart <span class="text-teal-400">Hub</span>
                     </h2>
-                    <p class="text-xs text-slate-400">Tampilkan lebih dari 1 grafik bersamaan (Stock & Crypto) dengan instrumen selector interaktif.</p>
+                    <p class="text-[10px] sm:text-xs text-slate-400 mt-0.5">Tampilkan lebih dari 1 grafik bersamaan (Stock & Crypto) dengan instrumen selector interaktif.</p>
                 </div>
                 <!-- Layout Grid Controls -->
-                <div class="flex items-center gap-2 bg-slate-900 p-1.5 rounded-xl border border-slate-800 text-xs font-semibold">
-                    <span class="text-slate-400 px-2">Tata Letak:</span>
-                    <button onclick="setChartGrid(1)" id="grid-btn-1" class="chart-grid-btn px-3 py-1.5 rounded-lg bg-teal-500/20 text-teal-300 border border-teal-500/30">1 Chart</button>
-                    <button onclick="setChartGrid(2)" id="grid-btn-2" class="chart-grid-btn px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:text-white">2 Split</button>
-                    <button onclick="setChartGrid(4)" id="grid-btn-4" class="chart-grid-btn px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:text-white">4 Quad</button>
+                <div class="flex items-center gap-1.5 sm:gap-2 bg-slate-900 p-1 sm:p-1.5 rounded-lg sm:rounded-xl border border-slate-800 text-[10px] sm:text-xs font-semibold shrink-0 self-start sm:self-auto">
+                    <span class="text-slate-400 px-1.5 sm:px-2 hidden min-[420px]:inline">Tata Letak:</span>
+                    <button onclick="setChartGrid(1)" id="grid-btn-1" class="chart-grid-btn px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-md sm:rounded-lg bg-teal-500/20 text-teal-300 border border-teal-500/30">1</button>
+                    <button onclick="setChartGrid(2)" id="grid-btn-2" class="chart-grid-btn px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-md sm:rounded-lg bg-slate-800 text-slate-300 hover:text-white">2</button>
+                    <button onclick="setChartGrid(4)" id="grid-btn-4" class="chart-grid-btn px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-md sm:rounded-lg bg-slate-800 text-slate-300 hover:text-white">4</button>
                 </div>
             </div>
 

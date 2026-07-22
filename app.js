@@ -36,9 +36,32 @@ function initScrollNavHighlight() {
                 });
             }
         });
-    }, { threshold: 0.2 });
+    }, { threshold: 0.15 });
 
     sections.forEach(section => observer.observe(section));
+
+    // Mobile hamburger menu toggle
+    const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+    const mobileNav = document.getElementById('mobile-nav');
+    if (mobileMenuBtn && mobileNav) {
+        mobileMenuBtn.addEventListener('click', () => {
+            mobileNav.classList.toggle('hidden');
+            const icon = mobileMenuBtn.querySelector('i');
+            if (mobileNav.classList.contains('hidden')) {
+                icon.className = 'fa-solid fa-bars';
+            } else {
+                icon.className = 'fa-solid fa-xmark';
+            }
+        });
+
+        // Auto-close mobile nav when a link is clicked
+        mobileNav.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                mobileNav.classList.add('hidden');
+                mobileMenuBtn.querySelector('i').className = 'fa-solid fa-bars';
+            });
+        });
+    }
 }
 
 /* ==========================================================================
