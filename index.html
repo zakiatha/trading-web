@@ -1,1153 +1,637 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TradeVision - Platform Trading Pro</title>
+    <title>TradeVision Pro — Platform Trading & Market Intelligence AI</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: ['class', '[data-theme="dark"]'],
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            teal: '#00f5a0',
+                            accent: '#00ccff',
+                            bullish: '#00e676',
+                            bearish: '#ff1744',
+                            darkBg: '#080a0f',
+                            cardBg: '#111620'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
     
     <!-- Google Fonts: Inter & Space Grotesk -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
     
-    <!-- FontAwesome for Icons -->
+    <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Three.js for 3D Background -->
+    <!-- Three.js for 3D Canvas Background -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     
-    <!-- Chart.js for Journal Analytics -->
+    <!-- Chart.js for Analytics -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
-    <!-- html2pdf.js for Daily AI Report Download -->
+    <!-- html2pdf.js for AI Report Export -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    
+
     <!-- Custom Stylesheet -->
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="bg-slate-950 text-slate-100 font-sans antialiased selection:bg-teal-500 selection:text-black">
 
-    <!-- Canvas Container for 3D Background -->
-    <div id="canvas-container"></div>
+    <!-- 3D Canvas Background -->
+    <div id="canvas-container" class="fixed inset-0 pointer-events-none z-0 opacity-40"></div>
 
-    <!-- Header / Navbar -->
-    <header class="navbar">
-        <div class="navbar-container">
-            <a href="#home" class="logo">
-                <i class="fa-solid fa-chart-line text-bullish"></i>
-                <span>Trade<span class="text-bullish">Vision</span></span>
-            </a>
-            
-            <nav class="nav-menu" id="nav-menu">
-                <a href="#home" class="nav-link active">Beranda</a>
-                <a href="#kalkulator" class="nav-link">Kalkulator</a>
-                <a href="#jurnal" class="nav-link">Jurnal</a>
-                <a href="#myplan" class="nav-link">My Plan</a>
-                <a href="#news" class="nav-link">News</a>
-                <a href="#shipfinder" class="nav-link">ShipFinder</a>
-                <a href="#network-monitor" class="nav-link">Network Monitor</a>
-                <a href="#indikator" class="nav-link">Indikator</a>
-            </nav>
-            
-            <button class="mobile-menu-toggle" id="mobile-menu-btn" aria-label="Toggle Menu">
-                <i class="fa-solid fa-bars"></i>
-            </button>
-        </div>
-    </header>
-
-    <!-- Ticker Tape Running Prices (TradingView Ticker Tape Widget) -->
-    <div class="ticker-tape-wrapper" style="flex-direction: column; height: auto; padding: 0;">
-        <div class="ticker-status-rail" style="border-bottom: 1px solid var(--card-border); padding: 6px 20px; display: flex; justify-content: space-between; align-items: center; width: 100%;">
-            <span id="data-status-badge" class="data-status-badge demo"><span class="pulse-dot"></span> MENYAMBUNG...</span>
-            <span id="ticker-last-updated" class="ticker-last-updated">Memuat...</span>
-        </div>
-        <div class="tradingview-widget-container" style="width: 100%; height: 46px;">
-            <div class="tradingview-widget-container__widget"></div>
-            <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js" async>
-            {
-            "symbols": [
-              {
-                "proName": "OANDA:XAUUSD",
-                "title": "XAU/USD"
-              },
-              {
-                "proName": "INDEX:DXY",
-                "title": "DXY"
-              },
-              {
-                "proName": "FX:EURUSD",
-                "title": "EUR/USD"
-              },
-              {
-                "proName": "FX:GBPUSD",
-                "title": "GBP/USD"
-              },
-              {
-                "proName": "FX:USDJPY",
-                "title": "USD/JPY"
-              },
-              {
-                "proName": "FX:AUDUSD",
-                "title": "AUD/USD"
-              },
-              {
-                "proName": "FX:NZDUSD",
-                "title": "NZD/USD"
-              },
-              {
-                "proName": "FX:USDCHF",
-                "title": "USD/CHF"
-              },
-              {
-                "proName": "FX:USDCAD",
-                "title": "USD/CAD"
-              },
-              {
-                "proName": "BITSTAMP:BTCUSD",
-                "title": "BTC/USD"
-              }
-            ],
-            "showSymbolLogo": true,
-            "isTransparent": true,
-            "displayMode": "adaptive",
-            "colorTheme": "dark",
-            "locale": "id"
-            }
-            </script>
+    <!-- GLOBAL SEARCH MODAL -->
+    <div id="search-modal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-md hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-xl w-full p-6 shadow-2xl relative">
+            <div class="flex justify-between items-center pb-4 border-b border-slate-800">
+                <div class="flex items-center gap-3 w-full">
+                    <i class="fa-solid fa-magnifying-glass text-teal-400 text-lg"></i>
+                    <input type="text" id="global-search-input" placeholder="Cari instrumen, saham, crypto (Cth: XAUUSD, NVDA, BTC)..." class="w-full bg-transparent border-none text-white focus:outline-none text-base">
+                </div>
+                <button id="btn-close-search" class="text-slate-400 hover:text-white text-xl"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="py-4 max-h-80 overflow-y-auto space-y-2" id="search-results-list">
+                <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Pencarian Populer</div>
+                <div class="flex flex-wrap gap-2">
+                    <button class="search-tag px-3 py-1.5 bg-slate-800 hover:bg-teal-500/20 hover:text-teal-300 rounded-lg text-sm transition" onclick="quickSearch('XAUUSD')">🥇 XAU/USD (Gold)</button>
+                    <button class="search-tag px-3 py-1.5 bg-slate-800 hover:bg-teal-500/20 hover:text-teal-300 rounded-lg text-sm transition" onclick="quickSearch('BTCUSD')">₿ Bitcoin (BTC)</button>
+                    <button class="search-tag px-3 py-1.5 bg-slate-800 hover:bg-teal-500/20 hover:text-teal-300 rounded-lg text-sm transition" onclick="quickSearch('NVDA')">📈 Nvidia (NVDA)</button>
+                    <button class="search-tag px-3 py-1.5 bg-slate-800 hover:bg-teal-500/20 hover:text-teal-300 rounded-lg text-sm transition" onclick="quickSearch('EURUSD')">💶 EUR/USD</button>
+                    <button class="search-tag px-3 py-1.5 bg-slate-800 hover:bg-teal-500/20 hover:text-teal-300 rounded-lg text-sm transition" onclick="quickSearch('BBRI')">🏛️ Bank BRI (BBRI)</button>
+                </div>
+            </div>
         </div>
     </div>
 
-
-    <!-- SECTION 1: HERO -->
-    <section id="home" class="hero-section">
-        <div class="hero-content">
-            <div class="status-badge">
-                <span class="pulse-dot"></span>
-                <span>Sistem Live & Up-to-date</span>
+    <!-- INSTRUMENT FUNDAMENTAL INFO MODAL -->
+    <div id="info-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-750 rounded-2xl max-w-2xl w-full p-6 shadow-2xl relative space-y-4">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-4">
+                <div class="flex items-center gap-3">
+                    <div id="modal-info-icon" class="w-10 h-10 rounded-xl bg-teal-500/10 text-teal-400 flex items-center justify-center text-xl font-bold">💎</div>
+                    <div>
+                        <h3 id="modal-info-name" class="text-xl font-bold text-white">XAU/USD (Gold)</h3>
+                        <span id="modal-info-category" class="text-xs text-slate-400">Komoditas Logam Mulia</span>
+                    </div>
+                </div>
+                <button id="btn-close-info-modal" class="text-slate-400 hover:text-white text-xl"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            <h1 class="hero-title">
-                Navigasi Pasar <br>Dengan <span class="gradient-text">Presisi Tinggi</span>
-            </h1>
-            <p class="hero-subtitle">
-                Platform cerdas dengan sentimen teknikal real-time, kalender ekonomi live, dan manajemen risiko ala trader profesional.
-            </p>
-            <div class="hero-actions">
-                <a href="#kalkulator" class="btn btn-primary">
-                    Kalkulator Lot <i class="fa-solid fa-arrow-right"></i>
-                </a>
-                <a href="#indikator" class="btn btn-secondary">
-                    Lihat Sentimen Pasar
-                </a>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                <div class="bg-slate-800/60 p-3 rounded-xl">
+                    <span class="text-xs text-slate-400 block">Harga Saat Ini</span>
+                    <span id="modal-info-price" class="text-lg font-bold text-teal-400">$2,345.50</span>
+                </div>
+                <div class="bg-slate-800/60 p-3 rounded-xl">
+                    <span class="text-xs text-slate-400 block">Perubahan 24j</span>
+                    <span id="modal-info-change" class="text-lg font-bold text-emerald-400">+1.25%</span>
+                </div>
+                <div class="bg-slate-800/60 p-3 rounded-xl">
+                    <span class="text-xs text-slate-400 block">Tertinggi 52W</span>
+                    <span id="modal-info-high" class="text-lg font-bold text-white">$2,450.00</span>
+                </div>
+                <div class="bg-slate-800/60 p-3 rounded-xl">
+                    <span class="text-xs text-slate-400 block">Terendah 52W</span>
+                    <span id="modal-info-low" class="text-lg font-bold text-white">$1,980.00</span>
+                </div>
+            </div>
+            <div class="bg-slate-800/40 p-4 rounded-xl space-y-2">
+                <h4 class="text-sm font-semibold text-slate-200">Ringkasan Analisis & Sentimen</h4>
+                <p id="modal-info-desc" class="text-xs text-slate-300 leading-relaxed">Aset safe-haven utama yang sangat dipengaruhi oleh inflasi AS, kebijakan suku bunga Federal Reserve, dan geopolitik global.</p>
+            </div>
+            <div class="flex justify-end pt-2">
+                <button id="btn-modal-action-buy" class="px-5 py-2 bg-emerald-500 hover:bg-emerald-600 text-black font-bold rounded-xl text-sm transition">Trade Instrumen Ini</button>
             </div>
         </div>
-    </section>
+    </div>
 
-    <!-- SECTION 2: RISK CALCULATOR -->
-    <section id="kalkulator" class="calculator-section">
-        <div class="section-container">
-            <div class="section-header">
-                <h2 class="section-title">Kalkulator <span class="text-accent">Risiko Pro</span></h2>
-                <p class="section-subtitle">Hitung ukuran Lot dengan akurat. Mendukung pasangan mata uang Major (Standard Contract 100k) dan XAUUSD.</p>
+    <!-- SUDDEN BREAKING NEWS AUDIO ALERT MODAL -->
+    <div id="breaking-news-modal" class="fixed bottom-6 right-6 z-50 max-w-md w-full bg-rose-950/90 border-2 border-rose-500/80 rounded-2xl p-5 shadow-2xl backdrop-blur-lg hidden animate-bounce">
+        <div class="flex items-start justify-between gap-3">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-rose-500/20 text-rose-400 flex items-center justify-center text-xl animate-pulse">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>
+                <div>
+                    <span class="text-xs font-bold uppercase tracking-wider text-rose-400">BREAKING NEWS ALARM</span>
+                    <h4 id="breaking-title" class="font-bold text-white text-sm">Rilis Data Inflasi CPI AS Melonjak</h4>
+                </div>
+            </div>
+            <button onclick="closeBreakingModal()" class="text-rose-300 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <p id="breaking-desc" class="text-xs text-slate-300 mt-2">Dolar AS bergerak melonjak drastis pasca kejutan data makro. Volatilitas pasar sangat tinggi!</p>
+        <div class="mt-3 flex justify-between items-center text-xs">
+            <span class="text-slate-400"><i class="fa-solid fa-volume-high text-rose-400"></i> Notifikasi Suara Aktif</span>
+            <button onclick="closeBreakingModal()" class="px-3 py-1.5 bg-rose-500 hover:bg-rose-600 text-white font-semibold rounded-lg">Mengerti</button>
+        </div>
+    </div>
+
+    <!-- AUTH LOGIN / REGISTER MODAL -->
+    <div id="auth-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl relative space-y-4">
+            <div class="flex justify-between items-center pb-3 border-b border-slate-800">
+                <h3 id="auth-modal-title" class="text-lg font-bold text-white">Masuk ke TradeVision Pro</h3>
+                <button id="btn-close-auth" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="auth-form" onsubmit="event.preventDefault(); handleAuthSubmit();" class="space-y-4">
+                <div>
+                    <label class="text-xs font-medium text-slate-300 block mb-1">Email / Username</label>
+                    <input type="email" required placeholder="nama@email.com" class="w-full px-4 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-teal-400 text-sm">
+                </div>
+                <div>
+                    <label class="text-xs font-medium text-slate-300 block mb-1">Kata Sandi</label>
+                    <input type="password" required placeholder="••••••••" class="w-full px-4 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-teal-400 text-sm">
+                </div>
+                <button type="submit" id="btn-auth-submit" class="w-full py-3 bg-gradient-to-r from-teal-400 to-cyan-500 text-slate-950 font-bold rounded-xl shadow-lg hover:brightness-110 transition">Masuk Akun</button>
+            </form>
+            <div class="text-center text-xs text-slate-400 pt-2">
+                Belum punya akun? <button id="toggle-auth-mode" class="text-teal-400 font-semibold hover:underline">Daftar Sekarang</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN NAVBAR -->
+    <header class="sticky top-0 z-40 bg-slate-950/85 backdrop-blur-xl border-b border-slate-800/80">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between py-3">
+            
+            <!-- Logo -->
+            <a href="#home" class="flex items-center gap-2 text-xl font-bold tracking-tight text-white group">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-teal-400 to-cyan-500 flex items-center justify-center shadow-lg shadow-teal-500/20 group-hover:scale-105 transition">
+                    <i class="fa-solid fa-chart-line text-slate-950 text-lg"></i>
+                </div>
+                <span>Trade<span class="text-teal-400">Vision</span> <span class="text-xs px-2 py-0.5 rounded bg-teal-500/10 text-teal-300 border border-teal-500/20">PRO</span></span>
+            </a>
+
+            <!-- Nav Links (Desktop) -->
+            <nav class="hidden lg:flex items-center gap-1 bg-slate-900/60 p-1.5 rounded-2xl border border-slate-800/80 text-sm font-medium text-slate-300">
+                <a href="#home" class="nav-item px-3.5 py-1.5 rounded-xl hover:text-white hover:bg-slate-800/60 transition">Beranda</a>
+                <a href="#chart-hub" class="nav-item px-3.5 py-1.5 rounded-xl hover:text-white hover:bg-slate-800/60 transition">Multi-Chart</a>
+                <a href="#news" class="nav-item px-3.5 py-1.5 rounded-xl hover:text-white hover:bg-slate-800/60 transition">News</a>
+                <a href="#ai-intel" class="nav-item px-3.5 py-1.5 rounded-xl hover:text-white hover:bg-slate-800/60 transition">AI Intel</a>
+                <a href="#ai-chat" class="nav-item px-3.5 py-1.5 rounded-xl hover:text-white hover:bg-slate-800/60 transition">AI Chat</a>
+                <a href="#shipfinder" class="nav-item px-3.5 py-1.5 rounded-xl hover:text-white hover:bg-slate-800/60 transition">ShipFinder</a>
+                <a href="#crypto" class="nav-item px-3.5 py-1.5 rounded-xl hover:text-white hover:bg-slate-800/60 transition">Crypto</a>
+                <a href="#stock" class="nav-item px-3.5 py-1.5 rounded-xl hover:text-white hover:bg-slate-800/60 transition">Stock</a>
+            </nav>
+
+            <!-- Actions Right -->
+            <div class="flex items-center gap-2 sm:gap-3">
+                <!-- Global Search Trigger -->
+                <button id="btn-open-search" class="p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white hover:border-slate-700 transition" title="Cari Instrumen (Ctrl+K)">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </button>
+
+                <!-- Light / Dark Mode Switcher -->
+                <button id="theme-toggle-btn" class="p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-amber-400 hover:border-slate-700 transition" title="Ganti Mode Gelap / Terang">
+                    <i id="theme-icon" class="fa-solid fa-moon"></i>
+                </button>
+
+                <!-- Login / Register Buttons -->
+                <button onclick="openAuthModal('login')" class="hidden sm:inline-flex px-4 py-2 text-sm font-semibold text-slate-200 hover:text-white transition">Masuk</button>
+                <button onclick="openAuthModal('register')" class="px-4 py-2 text-sm font-bold bg-gradient-to-r from-teal-400 to-cyan-500 text-slate-950 rounded-xl shadow-lg shadow-teal-500/20 hover:brightness-110 transition">Registrasi</button>
+
+                <!-- Mobile Menu Button -->
+                <button id="mobile-menu-btn" class="lg:hidden p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Nav Menu dropdown -->
+        <div id="mobile-nav" class="hidden lg:hidden bg-slate-900/95 border-b border-slate-800 px-4 py-3 space-y-2">
+            <a href="#home" class="block py-2 text-slate-200 hover:text-teal-400">Beranda</a>
+            <a href="#chart-hub" class="block py-2 text-slate-200 hover:text-teal-400">Multi-Chart Hub</a>
+            <a href="#news" class="block py-2 text-slate-200 hover:text-teal-400">News Live</a>
+            <a href="#ai-intel" class="block py-2 text-slate-200 hover:text-teal-400">AI Market Intel</a>
+            <a href="#ai-chat" class="block py-2 text-slate-200 hover:text-teal-400">AI Voice Assistant</a>
+            <a href="#shipfinder" class="block py-2 text-slate-200 hover:text-teal-400">ShipFinder Live</a>
+            <a href="#crypto" class="block py-2 text-slate-200 hover:text-teal-400">Crypto Dashboard</a>
+            <a href="#stock" class="block py-2 text-slate-200 hover:text-teal-400">Stock Dashboard</a>
+        </div>
+    </header>
+
+    <!-- REAL-TIME TICKER TAPE BAR -->
+    <div class="bg-slate-900/90 border-b border-slate-800/80 py-2 px-4 flex justify-between items-center text-xs overflow-hidden">
+        <div class="flex items-center gap-3 shrink-0 mr-4">
+            <span id="data-status-badge" class="px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-semibold flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span> LIVE 1S TICK
+            </span>
+            <span id="ticker-last-updated" class="text-slate-400 hidden sm:inline">Memuat feed...</span>
+        </div>
+        <div class="overflow-x-auto whitespace-nowrap scrollbar-none flex items-center gap-6 text-slate-300 font-mono" id="ticker-tape-container">
+            <!-- Dynamic ticker items -->
+        </div>
+    </div>
+
+    <!-- MAIN CONTENT WRAPPER -->
+    <main class="relative z-10 space-y-16 py-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        <!-- HERO HEADER SECTION -->
+        <section id="home" class="relative rounded-3xl overflow-hidden bg-gradient-to-b from-slate-900/80 to-slate-950/80 border border-slate-800 p-8 sm:p-12 text-center space-y-6">
+            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-teal-500/10 border border-teal-500/20 text-teal-300 text-xs font-semibold">
+                <i class="fa-solid fa-sparkles"></i> Trading Platform Next-Gen Berbasis AI & Analytics Live
+            </div>
+            <h1 class="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-tight font-heading">
+                Navigasi Pasar & Logistik <br>Dengan <span class="bg-gradient-to-r from-teal-400 via-cyan-400 to-emerald-400 bg-clip-text text-transparent">Kecerdasan Presisi</span>
+            </h1>
+            <p class="max-w-2xl mx-auto text-slate-400 text-sm sm:text-base leading-relaxed">
+                Platform unggulan serba ada: Multi-chart fleksibel, sinyal rekomendasi AI, notifikasi berita suara, AI voice assistant, dan pelacakan live maritim ShipFinder.
+            </p>
+            <div class="flex flex-wrap items-center justify-center gap-4 pt-2">
+                <a href="#chart-hub" class="px-6 py-3 bg-gradient-to-r from-teal-400 to-cyan-500 text-slate-950 font-bold rounded-xl shadow-lg shadow-teal-500/25 hover:brightness-110 transition flex items-center gap-2">
+                    Buka Multi-Chart <i class="fa-solid fa-arrow-right"></i>
+                </a>
+                <a href="#ai-chat" class="px-6 py-3 bg-slate-900 border border-slate-750 text-slate-200 font-semibold rounded-xl hover:bg-slate-800 hover:text-white transition flex items-center gap-2">
+                    <i class="fa-solid fa-microphone text-teal-400"></i> AI Voice Chat
+                </a>
+            </div>
+        </section>
+
+        <!-- SECTION 1: MULTI-CHART HUB & INSTRUMENT SELECTOR -->
+        <section id="chart-hub" class="space-y-6">
+            <div class="flex flex-wrap items-center justify-between gap-4 pb-2 border-b border-slate-800">
+                <div>
+                    <h2 class="text-2xl font-extrabold text-white flex items-center gap-2 font-heading">
+                        <i class="fa-solid fa-chart-line text-teal-400"></i> Multi-Chart <span class="text-teal-400">Hub</span>
+                    </h2>
+                    <p class="text-xs text-slate-400">Tampilkan lebih dari 1 grafik bersamaan (Stock & Crypto) dengan instrumen selector interaktif.</p>
+                </div>
+                <!-- Layout Grid Controls -->
+                <div class="flex items-center gap-2 bg-slate-900 p-1.5 rounded-xl border border-slate-800 text-xs font-semibold">
+                    <span class="text-slate-400 px-2">Tata Letak:</span>
+                    <button onclick="setChartGrid(1)" id="grid-btn-1" class="chart-grid-btn px-3 py-1.5 rounded-lg bg-teal-500/20 text-teal-300 border border-teal-500/30">1 Chart</button>
+                    <button onclick="setChartGrid(2)" id="grid-btn-2" class="chart-grid-btn px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:text-white">2 Split</button>
+                    <button onclick="setChartGrid(4)" id="grid-btn-4" class="chart-grid-btn px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:text-white">4 Quad</button>
+                </div>
             </div>
 
-            <div class="calculator-grid">
-                <!-- Form Input -->
-                <div class="card glass-card calculator-form-card">
-                    <form id="risk-form" onsubmit="event.preventDefault();">
-                        <div class="form-group">
-                            <label for="calc-pair" class="form-label">Pilih Instrumen</label>
-                            <select id="calc-pair" class="form-select">
-                                <optgroup label="USD sebagai Quote (Pip Value Tetap)">
-                                    <option value="eurusd" selected>EUR/USD</option>
-                                    <option value="gbpusd">GBP/USD</option>
-                                    <option value="audusd">AUD/USD</option>
-                                    <option value="nzdusd">NZD/USD</option>
-                                    <option value="xauusd">XAU/USD (Gold)</option>
+            <!-- Dynamic Multi-Chart Grid Container -->
+            <div id="multi-chart-grid" class="grid grid-cols-1 gap-6">
+                <!-- Card Chart 1 (Default) -->
+                <div class="chart-card-wrapper bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-4 shadow-xl">
+                    <div class="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-800">
+                        <!-- Custom Select Dropdown -->
+                        <div class="flex items-center gap-3">
+                            <span class="text-xs font-bold text-slate-400 uppercase">Pilih Instrumen:</span>
+                            <select onchange="updateChartInstrument(0, this.value)" class="bg-slate-800 border border-slate-700 text-white text-sm rounded-xl px-3 py-2 focus:outline-none focus:border-teal-400 font-semibold cursor-pointer">
+                                <optgroup label="🥇 Komoditas & Forex">
+                                    <option value="OANDA:XAUUSD" selected>XAU/USD (Gold)</option>
+                                    <option value="FX:EURUSD">EUR/USD</option>
+                                    <option value="FX:GBPUSD">GBP/USD</option>
+                                    <option value="FX:USDJPY">USD/JPY</option>
                                 </optgroup>
-                                <optgroup label="USD sebagai Base (Pip Value Dinamis)">
-                                    <option value="usdjpy">USD/JPY</option>
-                                    <option value="usdchf">USD/CHF</option>
-                                    <option value="usdcad">USD/CAD</option>
+                                <optgroup label="₿ Crypto Assets">
+                                    <option value="BITSTAMP:BTCUSD">Bitcoin (BTC/USD)</option>
+                                    <option value="BITSTAMP:ETHUSD">Ethereum (ETH/USD)</option>
+                                    <option value="BINANCE:SOLUSD">Solana (SOL/USD)</option>
+                                </optgroup>
+                                <optgroup label="📈 Saham US & Global">
+                                    <option value="NASDAQ:NVDA">Nvidia (NVDA)</option>
+                                    <option value="NASDAQ:AAPL">Apple (AAPL)</option>
+                                    <option value="NASDAQ:TSLA">Tesla (TSLA)</option>
+                                    <option value="NASDAQ:MSFT">Microsoft (MSFT)</option>
                                 </optgroup>
                             </select>
                         </div>
-
-                        <!-- Harga Saat Ini (Dinamis untuk Base USD) -->
-                        <div id="current-price-div" class="form-group hidden">
-                            <label for="calc-price" class="form-label">Harga Pasar Saat Ini (Bid/Ask)</label>
-                            <div class="input-wrapper">
-                                <input type="number" id="calc-price" min="0.0001" step="any" placeholder="Cth: 150.50 (JPY) atau 0.9000 (CHF)" class="form-input">
-                            </div>
-                            <span class="form-tip">*Dibutuhkan untuk menghitung nilai pip yang akurat karena USD di depan.</span>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="calc-balance" class="form-label">Saldo Akun (USD)</label>
-                            <div class="input-wrapper prefix-wrapper">
-                                <span class="input-prefix">$</span>
-                                <input type="number" id="calc-balance" required min="1" step="any" placeholder="1000" class="form-input">
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group col-half">
-                                <label for="calc-risk" class="form-label">Risiko (%)</label>
-                                <div class="input-wrapper suffix-wrapper">
-                                    <input type="number" id="calc-risk" required min="0.1" max="100" step="0.1" placeholder="1" class="form-input">
-                                    <span class="input-suffix">%</span>
-                                </div>
-                            </div>
-                            <div class="form-group col-half">
-                                <label for="calc-sl" class="form-label">Stop Loss (Pips)</label>
-                                <div class="input-wrapper">
-                                    <input type="number" id="calc-sl" required min="0.1" step="0.1" placeholder="30" class="form-input">
-                                </div>
-                            </div>
-                        </div>
-
-                        <button type="submit" id="btn-calculate" class="btn btn-accent btn-block">
-                            Hitung Lot Sekarang
-                        </button>
-                    </form>
-                </div>
-
-                <!-- Result Display -->
-                <div class="card glass-card calculator-result-card">
-                    <div class="result-glow-top"></div>
-                    <div class="result-glow-bottom"></div>
-                    
-                    <h3 class="result-title">Ukuran Lot Ideal Anda</h3>
-                    <div class="result-value-container">
-                        <span id="lot-result" class="result-value">0.00</span>
-                        <span class="result-unit">Lot</span>
-                    </div>
-                    
-                    <div class="result-details">
-                        <div class="detail-row">
-                            <span class="detail-label">Modal Diresikokan:</span>
-                            <span id="risk-amount-result" class="detail-value text-bearish">$0.00</span>
-                        </div>
-                        <div class="detail-row">
-                            <span class="detail-label">Nilai Per Pip (1 Lot):</span>
-                            <span id="pip-value-result" class="detail-value text-bullish">$0.00</span>
-                        </div>
-                    </div>
-                    
-                    <div id="calc-error" class="error-banner hidden"></div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- SECTION 2.0: AI TODAY INTEL -->
-    <section id="ai-intel" class="ai-intel-section">
-        <div class="section-container">
-            <div class="section-header">
-                <h2 class="section-title"><i class="fa-solid fa-brain text-accent"></i> AI Today <span class="gradient-text">Market Intel</span></h2>
-                <p class="section-subtitle">Sentimen pasar harian otomatis dan proyeksi teknikal berbasis AI untuk membimbing keputusan trading Anda hari ini.</p>
-            </div>
-
-            <div class="ai-intel-grid">
-                <!-- AI Daily Overview -->
-                <div class="card glass-card ai-overview-card">
-                    <div class="ai-card-header">
-                        <span class="ai-date-badge" id="ai-current-date">30 Juni 2026</span>
-                        <div style="display: flex; align-items: center; gap: 8px;">
-                            <span class="ai-reset-badge" style="background: rgba(0, 245, 160, 0.12); color: var(--color-teal); border: 1px solid rgba(0, 245, 160, 0.25); padding: 3px 9px; border-radius: var(--radius-sm); font-size: 0.75rem; font-weight: 600; display: inline-flex; align-items: center; gap: 5px;"><i class="fa-solid fa-clock-rotate-left"></i> Reset Daily 06:00 AM</span>
-                            <span class="ai-status-pulse"><span class="pulse-dot"></span> AI Active</span>
-                        </div>
-                    </div>
-                    <h3 class="ai-overview-title">Market Sentiment & Macro Outlook</h3>
-                    <p id="ai-macro-outlook" class="ai-overview-text">Memuat analisis makro...</p>
-                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; border-top: 1px solid var(--card-border); padding-top: 15px; margin-top: auto;">
-                        <span class="ai-source-credit" style="border: none; padding: 0; margin: 0;">Source: AI Synthesis (Reuters, Bloomberg & Technical feeds)</span>
-                        <button id="btn-download-ai-pdf" class="btn btn-accent btn-sm" style="padding: 6px 14px; font-size: 0.8rem; border-radius: var(--radius-sm); cursor: pointer; display: inline-flex; align-items: center; gap: 6px; margin: 0;">
-                            <i class="fa-solid fa-file-pdf"></i> Unduh PDF Laporan
-                        </button>
-                    </div>
-                </div>
-
-                <!-- AI Pair Projections -->
-                <div class="ai-pairs-grid">
-                    <!-- XAUUSD -->
-                    <div class="card glass-card ai-pair-card" id="ai-card-xauusd">
-                        <div class="ai-pair-header">
-                            <span class="ai-pair-name">XAU/USD (Gold)</span>
-                            <span class="ai-sentiment-badge" id="ai-sent-xauusd">BULLISH</span>
-                        </div>
-                        <p class="ai-pair-projection" id="ai-proj-xauusd">Memuat proyeksi...</p>
-                    </div>
-
-                    <!-- EURUSD -->
-                    <div class="card glass-card ai-pair-card" id="ai-card-eurusd">
-                        <div class="ai-pair-header">
-                            <span class="ai-pair-name">EUR/USD</span>
-                            <span class="ai-sentiment-badge" id="ai-sent-eurusd">BEARISH</span>
-                        </div>
-                        <p class="ai-pair-projection" id="ai-proj-eurusd">Memuat proyeksi...</p>
-                    </div>
-
-                    <!-- GBPUSD -->
-                    <div class="card glass-card ai-pair-card" id="ai-card-gbpusd">
-                        <div class="ai-pair-header">
-                            <span class="ai-pair-name">GBP/USD</span>
-                            <span class="ai-sentiment-badge" id="ai-sent-gbpusd">NEUTRAL</span>
-                        </div>
-                        <p class="ai-pair-projection" id="ai-proj-gbpusd">Memuat proyeksi...</p>
-                    </div>
-
-                    <!-- AUDUSD -->
-                    <div class="card glass-card ai-pair-card" id="ai-card-audusd">
-                        <div class="ai-pair-header">
-                            <span class="ai-pair-name">AUD/USD</span>
-                            <span class="ai-sentiment-badge" id="ai-sent-audusd">NEUTRAL</span>
-                        </div>
-                        <p class="ai-pair-projection" id="ai-proj-audusd">Memuat proyeksi...</p>
-                    </div>
-
-                    <!-- NZDUSD -->
-                    <div class="card glass-card ai-pair-card" id="ai-card-nzdusd">
-                        <div class="ai-pair-header">
-                            <span class="ai-pair-name">NZD/USD</span>
-                            <span class="ai-sentiment-badge" id="ai-sent-nzdusd">NEUTRAL</span>
-                        </div>
-                        <p class="ai-pair-projection" id="ai-proj-nzdusd">Memuat proyeksi...</p>
-                    </div>
-
-                    <!-- USDJPY -->
-                    <div class="card glass-card ai-pair-card" id="ai-card-usdjpy">
-                        <div class="ai-pair-header">
-                            <span class="ai-pair-name">USD/JPY</span>
-                            <span class="ai-sentiment-badge" id="ai-sent-usdjpy">NEUTRAL</span>
-                        </div>
-                        <p class="ai-pair-projection" id="ai-proj-usdjpy">Memuat proyeksi...</p>
-                    </div>
-
-                    <!-- USDCHF -->
-                    <div class="card glass-card ai-pair-card" id="ai-card-usdchf">
-                        <div class="ai-pair-header">
-                            <span class="ai-pair-name">USD/CHF</span>
-                            <span class="ai-sentiment-badge" id="ai-sent-usdchf">NEUTRAL</span>
-                        </div>
-                        <p class="ai-pair-projection" id="ai-proj-usdchf">Memuat proyeksi...</p>
-                    </div>
-
-                    <!-- USDCAD -->
-                    <div class="card glass-card ai-pair-card" id="ai-card-usdcad">
-                        <div class="ai-pair-header">
-                            <span class="ai-pair-name">USD/CAD</span>
-                            <span class="ai-sentiment-badge" id="ai-sent-usdcad">NEUTRAL</span>
-                        </div>
-                        <p class="ai-pair-projection" id="ai-proj-usdcad">Memuat proyeksi...</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- INSTITUTIONAL SENTIMENT & VOLUME (COT REPORT) -->
-            <div class="card glass-card ai-cot-card" style="margin-top: 30px; padding: 24px;">
-                <div class="ai-card-header" style="border-bottom: 1px solid var(--card-border); padding-bottom: 12px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <h3 class="ai-overview-title" style="margin: 0; font-size: 1.2rem;"><i class="fa-solid fa-building-columns text-accent"></i> Institutional Positions (COT Report)</h3>
-                        <button id="btn-refresh-cot" class="btn-refresh" title="Refresh Data Institusi">
-                            <i class="fa-solid fa-arrows-rotate"></i>
-                        </button>
-                    </div>
-                    <span class="ai-date-badge" style="background: rgba(0, 245, 160, 0.15); color: var(--color-teal); font-weight: 600;">Commitment of Traders (Speculative Net)</span>
-                </div>
-                <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 20px;">Menampilkan volume posisi Long (Beli) vs Short (Jual) bersih yang diakumulasikan oleh hedge fund besar dan bank institusi global saat ini.</p>
-                <div class="cot-chart-wrapper" style="position: relative; height: 320px; width: 100%;">
-                    <canvas id="chart-cot-report"></canvas>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- SECTION 2.1: TRADING JOURNAL -->
-    <section id="jurnal" class="journal-section">
-        <div class="section-container">
-            <div class="section-header">
-                <h2 class="section-title">Trading <span class="text-accent">Journal</span></h2>
-                <p class="section-subtitle">Catat setiap trade, evaluasi emosi Anda, dan pelajari kesalahan masa lalu agar menjadi lebih disiplin.</p>
-            </div>
-
-            <!-- WALL OF SHAME / PSYCHOLOGY REMINDER -->
-            <div id="wall-of-shame" class="wall-of-shame hidden">
-                <div class="shame-header">
-                    <i class="fa-solid fa-triangle-exclamation text-bearish"></i>
-                    <span>EVALUASI EMOSI & PENGINGAT DIRI (JANGAN DIULANGI!)</span>
-                </div>
-                <div id="shame-list" class="shame-list">
-                    <!-- Dynamic content: List of bad emotional losses -->
-                </div>
-            </div>
-
-            <div class="journal-grid">
-                <!-- Left: Stats & Journal Form -->
-                <div class="journal-sidebar">
-                    <!-- Stats Card -->
-                    <div class="card glass-card journal-stats-card">
-                        <h3 class="card-title-sm">Rangkuman Performa</h3>
-                        <div class="stats-mini-grid">
-                            <div class="stat-box">
-                                <span class="stat-label">Total Trade</span>
-                                <span id="stat-total-trades" class="stat-val">0</span>
-                            </div>
-                            <div class="stat-box">
-                                <span class="stat-label">Win Rate</span>
-                                <span id="stat-winrate" class="stat-val">0%</span>
-                            </div>
-                            <div class="stat-box">
-                                <span class="stat-label">Net PnL</span>
-                                <span id="stat-net-pnl" class="stat-val">$0.00</span>
-                            </div>
-                        </div>
-                        <div class="emotion-insight">
-                            <span class="stat-label">Emosi Paling Sering:</span>
-                            <span id="stat-dominant-emotion" class="badge-emotion badge-neutral">Belum Ada</span>
-                        </div>
-                    </div>
-
-                    <!-- Analytics Charts Card -->
-                    <div class="card glass-card journal-analytics-card">
-                        <h3 class="card-title-sm">Visualisasi Performa</h3>
-                        <div class="chart-container-sm">
-                            <canvas id="chart-winrate" height="160"></canvas>
-                        </div>
-                        <div class="chart-container-sm" style="margin-top: 15px;">
-                            <canvas id="chart-pnl" height="140"></canvas>
-                        </div>
-                    </div>
-
-                    <!-- Journal Form -->
-                    <div class="card glass-card journal-form-card">
-                        <h3 class="card-title-sm" id="form-title">Catat Entry Baru</h3>
-                        <form id="journal-form" onsubmit="event.preventDefault();">
-                            <input type="hidden" id="journal-id">
-                            
-                            <div class="form-row">
-                                <div class="form-group col-half">
-                                    <label for="journal-pair" class="form-label">Instrumen (PAIR)</label>
-                                    <input type="text" id="journal-pair" class="form-input" placeholder="Cth: XAUUSD" required>
-                                </div>
-                                <div class="form-group col-half">
-                                    <label for="journal-type" class="form-label">Posisi</label>
-                                    <select id="journal-type" class="form-select">
-                                        <option value="BUY">BUY</option>
-                                        <option value="SELL">SELL</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div class="form-row">
-                                <div class="form-group col-half">
-                                    <label for="journal-risk" class="form-label">Risk (%)</label>
-                                    <input type="number" id="journal-risk" step="any" class="form-input" placeholder="Cth: 1" required>
-                                </div>
-                                <div class="form-group col-half">
-                                    <label for="journal-rr" class="form-label">RR Ratio</label>
-                                    <input type="text" id="journal-rr" class="form-input" placeholder="Cth: 1:2 atau 2.5" required>
-                                </div>
-                            </div>
-
-                            <div class="form-row">
-                                <div class="form-group col-third">
-                                    <label for="journal-entry" class="form-label">Entry Price</label>
-                                    <input type="number" id="journal-entry" step="any" class="form-input" placeholder="0.0" required>
-                                </div>
-                                <div class="form-group col-third">
-                                    <label for="journal-sl" class="form-label">Stop Loss</label>
-                                    <input type="number" id="journal-sl" step="any" class="form-input" placeholder="0.0" required>
-                                </div>
-                                <div class="form-group col-third">
-                                    <label for="journal-tp" class="form-label">Take Profit</label>
-                                    <input type="number" id="journal-tp" step="any" class="form-input" placeholder="0.0" required>
-                                </div>
-                            </div>
-
-                            <div class="form-row">
-                                <div class="form-group col-half">
-                                    <label for="journal-time-open" class="form-label">Waktu Open Position</label>
-                                    <input type="datetime-local" id="journal-time-open" class="form-input" required>
-                                </div>
-                                <div class="form-group col-half" id="time-close-group">
-                                    <label for="journal-time-close" class="form-label">Waktu Close Position</label>
-                                    <input type="datetime-local" id="journal-time-close" class="form-input">
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="journal-emotion" class="form-label">Kondisi Emosi Saat Entry</label>
-                                <select id="journal-emotion" class="form-select">
-                                    <option value="Sabar">Sabar & Disiplin (Sesuai Plan) 🟢</option>
-                                    <option value="Confident">Yakin & Tenang 🟢</option>
-                                    <option value="FOMO">FOMO (Takut Ketinggalan) 🔴</option>
-                                    <option value="Greedy">Greedy (Serakah / Lot Kegedean) 🔴</option>
-                                    <option value="Revenge">Revenge Trading (Balas Dendam) 🔴</option>
-                                    <option value="Takut">Takut / Ragu-ragu 🟡</option>
-                                    <option value="Bosan">Bosan (Gak Ada Setup Tapi Maksa) 🟡</option>
-                                </select>
-                            </div>
-
-                            <div class="form-group">
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                                    <label for="journal-reason" class="form-label" style="margin-bottom: 0;">Alasan Entry / Catatan Setup</label>
-                                    <button type="button" id="btn-template-smc" class="btn-xs" style="background: rgba(0, 245, 160, 0.1); color: var(--color-teal); border: 1px solid rgba(0, 245, 160, 0.2); border-radius: 4px; padding: 2px 8px; font-size: 0.75rem; cursor: pointer; transition: all 0.2s;">
-                                        <i class="fa-solid fa-wand-magic-sparkles"></i> Template SMC
-                                    </button>
-                                </div>
-                                <textarea id="journal-reason" class="form-textarea" rows="3" placeholder="Mengapa Anda mengambil trade ini? Konfirmasi apa saja yang terlihat? (Cth: Break of Structure + FVG Tap)" required></textarea>
-                            </div>
-
-                            <div class="form-row">
-                                <div class="form-group col-half">
-                                    <label for="journal-status" class="form-label">Status Trade</label>
-                                    <select id="journal-status" class="form-select">
-                                        <option value="OPEN">OPEN (Sedang Berjalan)</option>
-                                        <option value="WIN">WIN (Profit)</option>
-                                        <option value="LOSS">LOSS (Rugi)</option>
-                                        <option value="BE">BE (Break Even / Balik Modal)</option>
-                                    </select>
-                                </div>
-                                <div class="form-group col-half">
-                                    <label for="journal-pnl" class="form-label">PnL ($ USD)</label>
-                                    <input type="number" id="journal-pnl" step="any" class="form-input" placeholder="0.00" required>
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="journal-tv-link" class="form-label">Link TradingView / Gambar Chart</label>
-                                <input type="url" id="journal-tv-link" class="form-input" placeholder="Cth: https://www.tradingview.com/x/xxxxxx/">
-                            </div>
-
-                            <!-- Conditional Loss Fields -->
-                            <div id="loss-details-group" class="hidden">
-                                <div class="form-group">
-                                    <label for="journal-loss-cause" class="form-label">Penyebab Loss Utama</label>
-                                    <select id="journal-loss-cause" class="form-select">
-                                        <option value="Market Normal">Market Noise / SL Hunter (Normal) 🟢</option>
-                                        <option value="FOMO">Masuk Terlalu Cepat (FOMO) 🔴</option>
-                                        <option value="Greedy">Gak Ambil TP / Tamak (Greedy) 🔴</option>
-                                        <option value="No Setup">Gak Ada Setup / Iseng Masuk 🔴</option>
-                                        <option value="Bad Risk">Manajemen Risiko Buruk / Overlot 🔴</option>
-                                        <option value="Overtrade">Balas Dendam / Kebanyakan Trade 🔴</option>
-                                        <option value="Bad Exit">Panik Close Manual / Exit Kepagian 🟡</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label for="journal-self-critique" class="form-label">Evaluasi / Maki-maki Diri Sendiri (Sebagai Pengingat)</label>
-                                    <textarea id="journal-self-critique" class="form-textarea" rows="2" placeholder="Tulis kritik pedas untuk diri sendiri jika melanggar rule. Cth: 'Bego banget jangan fomo lagi, tunggu retest!'"></textarea>
-                                </div>
-                            </div>
-
-                            <div class="form-actions">
-                                <button type="submit" id="btn-save-journal" class="btn btn-accent btn-block">Simpan Jurnal</button>
-                                <button type="button" id="btn-cancel-edit-journal" class="btn btn-secondary btn-block hidden">Batal Edit</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-
-                <!-- Right: Trade Logs List -->
-                <div class="journal-main">
-                    <div class="journal-filter-bar">
-                        <div class="filter-group">
-                            <button class="filter-btn active" data-filter="ALL">Semua</button>
-                            <button class="filter-btn" data-filter="OPEN">Open</button>
-                            <button class="filter-btn" data-filter="WIN">Win</button>
-                            <button class="filter-btn" data-filter="LOSS">Loss</button>
-                            <button class="filter-btn" data-filter="BE">BE</button>
-                        </div>
-                        <button id="btn-clear-journal" class="btn btn-danger-text"><i class="fa-solid fa-trash-can"></i> Hapus Semua</button>
-                    </div>
-
-                    <div id="journal-list" class="journal-list">
-                        <!-- Dynamic list of trade cards -->
-                        <div class="no-data">
-                            <i class="fa-regular fa-folder-open"></i>
-                            <p>Belum ada catatan jurnal. Mulai catat trade pertama Anda!</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- SECTION 2.2: MY TRADING PLAN -->
-    <section id="myplan" class="myplan-section">
-        <div class="section-container">
-            <div class="section-header">
-                <h2 class="section-title">My Trading <span class="text-bullish">Plan</span></h2>
-                <p class="section-subtitle">Tentukan aturan main Anda. Disiplin mematuhi rencana adalah kunci profit konsisten.</p>
-            </div>
-
-            <div class="myplan-grid">
-                <!-- Plan Editor Form -->
-                <div class="card glass-card plan-editor-card">
-                    <h3 class="card-title-sm">Atur Trading Plan Anda</h3>
-                    <form id="plan-form" onsubmit="event.preventDefault();">
-                        <div class="form-group">
-                            <label for="plan-rules" class="form-label">Aturan Emas / Golden Rules</label>
-                            <textarea id="plan-rules" class="form-textarea" rows="4" placeholder="Cth: &#10;1. Maksimal 2 trade per hari.&#10;2. Risiko per trade maksimal 1% dari modal.&#10;3. Stop trading jika loss 2x berturut-turut dalam sehari."></textarea>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="plan-setup" class="form-label">Kriteria Setup / Entry Model</label>
-                            <textarea id="plan-setup" class="form-textarea" rows="4" placeholder="Cth: &#10;- Harus ada Break of Structure (BOS) atau Change of Character (CHoCH) di M15.&#10;- Entry hanya di area Fair Value Gap (FVG) atau Order Block (OB) H1."></textarea>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="plan-exit" class="form-label">Rencana Exit & Manajemen Trade</label>
-                            <textarea id="plan-exit" class="form-textarea" rows="3" placeholder="Cth: &#10;- Pindahkan SL ke BE setelah running profit 1:1 RR.&#10;- Selalu pasang target TP realistis pada Major Liquidity terdekat."></textarea>
-                        </div>
-
-                        <button type="submit" id="btn-save-plan" class="btn btn-accent btn-block">Simpan Rencana</button>
-                    </form>
-                </div>
-
-                <!-- Plan Display (Discord Style) -->
-                <div class="card glass-card plan-display-card">
-                    <div class="discord-channel-header">
-                        <i class="fa-solid fa-hashtag"></i>
-                        <span>trading-rules-and-setup</span>
-                    </div>
-                    
-                    <div class="discord-message-box">
-                        <!-- Message 1: Golden Rules -->
-                        <div class="discord-msg">
-                            <div class="discord-avatar"><i class="fa-solid fa-user-shield"></i></div>
-                            <div class="discord-msg-content">
-                                <span class="discord-author">My Mind / System</span>
-                                <span class="discord-timestamp">Hari ini pukul 08:00</span>
-                                <div class="discord-text">
-                                    <h4>📌 GOLDEN RULES</h4>
-                                    <div id="display-rules" class="pre-wrap-text">Belum ada aturan yang disimpan. Klik simpan di form kiri untuk memperbarui.</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Message 2: Setup Criteria -->
-                        <div class="discord-msg">
-                            <div class="discord-avatar"><i class="fa-solid fa-circle-nodes"></i></div>
-                            <div class="discord-msg-content">
-                                <span class="discord-author">Entry Model</span>
-                                <span class="discord-timestamp">Hari ini pukul 08:01</span>
-                                <div class="discord-text">
-                                    <h4>⚡ SETUP CRITERIA</h4>
-                                    <div id="display-setup" class="pre-wrap-text">Belum ada kriteria setup yang disimpan.</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Message 3: Exit Plan -->
-                        <div class="discord-msg">
-                            <div class="discord-avatar"><i class="fa-solid fa-right-from-bracket"></i></div>
-                            <div class="discord-msg-content">
-                                <span class="discord-author">Risk & Exit</span>
-                                <span class="discord-timestamp">Hari ini pukul 08:02</span>
-                                <div class="discord-text">
-                                    <h4>🎯 EXIT PLAN & RISK MANAGEMENT</h4>
-                                    <div id="display-exit" class="pre-wrap-text">Belum ada rencana exit yang disimpan.</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- SECTION 3: NEWS & ECONOMIC CALENDAR -->
-    <section id="news" class="news-section">
-        <div class="section-container">
-            <div class="section-header-left">
-                <h2 class="section-title">Berita & <span class="text-bullish">Kalender Ekonomi</span></h2>
-                <p class="section-subtitle">Pantau sentimen fundamental dan jadwal rilis data penting dari pasar global.</p>
-            </div>
-
-            <div class="news-grid">
-                <!-- Market News (FXStreet Style) -->
-                <div class="news-list-container">
-                    <div class="news-tabs-header">
-                        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-                            <h3 class="news-group-title text-accent-border" style="margin: 0; padding-left: 12px;">Market News</h3>
-                            <button id="btn-refresh-news" class="btn-refresh" title="Refresh Berita">
-                                <i class="fa-solid fa-arrows-rotate"></i>
+                        <div class="flex items-center gap-2">
+                            <button onclick="openInfoModalForCurrent(0)" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-750 text-xs font-semibold text-teal-300 rounded-lg flex items-center gap-1">
+                                <i class="fa-solid fa-circle-info"></i> Info & Fundamental
                             </button>
-                            <span id="news-auto-update-badge" class="data-status-badge live" style="font-size: 0.75rem; background: rgba(255, 170, 0, 0.12); color: #ffaa00; border: 1px solid rgba(255, 170, 0, 0.25); display: inline-flex; align-items: center; gap: 5px; padding: 4px 8px;"><i class="fa-solid fa-clock-rotate-left"></i> ForexFactory Live 5m (<span id="news-countdown">05:00</span>)</span>
-                        </div>
-                        <div class="news-tabs">
-                            <button class="news-tab-btn active" data-category="forex">Forex</button>
-                            <button class="news-tab-btn" data-category="crypto">Crypto</button>
-                            <button class="news-tab-btn" data-category="index">Index Lokal</button>
-                            <button class="news-tab-btn" data-category="commodities">Commodities</button>
-                        </div>
-                    </div>
-                    
-                    <!-- Forex News -->
-                    <div class="news-cards-stack" id="news-forex">
-                        <a href="https://www.fxstreet.com" target="_blank" class="news-card">
-                            <div class="news-badge-container">
-                                <span class="news-badge-breaking">
-                                    <i class="fa-solid fa-bolt animate-pulse"></i> BREAKING
-                                </span>
-                            </div>
-                            <h4 class="news-card-title">Dolar AS Melemah Jelang Rilis Data CPI Inti</h4>
-                            <p class="news-card-excerpt">Para pelaku pasar berhati-hati menjelang rilis inflasi yang dapat menentukan arah kebijakan The Fed selanjutnya.</p>
-                            <div class="news-card-meta">
-                                <span><i class="fa-regular fa-clock"></i> 10 Menit lalu</span>
-                                <span>via FXStreet</span>
-                            </div>
-                        </a>
-
-                        <a href="https://www.fxstreet.com" target="_blank" class="news-card">
-                            <h4 class="news-card-title">GBP/USD Stabil di Atas 1.2650 Pasca Data Tenaga Kerja</h4>
-                            <p class="news-card-excerpt">Perekonomian Inggris menunjukkan ketahanan dengan tingkat pengangguran yang tetap stabil, mendukung penguatan sterling.</p>
-                            <div class="news-card-meta">
-                                <span><i class="fa-regular fa-clock"></i> 1 Jam lalu</span>
-                                <span>via FXStreet</span>
-                            </div>
-                        </a>
-
-                        <a href="https://www.fxstreet.com" target="_blank" class="news-card">
-                            <h4 class="news-card-title">Analisis EUR/USD: Tekanan Jual Masih Dominan di Sesi Eropa</h4>
-                            <p class="news-card-excerpt">Data PMI manufaktur Jerman yang mengecewakan kembali membebani mata uang tunggal Euro hari ini.</p>
-                            <div class="news-card-meta">
-                                <span><i class="fa-regular fa-clock"></i> 3 Jam lalu</span>
-                                <span>via FXStreet</span>
-                            </div>
-                        </a>
-                    </div>
-
-                    <!-- Crypto News -->
-                    <div class="news-cards-stack hidden" id="news-crypto">
-                        <a href="https://cointelegraph.com" target="_blank" class="news-card">
-                            <div class="news-badge-container">
-                                <span class="news-badge-breaking">
-                                    <i class="fa-solid fa-bolt animate-pulse"></i> HOT
-                                </span>
-                            </div>
-                            <h4 class="news-card-title">Bitcoin (BTC) Tembus $95,000 Didorong Arus Masuk ETF</h4>
-                            <p class="news-card-excerpt">Minat institusional terus meningkat dengan rekor pembelian bersih harian baru pada produk ETF Spot Bitcoin.</p>
-                            <div class="news-card-meta">
-                                <span><i class="fa-regular fa-clock"></i> 30 Menit lalu</span>
-                                <span>via Cointelegraph</span>
-                            </div>
-                        </a>
-
-                        <a href="https://www.coindesk.com" target="_blank" class="news-card">
-                            <h4 class="news-card-title">Ethereum (ETH) Menguji Area $3,200 Saat Gas Fee Turun</h4>
-                            <p class="news-card-excerpt">Pembaruan layer-2 berhasil menurunkan biaya transaksi jaringan, memicu lonjakan aktivitas smart contract.</p>
-                            <div class="news-card-meta">
-                                <span><i class="fa-regular fa-clock"></i> 2 Jam lalu</span>
-                                <span>via CoinDesk</span>
-                            </div>
-                        </a>
-
-                        <a href="https://decrypt.co" target="_blank" class="news-card">
-                            <h4 class="news-card-title">Solana Memimpin Reli Altcoin dengan Kenaikan 12%</h4>
-                            <p class="news-card-excerpt">Volume transaksi DEX di jaringan Solana melampaui Ethereum dalam basis mingguan, didorong antusiasme pasar.</p>
-                            <div class="news-card-meta">
-                                <span><i class="fa-regular fa-clock"></i> 4 Jam lalu</span>
-                                <span>via Decrypt</span>
-                            </div>
-                        </a>
-                    </div>
-
-                    <!-- Index Lokal News -->
-                    <div class="news-cards-stack hidden" id="news-index">
-                        <a href="https://www.cnbcindonesia.com" target="_blank" class="news-card">
-                            <div class="news-badge-container">
-                                <span class="news-badge-breaking">
-                                    <i class="fa-solid fa-circle-check"></i> IHSG LIVE
-                                </span>
-                            </div>
-                            <h4 class="news-card-title">IHSG Ditutup Menguat ke Level 7,300 Didorong Sektor Perbankan</h4>
-                            <p class="news-card-excerpt">Saham-saham bank papan atas seperti BBRI, BMRI, dan BBCA memimpin penguatan indeks di sesi perdagangan sore.</p>
-                            <div class="news-card-meta">
-                                <span><i class="fa-regular fa-clock"></i> 45 Menit lalu</span>
-                                <span>via CNBC Indonesia</span>
-                            </div>
-                        </a>
-
-                        <a href="https://www.kontan.co.id" target="_blank" class="news-card">
-                            <h4 class="news-card-title">Rupiah Menguat Terhadap Dolar AS Pasca Keputusan BI-Rate</h4>
-                            <p class="news-card-excerpt">Bank Indonesia memutuskan untuk menahan suku bunga acuan, memberikan sentimen positif bagi stabilitas nilai tukar rupiah.</p>
-                            <div class="news-card-meta">
-                                <span><i class="fa-regular fa-clock"></i> 2 Jam lalu</span>
-                                <span>via Kontan</span>
-                            </div>
-                        </a>
-
-                        <a href="https://www.bisnis.com" target="_blank" class="news-card">
-                            <h4 class="news-card-title">Saham BBRI dan BMRI Catat Net Buy Asing Tertinggi Pekan Ini</h4>
-                            <p class="news-card-excerpt">Investor asing kembali masuk ke pasar saham Indonesia dengan akumulasi nilai transaksi bersih yang signifikan.</p>
-                            <div class="news-card-meta">
-                                <span><i class="fa-regular fa-clock"></i> 5 Jam lalu</span>
-                                <span>via Bisnis Indonesia</span>
-                            </div>
-                        </a>
-                    </div>
-
-                    <!-- Commodities News -->
-                    <div class="news-cards-stack hidden" id="news-commodities">
-                        <a href="https://www.reuters.com" target="_blank" class="news-card">
-                            <div class="news-badge-container">
-                                <span class="news-badge-breaking">
-                                    <i class="fa-solid fa-leaf"></i> KOMODITAS
-                                </span>
-                            </div>
-                            <h4 class="news-card-title">Harga Emas (XAU/USD) Tertahan di Resisten $2,050</h4>
-                            <p class="news-card-excerpt">Ketegangan geopolitik mereda sementara, membuat Emas kesulitan menembus area resisten krusial mingguan.</p>
-                            <div class="news-card-meta">
-                                <span><i class="fa-regular fa-clock"></i> 1 Jam lalu</span>
-                                <span>via Reuters</span>
-                            </div>
-                        </a>
-
-                        <a href="https://www.bloomberg.com" target="_blank" class="news-card">
-                            <h4 class="news-card-title">Minyak Mentah Brent Turun ke $78 Per Barel</h4>
-                            <p class="news-card-excerpt">Kenaikan cadangan minyak mentah komersial di Amerika Serikat memicu kekhawatiran kelebihan pasokan global.</p>
-                            <div class="news-card-meta">
-                                <span><i class="fa-regular fa-clock"></i> 2 Jam lalu</span>
-                                <span>via Bloomberg</span>
-                            </div>
-                        </a>
-
-                        <a href="https://www.investing.com" target="_blank" class="news-card">
-                            <h4 class="news-card-title">Harga Tembaga Melonjak Didorong Permintaan Industri Global</h4>
-                            <p class="news-card-excerpt">Optimisme atas pulihnya aktivitas manufaktur di Asia dan Amerika Utara mendorong lonjakan harga logam industri.</p>
-                            <div class="news-card-meta">
-                                <span><i class="fa-regular fa-clock"></i> 6 Jam lalu</span>
-                                <span>via Investing.com</span>
-                            </div>
-                        </a>
-                    </div>
-                </div>
-
-                <!-- Economic Calendar (Investing.com Widget) -->
-                <div class="calendar-container">
-                    <h3 class="news-group-title text-bullish-border">Jadwal Rilis Mendatang</h3>
-                    <div class="calendar-widget-wrapper">
-                        <iframe src="https://sslecal2.investing.com?columns=exc_flags,exc_currency,exc_importance,exc_actual,exc_forecast,exc_previous&features=datepicker,timezone&countries=25,32,6,37,72,22,17,39,14,10,35,43,56,36,110,11,26,12,4,5&calType=week&timeZone=18&lang=1" width="100%" height="100%" frameborder="0" allowtransparency="true" marginwidth="0" marginheight="0"></iframe>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- SECTION 3.1: NETWORK & TUNNELING MONITOR -->
-    <section id="network-monitor" class="network-monitor-section" style="padding: 60px 0; border-top: 1px solid var(--card-border);">
-        <div class="section-container">
-            <div class="section-header">
-                <h2 class="section-title"><i class="fa-solid fa-network-wired text-accent"></i> Network <span class="gradient-text">Tunneling Monitor</span></h2>
-                <p class="section-subtitle">Analisis Perbandingan Performa Latensi Webhook dan Audit Keamanan Trading Node secara real-time.</p>
-            </div>
-
-            <!-- Stats Grid -->
-            <div class="calculator-grid" style="margin-bottom: 30px; display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
-                <!-- Port Forwarding Card -->
-                <div class="card glass-card" style="border-top: 4px solid var(--color-bearish); padding: 20px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                        <h3 style="font-family: var(--font-heading); font-size: 1.2rem; color: var(--text-primary); margin: 0;">Port Forwarding</h3>
-                        <span id="pf-status" class="data-status-badge demo" style="background: rgba(255, 23, 68, 0.1); color: var(--color-bearish); border-color: rgba(255, 23, 68, 0.2); padding: 4px 8px; border-radius: var(--radius-sm); font-size: 0.8rem; font-weight: 600;"><span class="pulse-dot" style="background-color: var(--color-bearish); display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; box-shadow: 0 0 8px var(--color-bearish);"></span> OFFLINE</span>
-                    </div>
-                    <div style="display: flex; flex-direction: column; gap: 10px;">
-                        <div style="display: flex; justify-content: space-between;"><span style="color: var(--text-secondary);">Total Request:</span> <span id="pf-requests" style="font-weight: 600; color: var(--text-primary);">0</span></div>
-                        <div style="display: flex; justify-content: space-between;"><span style="color: var(--text-secondary);">Avg RTT Latency:</span> <span id="pf-latency" style="font-weight: 600; color: var(--text-primary);">0 ms</span></div>
-                        <div style="display: flex; justify-content: space-between;"><span style="color: var(--text-secondary);">Packet Loss:</span> <span id="pf-loss" style="font-weight: 600; color: var(--color-bearish);">0.0%</span></div>
-                    </div>
-                </div>
-
-                <!-- Cloudflare Tunnel Card -->
-                <div class="card glass-card" style="border-top: 4px solid var(--color-teal); padding: 20px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                        <h3 style="font-family: var(--font-heading); font-size: 1.2rem; color: var(--text-primary); margin: 0;">Cloudflare Tunnel</h3>
-                        <span id="cf-status" class="data-status-badge demo" style="background: rgba(0, 245, 160, 0.1); color: var(--color-teal); border-color: rgba(0, 245, 160, 0.2); padding: 4px 8px; border-radius: var(--radius-sm); font-size: 0.8rem; font-weight: 600;"><span class="pulse-dot" style="background-color: var(--color-teal); display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; box-shadow: 0 0 8px var(--color-teal);"></span> OFFLINE</span>
-                    </div>
-                    <div style="display: flex; flex-direction: column; gap: 10px;">
-                        <div style="display: flex; justify-content: space-between;"><span style="color: var(--text-secondary);">Total Request:</span> <span id="cf-requests" style="font-weight: 600; color: var(--text-primary);">0</span></div>
-                        <div style="display: flex; justify-content: space-between;"><span style="color: var(--text-secondary);">Avg RTT Latency:</span> <span id="cf-latency" style="font-weight: 600; color: var(--text-primary);">0 ms</span></div>
-                        <div style="display: flex; justify-content: space-between;"><span style="color: var(--text-secondary);">Packet Loss:</span> <span id="cf-loss" style="font-weight: 600; color: var(--color-teal);">0.0%</span></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Charts & Security Grid -->
-            <div style="display: grid; grid-template-columns: 1.6fr 1fr; gap: 24px; margin-bottom: 30px; align-items: start;">
-                <!-- Latency Chart Card -->
-                <div class="card glass-card" style="padding: 20px; height: 380px; display: flex; flex-direction: column;">
-                    <h3 style="font-family: var(--font-heading); font-size: 1.1rem; margin-bottom: 15px; margin-top: 0;"><i class="fa-solid fa-chart-area text-accent"></i> RTT Latency History (ms)</h3>
-                    <div style="flex-grow: 1; position: relative;">
-                        <canvas id="network-latency-chart"></canvas>
-                    </div>
-                </div>
-
-                <!-- Security Nmap Results Card -->
-                <div class="card glass-card" style="padding: 20px; height: 380px; display: flex; flex-direction: column; justify-content: space-between;">
-                    <div>
-                        <h3 style="font-family: var(--font-heading); font-size: 1.1rem; margin-bottom: 15px; margin-top: 0;"><i class="fa-solid fa-shield-halved text-accent"></i> Nmap Security Scan Audit</h3>
-                        
-                        <div style="margin-bottom: 15px;">
-                            <span style="font-size: 0.85rem; color: var(--text-secondary);">Last Scan:</span> 
-                            <span id="nmap-last-scan" style="font-size: 0.85rem; color: var(--text-primary); font-weight: 500;">Belum pernah dijalankan</span>
-                        </div>
-
-                        <!-- Scan results comparisons -->
-                        <div style="display: flex; flex-direction: column; gap: 12px;">
-                            <div>
-                                <span style="font-size: 0.9rem; font-weight: 600; color: var(--color-bearish); display: block; margin-bottom: 4px;">Port Forwarding exposed ports:</span>
-                                <div id="pf-exposed-list" style="font-family: monospace; font-size: 0.85rem; background: rgba(0,0,0,0.3); padding: 8px; border-radius: var(--radius-sm); color: var(--text-secondary);">
-                                    Scan belum dijalankan.
-                                </div>
-                            </div>
-                            <div>
-                                <span style="font-size: 0.9rem; font-weight: 600; color: var(--color-teal); display: block; margin-bottom: 4px;">Cloudflare Tunnel exposed ports:</span>
-                                <div id="cf-exposed-list" style="font-family: monospace; font-size: 0.85rem; background: rgba(0,0,0,0.3); padding: 8px; border-radius: var(--radius-sm); color: var(--text-secondary);">
-                                    Scan belum dijalankan.
-                                </div>
-                            </div>
                         </div>
                     </div>
 
-                    <!-- Instructions / Actions -->
-                    <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--card-border); padding-top: 15px; margin-top: 10px;">
-                        <button id="btn-reset-network-stats" class="btn btn-secondary" style="padding: 8px 16px; font-size: 0.85rem; border-radius: var(--radius-sm); background: rgba(255,255,255,0.05); color: var(--text-primary); border: 1px solid var(--card-border); cursor: pointer;"><i class="fa-solid fa-rotate-left"></i> Reset Stats</button>
-                        <span style="font-size: 0.75rem; color: var(--text-muted); text-align: right;">Jalankan <code>server.js</code> &amp; <code>benchmark.py</code> untuk menguji.</span>
+                    <!-- TradingView Chart Container -->
+                    <div class="w-full h-96 rounded-xl overflow-hidden bg-slate-950 border border-slate-800" id="tv-chart-container-0">
+                        <!-- TradingView widget iframe dynamically mounted -->
                     </div>
-                </div>
-            </div>
-        </div>
-    </section>
 
-    <!-- SECTION 3.2: SHIPFINDER MARITIME LOGISTICS & MAP TRACKER -->
-    <section id="shipfinder" class="shipfinder-section" style="padding: 60px 0; border-top: 1px solid var(--card-border);">
-        <div class="section-container">
-            <div class="section-header">
-                <div class="status-badge" style="margin-bottom: 12px; display: inline-flex; align-items: center; gap: 8px;">
-                    <span class="pulse-dot" style="background-color: var(--color-teal); box-shadow: 0 0 8px var(--color-teal);"></span>
-                    <span>Live ShipFinder AIS Stream</span>
-                </div>
-                <h2 class="section-title"><i class="fa-solid fa-ship text-accent"></i> ShipFinder <span class="gradient-text">Maritime Intelligence</span></h2>
-                <p class="section-subtitle">Pelacakan live posisi kapal tanker minyak, komoditas emas/logam, dan analisis kepadatan jalur pelayaran di titik selat strategis dunia.</p>
-            </div>
+                    <!-- Under-Chart Metadata, Recommendation & Trending Cards -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+                        <!-- Card 1: AI Recommendation Signal -->
+                        <div class="bg-slate-950/60 p-4 rounded-xl border border-slate-800/80 space-y-2">
+                            <div class="flex justify-between items-center text-xs">
+                                <span class="font-bold text-slate-400 uppercase tracking-wider">Sinyal Rekomendasi AI</span>
+                                <span id="rec-badge-0" class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold border border-emerald-500/30">STRONG BUY</span>
+                            </div>
+                            <div class="text-sm font-bold text-white flex justify-between">
+                                <span>Target Profit: <span class="text-emerald-400" id="rec-tp-0">$2,380.00</span></span>
+                                <span>Stop Loss: <span class="text-rose-400" id="rec-sl-0">$2,315.00</span></span>
+                            </div>
+                            <p class="text-xs text-slate-400" id="rec-reason-0">Konfirmasi Break of Structure (BOS) M15 dengan Fair Value Gap (FVG) Tap teruji.</p>
+                        </div>
 
-            <!-- Chokepoints & Key Metrics Grid -->
-            <div class="shipfinder-metrics-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 25px;">
-                <div class="card glass-card shipfinder-metric-card" style="padding: 16px; border-left: 4px solid var(--color-bearish);">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                        <span style="font-size: 0.85rem; color: var(--text-secondary); font-weight: 500;">Bab-el-Mandeb & Laut Merah</span>
-                        <span style="font-size: 0.7rem; padding: 2px 6px; background: rgba(255, 23, 68, 0.2); color: var(--color-bearish); border-radius: 4px; font-weight: 700;">WASPADA RISIKO</span>
-                    </div>
-                    <div style="font-size: 1.4rem; font-weight: 700; color: var(--text-primary); margin-bottom: 4px;" id="ship-count-redsea">142 Tanker</div>
-                    <span style="font-size: 0.75rem; color: var(--text-secondary);">Rute Terusan Suez / Minyak & Kargo</span>
-                </div>
+                        <!-- Card 2: Related Latest News -->
+                        <div class="bg-slate-950/60 p-4 rounded-xl border border-slate-800/80 space-y-1">
+                            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block">Berita Terkini Terkait</span>
+                            <h4 class="text-xs font-semibold text-slate-200 hover:text-teal-400 transition cursor-pointer line-clamp-2" id="chart-news-title-0">Permintaan Safe Haven Emas Melonjak Ditengah Ketegangan Timur Tengah</h4>
+                            <span class="text-[10px] text-slate-400 block" id="chart-news-meta-0">15 Menit lalu via Reuters</span>
+                        </div>
 
-                <div class="card glass-card shipfinder-metric-card" style="padding: 16px; border-left: 4px solid var(--color-bullish);">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                        <span style="font-size: 0.85rem; color: var(--text-secondary); font-weight: 500;">Selat Hormuz (Teluk Persia)</span>
-                        <span style="font-size: 0.7rem; padding: 2px 6px; background: rgba(0, 230, 118, 0.2); color: var(--color-bullish); border-radius: 4px; font-weight: 700;">LANCAR</span>
-                    </div>
-                    <div style="font-size: 1.4rem; font-weight: 700; color: var(--text-primary); margin-bottom: 4px;" id="ship-count-hormuz">218 VLCC</div>
-                    <span style="font-size: 0.75rem; color: var(--text-secondary);">21% Pasokan Minyak Mentah Dunia</span>
-                </div>
-
-                <div class="card glass-card shipfinder-metric-card" style="padding: 16px; border-left: 4px solid var(--color-accent);">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                        <span style="font-size: 0.85rem; color: var(--text-secondary); font-weight: 500;">Selat Malaka (Asia-Pasifik)</span>
-                        <span style="font-size: 0.7rem; padding: 2px 6px; background: rgba(0, 204, 255, 0.2); color: var(--color-accent); border-radius: 4px; font-weight: 700;">PADAT</span>
-                    </div>
-                    <div style="font-size: 1.4rem; font-weight: 700; color: var(--text-primary); margin-bottom: 4px;" id="ship-count-malacca">385 Kapal</div>
-                    <span style="font-size: 0.75rem; color: var(--text-secondary);">Jalur Utama Emas & Komoditas Asia</span>
-                </div>
-
-                <div class="card glass-card shipfinder-metric-card" style="padding: 16px; border-left: 4px solid #ffaa00;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                        <span style="font-size: 0.85rem; color: var(--text-secondary); font-weight: 500;">Terusan Panama</span>
-                        <span style="font-size: 0.7rem; padding: 2px 6px; background: rgba(255, 170, 0, 0.2); color: #ffaa00; border-radius: 4px; font-weight: 700;">MODERAT</span>
-                    </div>
-                    <div style="font-size: 1.4rem; font-weight: 700; color: var(--text-primary); margin-bottom: 4px;" id="ship-count-panama">94 Kapal</div>
-                    <span style="font-size: 0.75rem; color: var(--text-secondary);">Koneksi Atlantik & Pasifik</span>
-                </div>
-            </div>
-
-            <!-- ShipFinder Interactive Radar Map Container -->
-            <div class="card glass-card shipfinder-map-card" style="padding: 20px; overflow: hidden; border: 1px solid var(--card-border);">
-                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; border-bottom: 1px solid var(--card-border); padding-bottom: 14px;">
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <h3 style="margin: 0; font-size: 1.15rem; font-family: var(--font-heading); color: var(--text-primary);"><i class="fa-solid fa-earth-americas text-accent"></i> Live ShipFinder AIS Radar Map</h3>
-                        <span class="data-status-badge live" style="font-size: 0.75rem;"><span class="pulse-dot"></span> Live Navigation Map</span>
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;" id="ship-preset-buttons">
-                        <button class="btn btn-secondary btn-sm ship-preset-btn active" data-lat="26.0" data-lon="55.0" data-zoom="6" style="padding: 5px 12px; font-size: 0.78rem;">Selat Hormuz</button>
-                        <button class="btn btn-secondary btn-sm ship-preset-btn" data-lat="12.5" data-lon="43.3" data-zoom="7" style="padding: 5px 12px; font-size: 0.78rem;">Laut Merah</button>
-                        <button class="btn btn-secondary btn-sm ship-preset-btn" data-lat="1.3" data-lon="103.8" data-zoom="8" style="padding: 5px 12px; font-size: 0.78rem;">Selat Malaka</button>
-                        <button class="btn btn-secondary btn-sm ship-preset-btn" data-lat="9.1" data-lon="-79.7" data-zoom="8" style="padding: 5px 12px; font-size: 0.78rem;">Terusan Panama</button>
-                    </div>
-                </div>
-
-                <div class="shipfinder-map-wrapper" style="width: 100%; height: 500px; border-radius: var(--radius-md); overflow: hidden; position: relative; border: 1px solid var(--card-border); background: #0b0f19;">
-                    <iframe id="shipfinder-iframe" src="https://www.vesselfinder.com/aisshownavpix?zoom=5&lat=20.0&lon=60.0&width=100%25&height=100%25&names=true&mmsi=0&track=true&fleet=false&fleet_name=false&fleet_hide_box=true&sim_track=false&show_track=true&show_ports=true" width="100%" height="100%" frameborder="0" allowfullscreen style="border: 0; filter: contrast(1.05) saturate(1.1);"></iframe>
-                </div>
-
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px; flex-wrap: wrap; gap: 10px;">
-                    <div style="display: flex; align-items: center; gap: 18px; font-size: 0.8rem; color: var(--text-secondary); flex-wrap: wrap;">
-                        <span><i class="fa-solid fa-circle" style="color: #00f5a0; font-size: 0.6rem;"></i> Tanker Minyak (Crude Oil)</span>
-                        <span><i class="fa-solid fa-circle" style="color: #00ccff; font-size: 0.6rem;"></i> Kargo Logistik / Emas</span>
-                        <span><i class="fa-solid fa-circle" style="color: #ffaa00; font-size: 0.6rem;"></i> Bulk Carrier</span>
-                    </div>
-                    <span style="font-size: 0.75rem; color: var(--text-muted);" id="shipfinder-last-sync">Terhubung ke ShipFinder Global AIS Traffic • Update Otomatis</span>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- SECTION 4: TECHNICAL ANALYSIS / SENTIMENT -->
-    <section id="indikator" class="sentiment-section">
-        <div class="section-container">
-            <div class="section-header">
-                <h2 class="section-title">Indikator <span class="text-bearish">Sentimen Live</span></h2>
-                <p class="section-subtitle">Analisis teknikal *real-time* yang merangkum sinyal dari Moving Averages, Osilator (RSI, MACD), dan indikator lainnya.</p>
-            </div>
-
-            <div class="sentiment-grid">
-                
-                <!-- XAUUSD Widget -->
-                <div class="card sentiment-card">
-                    <div class="indicator-live-header">
-                        <span class="indicator-live-pair"><i class="fa-solid fa-coins"></i> XAU/USD</span>
-                        <div class="indicator-live-quote">
-                            <span class="indicator-live-price" id="indicator-xauusd-price">—</span>
-                            <span class="indicator-change" id="indicator-xauusd-change">—</span>
+                        <!-- Card 3: Trending Stock/Crypto Asset -->
+                        <div class="bg-slate-950/60 p-4 rounded-xl border border-slate-800/80 space-y-1">
+                            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block">Trending Hot Asset</span>
+                            <div class="flex items-center justify-between text-xs pt-1">
+                                <span class="font-bold text-white flex items-center gap-1"><i class="fa-solid fa-fire text-amber-400"></i> Solana (SOL)</span>
+                                <span class="text-emerald-400 font-bold">+12.4%</span>
+                            </div>
+                            <span class="text-[10px] text-slate-400 block">Volume DEX Solana Melampaui Rekor Mingguan</span>
                         </div>
                     </div>
-                    <div class="tradingview-widget-container">
-                        <div class="tradingview-widget-container__widget"></div>
-                        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-technical-analysis.js" async>
-                        {
-                        "interval": "1D",
-                        "width": "100%",
-                        "isTransparent": true,
-                        "height": "100%",
-                        "symbol": "OANDA:XAUUSD",
-                        "showIntervalTabs": true,
-                        "locale": "id",
-                        "colorTheme": "dark"
-                        }
-                        </script>
-                    </div>
                 </div>
-
-                <!-- EURUSD Widget -->
-                <div class="card sentiment-card">
-                    <div class="indicator-live-header">
-                        <span class="indicator-live-pair"><i class="fa-solid fa-euro-sign"></i> EUR/USD</span>
-                        <div class="indicator-live-quote">
-                            <span class="indicator-live-price" id="indicator-eurusd-price">—</span>
-                            <span class="indicator-change" id="indicator-eurusd-change">—</span>
-                        </div>
-                    </div>
-                    <div class="tradingview-widget-container">
-                        <div class="tradingview-widget-container__widget"></div>
-                        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-technical-analysis.js" async>
-                        {
-                        "interval": "1D",
-                        "width": "100%",
-                        "isTransparent": true,
-                        "height": "100%",
-                        "symbol": "FX:EURUSD",
-                        "showIntervalTabs": true,
-                        "locale": "id",
-                        "colorTheme": "dark"
-                        }
-                        </script>
-                    </div>
-                </div>
-
-                <!-- GBPUSD Widget -->
-                <div class="card sentiment-card">
-                    <div class="indicator-live-header">
-                        <span class="indicator-live-pair"><i class="fa-solid fa-pound-sign"></i> GBP/USD</span>
-                        <div class="indicator-live-quote">
-                            <span class="indicator-live-price" id="indicator-gbpusd-price">—</span>
-                            <span class="indicator-change" id="indicator-gbpusd-change">—</span>
-                        </div>
-                    </div>
-                    <div class="tradingview-widget-container">
-                        <div class="tradingview-widget-container__widget"></div>
-                        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-technical-analysis.js" async>
-                        {
-                        "interval": "1D",
-                        "width": "100%",
-                        "isTransparent": true,
-                        "height": "100%",
-                        "symbol": "FX:GBPUSD",
-                        "showIntervalTabs": true,
-                        "locale": "id",
-                        "colorTheme": "dark"
-                        }
-                        </script>
-                    </div>
-                </div>
-
-                <!-- USDJPY Widget -->
-                <div class="card sentiment-card">
-                    <div class="indicator-live-header">
-                        <span class="indicator-live-pair"><i class="fa-solid fa-yen-sign"></i> USD/JPY</span>
-                        <div class="indicator-live-quote">
-                            <span class="indicator-live-price" id="indicator-usdjpy-price">—</span>
-                            <span class="indicator-change" id="indicator-usdjpy-change">—</span>
-                        </div>
-                    </div>
-                    <div class="tradingview-widget-container">
-                        <div class="tradingview-widget-container__widget"></div>
-                        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-technical-analysis.js" async>
-                        {
-                        "interval": "1D",
-                        "width": "100%",
-                        "isTransparent": true,
-                        "height": "100%",
-                        "symbol": "FX:USDJPY",
-                        "showIntervalTabs": true,
-                        "locale": "id",
-                        "colorTheme": "dark"
-                        }
-                        </script>
-                    </div>
-                </div>
-
             </div>
-        </div>
-    </section>
+        </section>
+
+        <!-- SECTION 2: LIVE NEWS & BREAKING ALERTS -->
+        <section id="news" class="space-y-6">
+            <div class="flex flex-wrap items-center justify-between gap-4 pb-2 border-b border-slate-800">
+                <div>
+                    <h2 class="text-2xl font-extrabold text-white flex items-center gap-2 font-heading">
+                        <i class="fa-solid fa-newspaper text-amber-400"></i> Live News & <span class="text-amber-400">Kalender Ekonomi</span>
+                    </h2>
+                    <p class="text-xs text-slate-400">Update berita otomatis per 5 menit dari ForexFactory & notifikasi suara berita mendadak.</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <span id="news-auto-update-badge" class="px-3 py-1.5 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20 text-xs font-semibold flex items-center gap-2">
+                        <i class="fa-solid fa-clock-rotate-left"></i> ForexFactory Live 5m (<span id="news-countdown">05:00</span>)
+                    </span>
+                    <button id="btn-trigger-test-breaking" class="px-3 py-1.5 bg-rose-500/20 hover:bg-rose-500/30 text-rose-400 border border-rose-500/30 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition">
+                        <i class="fa-solid fa-bell"></i> Tes Alarm Suara
+                    </button>
+                </div>
+            </div>
+
+            <!-- News Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- News List Container -->
+                <div class="lg:col-span-2 space-y-4">
+                    <!-- Category Tabs -->
+                    <div class="flex flex-wrap items-center gap-2 bg-slate-900 p-1.5 rounded-xl border border-slate-800 text-xs">
+                        <button class="news-tab-btn px-4 py-2 rounded-lg bg-teal-500/20 text-teal-300 font-bold border border-teal-500/30 active" data-category="forex">Forex</button>
+                        <button class="news-tab-btn px-4 py-2 rounded-lg bg-slate-800 text-slate-300 hover:text-white" data-category="crypto">Crypto</button>
+                        <button class="news-tab-btn px-4 py-2 rounded-lg bg-slate-800 text-slate-300 hover:text-white" data-category="stock">Saham & Index</button>
+                        <button class="news-tab-btn px-4 py-2 rounded-lg bg-slate-800 text-slate-300 hover:text-white" data-category="commodities">Komoditas</button>
+                    </div>
+
+                    <!-- News Cards Stack -->
+                    <div id="news-cards-stack" class="space-y-3">
+                        <!-- Dynamic News Cards -->
+                    </div>
+                </div>
+
+                <!-- Economic Calendar Widget -->
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-4">
+                    <h3 class="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2 border-b border-slate-800 pb-3">
+                        <i class="fa-solid fa-calendar-days text-teal-400"></i> Kalender Ekonomi
+                    </h3>
+                    <div class="w-full h-96 rounded-xl overflow-hidden border border-slate-800 bg-slate-950">
+                        <iframe src="https://sslecal2.investing.com?columns=exc_flags,exc_currency,exc_importance,exc_actual,exc_forecast,exc_previous&features=datepicker,timezone&countries=25,32,6,37,72,22,17,39,14,10,35,43,56,36,110,11,26,12,4,5&calType=week&timeZone=18&lang=1" width="100%" height="100%" frameborder="0" allowtransparency="true"></iframe>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3: AI TODAY MARKET INTEL -->
+        <section id="ai-intel" class="space-y-6">
+            <div class="flex flex-wrap items-center justify-between gap-4 pb-2 border-b border-slate-800">
+                <div>
+                    <h2 class="text-2xl font-extrabold text-white flex items-center gap-2 font-heading">
+                        <i class="fa-solid fa-brain text-teal-400"></i> AI Today <span class="text-teal-400">Market Intel</span>
+                    </h2>
+                    <p class="text-xs text-slate-400">Proyeksi harian otomatis & riset sentimen makro. Reset otomatis setiap pukul 06:00 AM WIB.</p>
+                </div>
+                <span class="px-3 py-1.5 rounded-xl bg-teal-500/10 text-teal-300 border border-teal-500/20 text-xs font-semibold flex items-center gap-2">
+                    <i class="fa-solid fa-rotate-left"></i> Reset Daily 06:00 AM WIB
+                </span>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- AI Daily Macro Overview -->
+                <div class="lg:col-span-1 bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4 flex flex-col justify-between">
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center pb-3 border-b border-slate-800">
+                            <span class="text-xs font-bold text-teal-400" id="ai-current-date">22 Juli 2026</span>
+                            <span class="text-xs px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-semibold"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block mr-1"></span> AI Active</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-white">Macro Sentiment Outlook</h3>
+                        <p id="ai-macro-outlook" class="text-xs text-slate-300 leading-relaxed max-h-80 overflow-y-auto">Memuat analisis makro...</p>
+                    </div>
+                    <button id="btn-download-ai-pdf" class="w-full py-2.5 bg-slate-800 hover:bg-slate-750 text-teal-300 border border-teal-500/30 text-xs font-bold rounded-xl transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-file-pdf"></i> Unduh Laporan PDF
+                    </button>
+                </div>
+
+                <!-- AI Pair Projections Grid -->
+                <div class="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4" id="ai-pair-cards-container">
+                    <!-- Pair cards generated dynamically -->
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 4: AI VOICE CHAT ASSISTANT -->
+        <section id="ai-chat" class="space-y-6">
+            <div class="pb-2 border-b border-slate-800">
+                <h2 class="text-2xl font-extrabold text-white flex items-center gap-2 font-heading">
+                    <i class="fa-solid fa-comments text-cyan-400"></i> AI Voice <span class="text-cyan-400">Trading Chat</span>
+                </h2>
+                <p class="text-xs text-slate-400">Tanyakan analisis teknikal, strategi SMC, atau berita makro langsung melalui suara atau teks.</p>
+            </div>
+
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4 max-w-4xl mx-auto shadow-2xl">
+                <!-- Chat Log -->
+                <div id="ai-chat-messages" class="h-80 overflow-y-auto space-y-3 p-4 bg-slate-950/80 rounded-xl border border-slate-800 text-xs">
+                    <div class="flex gap-3 items-start">
+                        <div class="w-7 h-7 rounded-lg bg-teal-500/20 text-teal-300 flex items-center justify-center font-bold text-sm shrink-0">🤖</div>
+                        <div class="bg-slate-800 p-3 rounded-2xl rounded-tl-none max-w-xl text-slate-200">
+                            Halo! Saya AI Trading Assistant TradeVision. Tanyakan analisis harga XAUUSD, setup SMC, atau berita saham & crypto hari ini!
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chat Input Form -->
+                <form id="ai-chat-form" onsubmit="event.preventDefault(); sendAIChatMessage();" class="flex gap-2 items-center">
+                    <button type="button" id="btn-voice-input" class="p-3 bg-slate-800 hover:bg-teal-500/20 text-slate-300 hover:text-teal-400 border border-slate-700 rounded-xl transition" title="Input Suara (Voice Recognition)">
+                        <i class="fa-solid fa-microphone"></i>
+                    </button>
+                    <input type="text" id="ai-chat-input" placeholder="Ketik pertanyaan atau klik mikrofon untuk bicara..." class="flex-grow px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-teal-400 text-xs">
+                    <button type="submit" class="px-5 py-3 bg-gradient-to-r from-teal-400 to-cyan-500 text-slate-950 font-bold rounded-xl hover:brightness-110 transition text-xs flex items-center gap-1.5">
+                        Kirim <i class="fa-solid fa-paper-plane"></i>
+                    </button>
+                </form>
+            </div>
+        </section>
+
+        <!-- SECTION 5: SHIPFINDER MARITIME LOGISTICS -->
+        <section id="shipfinder" class="space-y-6">
+            <div class="flex flex-wrap items-center justify-between gap-4 pb-2 border-b border-slate-800">
+                <div>
+                    <h2 class="text-2xl font-extrabold text-white flex items-center gap-2 font-heading">
+                        <i class="fa-solid fa-ship text-teal-400"></i> ShipFinder <span class="text-teal-400">Maritime Intelligence</span>
+                    </h2>
+                    <p class="text-xs text-slate-400">Pelacakan live posisi kapal tanker minyak, komoditas emas, dan titik selat logistik dunia.</p>
+                </div>
+                <div class="flex items-center gap-2" id="ship-preset-buttons">
+                    <button class="ship-preset-btn px-3 py-1.5 rounded-lg bg-teal-500/20 text-teal-300 border border-teal-500/30 text-xs font-semibold active" data-lat="26.0" data-lon="55.0" data-zoom="6">Selat Hormuz</button>
+                    <button class="ship-preset-btn px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 text-xs font-semibold" data-lat="12.5" data-lon="43.3" data-zoom="7">Laut Merah</button>
+                    <button class="ship-preset-btn px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 text-xs font-semibold" data-lat="1.3" data-lon="103.8" data-zoom="8">Selat Malaka</button>
+                    <button class="ship-preset-btn px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 text-xs font-semibold" data-lat="9.1" data-lon="-79.7" data-zoom="8">Terusan Panama</button>
+                </div>
+            </div>
+
+            <!-- Ship Map Card -->
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-4 shadow-xl">
+                <div class="w-full h-[480px] rounded-xl overflow-hidden border border-slate-800 bg-slate-950">
+                    <iframe id="shipfinder-iframe" src="https://www.vesselfinder.com/aisshownavpix?zoom=6&lat=26.0&lon=55.0&width=100%25&height=100%25&names=true&mmsi=0&track=true&fleet=false&fleet_name=false&fleet_hide_box=true&sim_track=false&show_track=true&show_ports=true" width="100%" height="100%" frameborder="0"></iframe>
+                </div>
+                <div class="flex flex-wrap items-center justify-between gap-4 text-xs text-slate-400">
+                    <div class="flex items-center gap-4">
+                        <span><i class="fa-solid fa-circle text-emerald-400"></i> Tanker Minyak</span>
+                        <span><i class="fa-solid fa-circle text-cyan-400"></i> Kargo Logistik / Emas</span>
+                        <span><i class="fa-solid fa-circle text-amber-400"></i> Bulk Carrier</span>
+                    </div>
+                    <span id="shipfinder-last-sync">Terhubung ke ShipFinder AIS Radar Live Stream</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 6: CRYPTO DASHBOARD -->
+        <section id="crypto" class="space-y-6">
+            <div class="pb-2 border-b border-slate-800">
+                <h2 class="text-2xl font-extrabold text-white flex items-center gap-2 font-heading">
+                    <i class="fa-brands fa-bitcoin text-amber-400"></i> Crypto <span class="text-amber-400">Dashboard & Analytics</span>
+                </h2>
+                <p class="text-xs text-slate-400">Pantau harga crypto realtime, berita aset digital, rekomendasi AI, dan trending token.</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Crypto Live Table -->
+                <div class="lg:col-span-2 bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-4">
+                    <h3 class="text-sm font-bold text-white uppercase tracking-wider">Top Crypto Assets (Realtime)</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs">
+                            <thead class="text-slate-400 border-b border-slate-800">
+                                <tr>
+                                    <th class="py-2.5">Aset</th>
+                                    <th class="py-2.5">Harga USD</th>
+                                    <th class="py-2.5">24j %</th>
+                                    <th class="py-2.5">Sinyal AI</th>
+                                    <th class="py-2.5 text-right">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="crypto-table-body" class="divide-y divide-slate-800/60 font-mono">
+                                <!-- Dynamic rows -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Trending & Recommendations -->
+                <div class="space-y-4">
+                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-3">
+                        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                            <i class="fa-solid fa-fire text-amber-400"></i> Trending Crypto Tokens
+                        </h3>
+                        <div id="crypto-trending-list" class="space-y-2 text-xs">
+                            <!-- Dynamic items -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 7: STOCK DASHBOARD -->
+        <section id="stock" class="space-y-6">
+            <div class="pb-2 border-b border-slate-800">
+                <h2 class="text-2xl font-extrabold text-white flex items-center gap-2 font-heading">
+                    <i class="fa-solid fa-arrow-trend-up text-emerald-400"></i> Stock <span class="text-emerald-400">Dashboard & Equities</span>
+                </h2>
+                <p class="text-xs text-slate-400">Saham raksasa teknologi AS & saham bluechip Indonesia dengan sinyal rekomendasi.</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Stock Live Table -->
+                <div class="lg:col-span-2 bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-4">
+                    <h3 class="text-sm font-bold text-white uppercase tracking-wider">Saham Pilihan US & Indonesia</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs">
+                            <thead class="text-slate-400 border-b border-slate-800">
+                                <tr>
+                                    <th class="py-2.5">Emiten</th>
+                                    <th class="py-2.5">Harga</th>
+                                    <th class="py-2.5">24j %</th>
+                                    <th class="py-2.5">Rekomendasi</th>
+                                    <th class="py-2.5 text-right">Detail</th>
+                                </tr>
+                            </thead>
+                            <tbody id="stock-table-body" class="divide-y divide-slate-800/60 font-mono">
+                                <!-- Dynamic rows -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Stock Watchlist Card -->
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-3">
+                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center justify-between">
+                        <span><i class="fa-solid fa-star text-amber-400"></i> My Stock Watchlist</span>
+                        <button onclick="addStockWatchlistPrompt()" class="text-teal-400 hover:underline">+ Tambah</button>
+                    </h3>
+                    <div id="stock-watchlist-list" class="space-y-2 text-xs">
+                        <!-- Dynamic items -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
 
     <!-- FOOTER -->
-    <footer class="footer">
-        <div class="footer-container">
-            <div class="footer-info">
-                <div class="footer-logo">
-                    <i class="fa-solid fa-chart-line text-bullish"></i>
-                    <span>Trade<span class="text-bullish">Vision</span></span>
+    <footer class="bg-slate-950 border-t border-slate-800/80 mt-16 py-12 text-slate-400 text-xs relative z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div class="space-y-3">
+                <div class="flex items-center gap-2 text-base font-bold text-white">
+                    <i class="fa-solid fa-chart-line text-teal-400"></i> TradeVision PRO
                 </div>
-                <p class="footer-desc">Memberikan alat canggih dan data akurat untuk keputusan trading Anda.</p>
+                <p class="leading-relaxed">Platform intelijen pasar & logistik maritim tercepat berbasis AI untuk trader profesional.</p>
             </div>
-            <div class="footer-links">
-                <h4 class="footer-title">Tautan</h4>
-                <ul class="footer-list">
-                    <li><a href="#kalkulator" class="footer-link-item">Kalkulator Risiko</a></li>
-                    <li><a href="#news" class="footer-link-item">Berita & Kalender</a></li>
-                    <li><a href="#indikator" class="footer-link-item">Indikator Teknikal Live</a></li>
+            <div>
+                <h4 class="text-xs font-bold uppercase text-white mb-3 tracking-wider">Fitur Utama</h4>
+                <ul class="space-y-2">
+                    <li><a href="#chart-hub" class="hover:text-white">Multi-Chart Hub</a></li>
+                    <li><a href="#news" class="hover:text-white">ForexFactory News Live</a></li>
+                    <li><a href="#ai-intel" class="hover:text-white">AI Market Intel 06:00 AM</a></li>
+                    <li><a href="#shipfinder" class="hover:text-white">ShipFinder AIS Track</a></li>
                 </ul>
             </div>
-            <div class="footer-risk">
-                <h4 class="footer-title">Peringatan Risiko</h4>
-                <p class="footer-risk-text">Trading Foreign Exchange (Forex) dan Komoditas menggunakan leverage membawa tingkat risiko yang tinggi. Data dari widget eksternal seperti TradingView & Investing.com disediakan "as is".</p>
+            <div>
+                <h4 class="text-xs font-bold uppercase text-white mb-3 tracking-wider">Pasar Finansial</h4>
+                <ul class="space-y-2">
+                    <li><a href="#crypto" class="hover:text-white">Pasar Crypto</a></li>
+                    <li><a href="#stock" class="hover:text-white">Pasar Saham Global</a></li>
+                    <li><a href="#chart-hub" class="hover:text-white">Pasar Forex & Emas</a></li>
+                </ul>
             </div>
-        </div>
-        <div class="footer-copyright">
-            &copy; 2026 TradeVision. All rights reserved.
+            <div class="space-y-3">
+                <h4 class="text-xs font-bold uppercase text-white tracking-wider">Peringatan Risiko</h4>
+                <p class="text-[11px] leading-relaxed text-slate-400">Perdagangan instrumen keuangan membawa tingkat risiko yang tinggi. Selalu gunakan manajemen risiko terukur.</p>
+                <div class="pt-2 text-slate-400">
+                    &copy; 2026 TradeVision Pro. All rights reserved.
+                </div>
+            </div>
         </div>
     </footer>
 
-    <!-- Custom Script -->
+    <!-- Custom App Script -->
     <script src="app.js"></script>
 </body>
 </html>
