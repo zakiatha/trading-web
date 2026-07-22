@@ -809,6 +809,33 @@ section {
 }
 
 /* ==========================================================================
+   SHIPFINDER MARITIME LOGISTICS STYLES
+   ========================================================================== */
+.shipfinder-metric-card {
+    transition: all 0.3s ease;
+}
+
+.shipfinder-metric-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.ship-preset-btn {
+    transition: all 0.2s ease;
+    border: 1px solid var(--card-border);
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--text-secondary);
+    cursor: pointer;
+}
+
+.ship-preset-btn.active, .ship-preset-btn:hover {
+    background: rgba(0, 204, 255, 0.15);
+    color: var(--color-accent);
+    border-color: rgba(0, 204, 255, 0.35);
+    font-weight: 600;
+}
+
+/* ==========================================================================
    FOOTER
    ========================================================================== */
 .footer {
