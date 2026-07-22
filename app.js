@@ -11,7 +11,6 @@ document.addEventListener('DOMContentLoaded', () => {
     initTradingJournalEngine();
     initForexFactoryNewsEngine();
     initAIMarketIntel06AM();
-    initAIVoiceChat();
     initShipFinderLeafletMap();
     initCryptoDashboard();
     initStockDashboard();
@@ -1227,77 +1226,7 @@ function renderAIPairCards() {
     }
 }
 
-/* ==========================================================================
-   9. AI VOICE CHAT ASSISTANT
-   ========================================================================== */
-function initAIVoiceChat() {
-    const voiceBtn = document.getElementById('btn-voice-input');
-    const inputEl = document.getElementById('ai-chat-input');
-    if (!voiceBtn || !inputEl) return;
-
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-
-    if (SpeechRecognition) {
-        const recognition = new SpeechRecognition();
-        recognition.lang = 'id-ID';
-        recognition.interimResults = false;
-
-        voiceBtn.addEventListener('click', () => {
-            voiceBtn.classList.add('text-rose-400', 'animate-pulse');
-            inputEl.placeholder = "Mendengarkan suara Anda...";
-            recognition.start();
-        });
-
-        recognition.onresult = (event) => {
-            const transcript = event.results[0][0].transcript;
-            inputEl.value = transcript;
-            voiceBtn.classList.remove('text-rose-400', 'animate-pulse');
-            sendAIChatMessage();
-        };
-
-        recognition.onerror = () => {
-            voiceBtn.classList.remove('text-rose-400', 'animate-pulse');
-            inputEl.placeholder = "Ketik pertanyaan atau klik mikrofon untuk bicara...";
-        };
-    }
 }
-
-window.sendAIChatMessage = function() {
-    const input = document.getElementById('ai-chat-input');
-    const log = document.getElementById('ai-chat-messages');
-    if (!input || !input.value.trim() || !log) return;
-
-    const userText = input.value.trim();
-    input.value = '';
-
-    log.innerHTML += `
-        <div class="flex gap-3 items-start justify-end">
-            <div class="bg-teal-500/20 text-teal-200 border border-teal-500/30 p-3 rounded-2xl rounded-tr-none max-w-xl text-xs">
-                ${userText}
-            </div>
-        </div>
-    `;
-    log.scrollTop = log.scrollHeight;
-
-    setTimeout(() => {
-        let aiReply = "Berdasarkan analisis teknikal SMC, struktur harga saat ini menunjukkan zona FVG H1 terkonfirmasi.";
-        if (userText.toLowerCase().includes('gold') || userText.toLowerCase().includes('xau')) {
-            aiReply = "XAU/USD (Emas) berada dalam bias BULLISH dengan target $2,370 dan support di $2,320.";
-        } else if (userText.toLowerCase().includes('bbri') || userText.toLowerCase().includes('saham')) {
-            aiReply = "Saham BBRI (Bank BRI) berada di zona akumulasi kuat Rp 5,150 - Rp 5,250 dengan target kenaikan Rp 5,500.";
-        }
-
-        log.innerHTML += `
-            <div class="flex gap-3 items-start">
-                <div class="w-7 h-7 rounded-lg bg-teal-500/20 text-teal-300 flex items-center justify-center font-bold text-sm shrink-0">🤖</div>
-                <div class="bg-slate-800 p-3 rounded-2xl rounded-tl-none max-w-xl text-slate-200 text-xs">
-                    ${aiReply}
-                </div>
-            </div>
-        `;
-        log.scrollTop = log.scrollHeight;
-    }, 800);
-};
 
 /* ==========================================================================
    10. SHIPFINDER INTERACTIVE LEAFLET AIS MAP ENGINE (NO 404 GUARANTEED)
