@@ -2,6 +2,12 @@
    TRADEVISION PRO DESIGN SYSTEM & THEME TOKENS
    ========================================================================== */
 
+/* Smooth Scroll & Smooth HUD Section Transitions */
+html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 5rem;
+}
+
 /* Typography & Fonts */
 .font-heading {
     font-family: 'Space Grotesk', sans-serif;
@@ -10,6 +16,46 @@
 body {
     font-family: 'Inter', sans-serif;
     transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Smooth Navbar Active Highlight & Card Hover */
+.nav-item {
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.nav-item.active-nav {
+    background-color: rgba(0, 245, 160, 0.15) !important;
+    color: #00f5a0 !important;
+    border: 1px solid rgba(0, 245, 160, 0.3) !important;
+    font-weight: 700 !important;
+    box-shadow: 0 0 15px rgba(0, 245, 160, 0.15);
+}
+
+[data-theme="pastel"] .nav-item.active-nav {
+    background-color: rgba(244, 143, 177, 0.25) !important;
+    color: #ad1457 !important;
+    border: 1px solid #ec407a !important;
+    box-shadow: 0 0 15px rgba(244, 143, 177, 0.2);
+}
+
+/* HUD Section Fade-in Glow Animation */
+section {
+    transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s ease;
+}
+
+.hud-section-animate {
+    animation: hudFadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes hudFadeInUp {
+    0% {
+        opacity: 0;
+        transform: translateY(24px) scale(0.98);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
 }
 
 /* 1. Light Mode Overrides */
@@ -55,9 +101,9 @@ body {
     border-color: #cbd5e1 !important;
 }
 
-/* 2. Pink Pastel Mode Overrides (Fitur Baru) */
+/* 2. Pink Pastel Mode Overrides */
 [data-theme="pastel"] {
-    background-color: #fff0f5 !important; /* Soft Lavender Blush */
+    background-color: #fff0f5 !important;
     color: #2d3748 !important;
 }
 
@@ -100,7 +146,7 @@ body {
 
 [data-theme="pastel"] .text-teal-400,
 [data-theme="pastel"] .text-teal-300 {
-    color: #d81b60 !important; /* Pastel Deep Pink */
+    color: #d81b60 !important;
 }
 
 /* Hide scrollbars for clean marquee */

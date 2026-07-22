@@ -16,7 +16,30 @@ document.addEventListener('DOMContentLoaded', () => {
     initCryptoDashboard();
     initStockDashboard();
     init3DCanvasBackground();
+    initScrollNavHighlight();
 });
+
+function initScrollNavHighlight() {
+    const sections = document.querySelectorAll('section[id]');
+    const navLinks = document.querySelectorAll('.nav-item');
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('hud-section-animate');
+                const id = entry.target.getAttribute('id');
+                navLinks.forEach(link => {
+                    link.classList.remove('active-nav');
+                    if (link.getAttribute('href') === `#${id}`) {
+                        link.classList.add('active-nav');
+                    }
+                });
+            }
+        });
+    }, { threshold: 0.2 });
+
+    sections.forEach(section => observer.observe(section));
+}
 
 /* ==========================================================================
    1. 3-WAY THEME MANAGER (DARK 🌙 / LIGHT ☀️ / PINK PASTEL 🌸)
