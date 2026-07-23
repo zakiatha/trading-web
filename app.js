@@ -1309,6 +1309,7 @@ let currentShipRegion = 'hormuz';
 let activeShipCategoryFilter = 'ALL';
 let activeVesselsList = [];
 let vesselMarkersMap = {};
+let showAllVessels = false;
 
 const shipFleetDatabase = {
     hormuz: [
@@ -1544,8 +1545,14 @@ function renderShipMapAndTable() {
     renderVesselTableBody();
 }
 
+window.toggleVesselListExpand = function() {
+    showAllVessels = !showAllVessels;
+    renderVesselTableBody();
+};
+
 function renderVesselTableBody() {
     const tableBody = document.getElementById('vessel-table-body');
+    const toggleBar = document.getElementById('vessel-list-toggle-bar');
     if (!tableBody) return;
 
     const searchTerm = (document.getElementById('ship-search-input')?.value || '').toLowerCase();
@@ -1571,39 +1578,71 @@ function renderVesselTableBody() {
                 <td colspan="7" class="py-6 text-center text-slate-500 italic">Tidak ada kapal terdeteksi yang sesuai dengan filter.</td>
             </tr>
         `;
+        if (toggleBar) toggleBar.innerHTML = '';
         return;
     }
 
-    tableBody.innerHTML = filtered.map(v => `
+    // Default minimal view (5 vessels) to keep mobile HP screen clean and elegant
+    const limit = 5;
+    const isSearchingOrFiltering = Boolean(searchTerm) || (activeShipCategoryFilter !== 'ALL');
+    const displayList = (showAllVessels || isSearchingOrFiltering) ? filtered : filtered.slice(0, limit);
+
+    tableBody.innerHTML = displayList.map(v => `
         <tr class="hover:bg-slate-800/50 transition">
-            <td class="py-3 px-4 font-bold text-white flex items-center gap-2">
-                <span class="w-2.5 h-2.5 rounded-full" style="background-color: ${v.color}"></span>
-                ${v.name}
+            <td class="py-2.5 px-4 font-bold text-white flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full shrink-0" style="background-color: ${v.color}"></span>
+                <span class="truncate max-w-[130px] sm:max-w-none">${v.name}</span>
             </td>
-            <td class="py-3 px-3 text-slate-300">
+            <td class="py-2.5 px-3 text-slate-300">
                 <div class="font-semibold text-slate-200">${v.type}</div>
                 <div class="text-[10px] text-slate-400">${v.flag}</div>
             </td>
-            <td class="py-3 px-3 font-semibold text-teal-400">${v.speed.toFixed(1)} kts</td>
-            <td class="py-3 px-3 text-slate-300">
-                <div class="text-xs text-white font-medium">${v.dest}</div>
+            <td class="py-2.5 px-3 font-semibold text-teal-400 whitespace-nowrap">${v.speed.toFixed(1)} kts</td>
+            <td class="py-2.5 px-3 text-slate-300">
+                <div class="text-xs text-white font-medium truncate max-w-[120px] sm:max-w-none">${v.dest}</div>
                 <div class="text-[10px] text-slate-400">ETA: ${v.eta}</div>
             </td>
-            <td class="py-3 px-3 text-[10px] text-slate-400 font-mono">
+            <td class="py-2.5 px-3 text-[10px] text-slate-400 font-mono whitespace-nowrap">
                 ${v.lat.toFixed(4)}°, ${v.lon.toFixed(4)}°
             </td>
-            <td class="py-3 px-3">
+            <td class="py-2.5 px-3 whitespace-nowrap">
                 <span class="px-2 py-0.5 rounded text-[10px] font-bold ${v.status.includes('Navigating') || v.status.includes('Transit') ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'}">
                     ${v.status}
                 </span>
             </td>
-            <td class="py-3 px-4 text-right">
-                <button onclick="trackVesselOnMap('${v.name}')" class="px-3 py-1 bg-teal-500/20 hover:bg-teal-500/30 text-teal-300 border border-teal-500/30 rounded-lg text-[10px] font-bold transition flex items-center gap-1 ml-auto">
+            <td class="py-2.5 px-4 text-right whitespace-nowrap">
+                <button onclick="trackVesselOnMap('${v.name}')" class="px-2.5 py-1 bg-teal-500/20 hover:bg-teal-500/30 text-teal-300 border border-teal-500/30 rounded-lg text-[10px] font-bold transition inline-flex items-center gap-1 ml-auto shadow-sm">
                     <i class="fa-solid fa-crosshairs"></i> Lacak Peta
                 </button>
             </td>
         </tr>
     `).join('');
+
+    // Minimalist Expand / Collapse Footer Toggle Bar
+    if (toggleBar) {
+        if (filtered.length <= limit) {
+            toggleBar.innerHTML = `<span class="text-[11px] text-slate-400 mx-auto">Menampilkan ${filtered.length} kapal terdeteksi</span>`;
+        } else {
+            const hiddenCount = filtered.length - limit;
+            if (showAllVessels || isSearchingOrFiltering) {
+                toggleBar.innerHTML = `
+                    <span class="text-[11px] text-slate-400">Menampilkan semua <strong>${filtered.length}</strong> kapal</span>
+                    ${!isSearchingOrFiltering ? `
+                        <button onclick="toggleVesselListExpand()" class="px-3.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-[11px] rounded-lg transition flex items-center gap-1.5 border border-slate-700">
+                            <i class="fa-solid fa-chevron-up text-teal-400"></i> Sembunyikan (Tampilkan 5 Utama)
+                        </button>
+                    ` : ''}
+                `;
+            } else {
+                toggleBar.innerHTML = `
+                    <span class="text-[11px] text-slate-400">Menampilkan <strong>5</strong> dari <strong>${filtered.length}</strong> kapal terdeteksi</span>
+                    <button onclick="toggleVesselListExpand()" class="px-3.5 py-1 bg-teal-500/20 hover:bg-teal-500/30 text-teal-300 border border-teal-500/30 font-bold text-[11px] rounded-lg transition flex items-center gap-1.5 shadow-sm">
+                        <i class="fa-solid fa-chevron-down text-teal-400"></i> Tampilkan Selengkapnya (+${hiddenCount} Kapal)
+                    </button>
+                `;
+            }
+        }
+    }
 }
 
 window.trackVesselOnMap = function(vesselName) {
