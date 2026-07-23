@@ -1317,39 +1317,96 @@ const shipFleetDatabase = {
         { name: 'ARABIAN EAGLE IX', type: 'Tanker Minyak', flag: '🇦🇪 UAE', speed: 12.4, color: '#00e676', dest: 'Rotterdam, NL', eta: '10 Aug 18:00', lat: 26.05, lon: 54.70, status: 'Navigating Underway' },
         { name: 'MAERSK HORMUZ FLIER', type: 'Kargo & Emas', flag: '🇸🇬 Singapura', speed: 18.2, color: '#00ccff', dest: 'Jebel Ali, UAE', eta: 'Hari ini 21:00', lat: 25.90, lon: 55.40, status: 'Moored / Pilot Aboard' },
         { name: 'OCEANIC GOLD FREIGHTER', type: 'Kargo & Emas', flag: '🇵🇦 Panama', speed: 15.0, color: '#00ccff', dest: 'Dubai DMCC', eta: '24 Jul 11:15', lat: 26.25, lon: 55.10, status: 'Navigating Underway' },
-        { name: 'BAHRI TITAN', type: 'Bulk Carrier', flag: '🇸🇦 Arab Saudi', speed: 11.9, color: '#ffaa00', dest: 'Port Klang, MY', eta: '30 Jul 08:45', lat: 25.75, lon: 55.30, status: 'Navigating Underway' }
+        { name: 'BAHRI TITAN', type: 'Bulk Carrier', flag: '🇸🇦 Arab Saudi', speed: 11.9, color: '#ffaa00', dest: 'Port Klang, MY', eta: '30 Jul 08:45', lat: 25.75, lon: 55.30, status: 'Navigating Underway' },
+        { name: 'FUJAIRAH SPIRIT', type: 'Tanker Minyak', flag: '🇦🇪 UAE', speed: 10.3, color: '#00e676', dest: 'Fujairah Anchorage', eta: 'Hari ini 16:00', lat: 25.65, lon: 56.35, status: 'Navigating Underway' },
+        { name: 'RASGAS PIONEER', type: 'LNG Supertanker', flag: '🇶🇦 Qatar', speed: 16.1, color: '#a855f7', dest: 'Incheon, KR', eta: '01 Aug 07:00', lat: 26.40, lon: 54.50, status: 'Navigating Underway' },
+        { name: 'IRAN DELVAR', type: 'Tanker Minyak', flag: '🇮🇷 Iran', speed: 11.5, color: '#00e676', dest: 'Bandar Abbas, IR', eta: 'Hari ini 18:30', lat: 26.55, lon: 55.65, status: 'Navigating Underway' },
+        { name: 'OMAN PRIDE BULKER', type: 'Bulk Carrier', flag: '🇴🇲 Oman', speed: 9.8, color: '#ffaa00', dest: 'Mumbai Port, IN', eta: '27 Jul 06:00', lat: 25.50, lon: 56.10, status: 'Navigating Underway' }
     ],
     redsea: [
         { name: 'RED SEA EXPRESS', type: 'Kargo & Emas', flag: '🇱🇷 Liberia', speed: 17.1, color: '#00ccff', dest: 'Suez Canal North', eta: '25 Jul 06:00', lat: 12.65, lon: 43.45, status: 'Navigating Underway' },
         { name: 'NILUS OIL VOYAGER', type: 'Tanker Minyak', flag: '🇪🇬 Mesir', speed: 12.8, color: '#00e676', dest: 'Jeddah Islamic Port', eta: '24 Jul 19:30', lat: 12.35, lon: 43.15, status: 'Navigating Underway' },
         { name: 'DESERT QUEEN LNG', type: 'LNG Supertanker', flag: '🇴🇲 Oman', speed: 15.6, color: '#a855f7', dest: 'Marseille, France', eta: '01 Aug 12:00', lat: 12.55, lon: 43.60, status: 'Navigating Underway' },
         { name: 'SUEZ MAX TITAN', type: 'Tanker Minyak', flag: '🇬🇷 Yunani', speed: 13.2, color: '#00e676', dest: 'Genoa, Italy', eta: '31 Jul 15:20', lat: 12.40, lon: 43.00, status: 'Navigating Underway' },
-        { name: 'GOLDEN ANCHOR BULKER', type: 'Bulk Carrier', flag: '🇲🇭 Marshall Is', speed: 0.0, color: '#ffaa00', dest: 'Aqaba Port, JO', eta: 'Tiba 22 Jul', lat: 12.70, lon: 43.20, status: 'Anchored at Sea' }
+        { name: 'GOLDEN ANCHOR BULKER', type: 'Bulk Carrier', flag: '🇲🇭 Marshall Is', speed: 0.0, color: '#ffaa00', dest: 'Aqaba Port, JO', eta: 'Tiba 22 Jul', lat: 12.70, lon: 43.20, status: 'Anchored at Sea' },
+        { name: 'DJIBOUTI PEARL', type: 'Kargo & Emas', flag: '🇩🇯 Djibouti', speed: 14.0, color: '#00ccff', dest: 'Djibouti Free Zone', eta: '24 Jul 15:00', lat: 11.90, lon: 43.10, status: 'Navigating Underway' },
+        { name: 'BAB EL MANDEB CRUISER', type: 'Tanker Minyak', flag: '🇳🇴 Norwegia', speed: 11.7, color: '#00e676', dest: 'Aden, Yemen', eta: '25 Jul 09:45', lat: 12.80, lon: 43.35, status: 'Navigating Underway' },
+        { name: 'HOUTHI PATROL EVADER', type: 'Tanker Minyak', flag: '🇬🇧 UK', speed: 18.5, color: '#00e676', dest: 'Port Said, EG', eta: '26 Jul 22:00', lat: 13.00, lon: 42.80, status: 'Navigating Underway' },
+        { name: 'ERITREA IRON ORE', type: 'Bulk Carrier', flag: '🇪🇷 Eritrea', speed: 10.2, color: '#ffaa00', dest: 'Massawa Port, ER', eta: '24 Jul 12:00', lat: 13.20, lon: 42.60, status: 'Navigating Underway' }
     ],
     malacca: [
         { name: 'NUSANTARA PETRO I', type: 'Tanker Minyak', flag: '🇮🇩 Indonesia', speed: 12.5, color: '#00e676', dest: 'Plaju Palembang', eta: '24 Jul 10:00', lat: 1.45, lon: 103.95, status: 'Navigating Underway' },
         { name: 'MALACCA GOLD CARRIER', type: 'Kargo & Emas', flag: '🇸🇬 Singapura', speed: 16.2, color: '#00ccff', dest: 'Port Klang, MY', eta: 'Hari ini 23:45', lat: 1.15, lon: 103.65, status: 'Navigating Underway' },
         { name: 'SINGAPORE EXPRESS', type: 'Kargo & Emas', flag: '🇩🇰 Denmark', speed: 19.5, color: '#00ccff', dest: 'Shanghai Port, CN', eta: '27 Jul 07:30', lat: 1.35, lon: 104.05, status: 'Navigating Underway' },
         { name: 'SUMATRA BULKER', type: 'Bulk Carrier', flag: '🇮🇩 Indonesia', speed: 11.2, color: '#ffaa00', dest: 'Cigading Banten', eta: '25 Jul 16:00', lat: 1.20, lon: 103.50, status: 'Navigating Underway' },
-        { name: 'PERTAMINA LNG KARTINI', type: 'LNG Supertanker', flag: '🇮🇩 Indonesia', speed: 14.8, color: '#a855f7', dest: 'Arun Lhokseumawe', eta: '26 Jul 14:15', lat: 1.50, lon: 103.75, status: 'Navigating Underway' }
+        { name: 'PERTAMINA LNG KARTINI', type: 'LNG Supertanker', flag: '🇮🇩 Indonesia', speed: 14.8, color: '#a855f7', dest: 'Arun Lhokseumawe', eta: '26 Jul 14:15', lat: 1.50, lon: 103.75, status: 'Navigating Underway' },
+        { name: 'EVERGREEN WORLD', type: 'Kargo & Emas', flag: '🇹🇼 Taiwan', speed: 21.0, color: '#00ccff', dest: 'Tanjung Pelepas, MY', eta: 'Hari ini 20:00', lat: 1.60, lon: 103.40, status: 'Navigating Underway' },
+        { name: 'PETRONAS ENERGY I', type: 'LNG Supertanker', flag: '🇲🇾 Malaysia', speed: 15.3, color: '#a855f7', dest: 'Bintulu LNG, MY', eta: '26 Jul 10:00', lat: 1.70, lon: 104.20, status: 'Navigating Underway' },
+        { name: 'THAI CRUDE VOYAGER', type: 'Tanker Minyak', flag: '🇹🇭 Thailand', speed: 12.0, color: '#00e676', dest: 'Map Ta Phut, TH', eta: '27 Jul 18:00', lat: 1.05, lon: 103.30, status: 'Navigating Underway' },
+        { name: 'MSC ADRIANA', type: 'Kargo & Emas', flag: '🇨🇭 Swiss', speed: 22.0, color: '#00ccff', dest: 'Colombo, LK', eta: '28 Jul 11:00', lat: 1.80, lon: 103.55, status: 'Navigating Underway' },
+        { name: 'BUKIT SIGUNTANG', type: 'Bulk Carrier', flag: '🇮🇩 Indonesia', speed: 10.5, color: '#ffaa00', dest: 'Belawan, Medan', eta: '25 Jul 08:30', lat: 1.30, lon: 103.90, status: 'Navigating Underway' }
     ],
     panama: [
         { name: 'PANAMAX PHOENIX', type: 'Kargo & Emas', flag: '🇵🇦 Panama', speed: 8.5, color: '#00ccff', dest: 'Colon Free Zone', eta: 'Hari ini 18:00', lat: 9.25, lon: -79.55, status: 'Canal Transit Underway' },
         { name: 'CARIBBEAN GOLD', type: 'Kargo & Emas', flag: '🇧🇸 Bahamas', speed: 12.0, color: '#00ccff', dest: 'Houston, US', eta: '28 Jul 09:00', lat: 8.95, lon: -79.85, status: 'Navigating Underway' },
         { name: 'ATLANTIC TANKER III', type: 'Tanker Minyak', flag: '🇱🇷 Liberia', speed: 0.0, color: '#00e676', dest: 'Balboa Port, PA', eta: 'Tiba 22 Jul', lat: 9.15, lon: -79.70, status: 'Anchored for Inspection' },
-        { name: 'PACIFIC EXPRESS V', type: 'Bulk Carrier', flag: '🇯🇵 Jepang', speed: 16.0, color: '#ffaa00', dest: 'Los Angeles, US', eta: '03 Aug 11:30', lat: 9.05, lon: -79.90, status: 'Navigating Underway' }
+        { name: 'PACIFIC EXPRESS V', type: 'Bulk Carrier', flag: '🇯🇵 Jepang', speed: 16.0, color: '#ffaa00', dest: 'Los Angeles, US', eta: '03 Aug 11:30', lat: 9.05, lon: -79.90, status: 'Navigating Underway' },
+        { name: 'NEO PANAMAX STAR', type: 'Kargo & Emas', flag: '🇰🇷 Korea Selatan', speed: 9.2, color: '#00ccff', dest: 'Busan, KR', eta: '08 Aug 06:00', lat: 9.35, lon: -79.60, status: 'Canal Transit Underway' },
+        { name: 'GATUN LAKE SPIRIT', type: 'LNG Supertanker', flag: '🇺🇸 Amerika Serikat', speed: 7.0, color: '#a855f7', dest: 'Sabine Pass, US', eta: '30 Jul 14:00', lat: 9.10, lon: -79.75, status: 'Canal Transit Underway' },
+        { name: 'COLOMBIAN BULKER', type: 'Bulk Carrier', flag: '🇨🇴 Kolombia', speed: 11.5, color: '#ffaa00', dest: 'Cartagena, CO', eta: '25 Jul 19:00', lat: 8.80, lon: -79.95, status: 'Navigating Underway' }
     ],
     indonesia: [
         { name: 'KRI CRUDE NUSANTARA', type: 'Tanker Minyak', flag: '🇮🇩 Indonesia', speed: 13.0, color: '#00e676', dest: 'Cilacap Refinery', eta: '24 Jul 08:00', lat: -5.75, lon: 105.95, status: 'Navigating Underway' },
         { name: 'JAKARTA GOLD LOGISTICS', type: 'Kargo & Emas', flag: '🇮🇩 Indonesia', speed: 15.4, color: '#00ccff', dest: 'Tanjung Priok, JKT', eta: 'Hari ini 22:15', lat: -6.05, lon: 105.65, status: 'Navigating Underway' },
         { name: 'KRAKATAU BULKER', type: 'Bulk Carrier', flag: '🇮🇩 Indonesia', speed: 10.8, color: '#ffaa00', dest: 'Merak Banten', eta: 'Hari ini 19:30', lat: -5.90, lon: 105.75, status: 'Navigating Underway' },
-        { name: 'PERTAMINA GAS ARUN', type: 'LNG Supertanker', flag: '🇮🇩 Indonesia', speed: 14.2, color: '#a855f7', dest: 'Surabaya Port', eta: '25 Jul 13:00', lat: -5.80, lon: 106.05, status: 'Navigating Underway' }
+        { name: 'PERTAMINA GAS ARUN', type: 'LNG Supertanker', flag: '🇮🇩 Indonesia', speed: 14.2, color: '#a855f7', dest: 'Surabaya Port', eta: '25 Jul 13:00', lat: -5.80, lon: 106.05, status: 'Navigating Underway' },
+        { name: 'PELNI NUSANTARA', type: 'Kargo & Emas', flag: '🇮🇩 Indonesia', speed: 16.5, color: '#00ccff', dest: 'Makassar, Sulawesi', eta: '26 Jul 09:00', lat: -6.15, lon: 106.30, status: 'Navigating Underway' },
+        { name: 'BALIKPAPAN OIL EXPRESS', type: 'Tanker Minyak', flag: '🇮🇩 Indonesia', speed: 12.8, color: '#00e676', dest: 'Balikpapan Refinery', eta: '27 Jul 14:00', lat: -5.60, lon: 105.50, status: 'Navigating Underway' },
+        { name: 'GARUDA COAL BULKER', type: 'Bulk Carrier', flag: '🇮🇩 Indonesia', speed: 9.5, color: '#ffaa00', dest: 'Banjarmasin, Kalsel', eta: '28 Jul 07:45', lat: -6.30, lon: 105.85, status: 'Navigating Underway' },
+        { name: 'TANGGUH LNG JAYA', type: 'LNG Supertanker', flag: '🇮🇩 Indonesia', speed: 15.0, color: '#a855f7', dest: 'Tangguh Papua Barat', eta: '29 Jul 10:30', lat: -5.45, lon: 106.20, status: 'Navigating Underway' },
+        { name: 'TIMOR LESTE PRIDE', type: 'Tanker Minyak', flag: '🇹🇱 Timor Leste', speed: 11.0, color: '#00e676', dest: 'Dili Port, TL', eta: '30 Jul 15:00', lat: -6.50, lon: 105.40, status: 'Navigating Underway' }
     ],
     southchina: [
         { name: 'ORIENTAL CRUDE DRAGON', type: 'Tanker Minyak', flag: '🇨🇳 China', speed: 14.1, color: '#00e676', dest: 'Guangzhou Port', eta: '26 Jul 17:00', lat: 14.20, lon: 112.20, status: 'Navigating Underway' },
         { name: 'PACIFIC GOLD MARINER', type: 'Kargo & Emas', flag: '🇭🇰 Hong Kong', speed: 17.0, color: '#00ccff', dest: 'Manila Bay, PH', eta: '25 Jul 05:45', lat: 13.80, lon: 111.80, status: 'Navigating Underway' },
         { name: 'VIETNAM BULKER IX', type: 'Bulk Carrier', flag: '🇻🇳 Vietnam', speed: 11.5, color: '#ffaa00', dest: 'Da Nang, VN', eta: '24 Jul 20:00', lat: 14.10, lon: 112.40, status: 'Navigating Underway' },
-        { name: 'SOUTH CHINA SEA LNG', type: 'LNG Supertanker', flag: '🇸🇬 Singapura', speed: 15.0, color: '#a855f7', dest: 'Shenzhen, CN', eta: '27 Jul 10:30', lat: 13.90, lon: 111.90, status: 'Navigating Underway' }
+        { name: 'SOUTH CHINA SEA LNG', type: 'LNG Supertanker', flag: '🇸🇬 Singapura', speed: 15.0, color: '#a855f7', dest: 'Shenzhen, CN', eta: '27 Jul 10:30', lat: 13.90, lon: 111.90, status: 'Navigating Underway' },
+        { name: 'COSCO SHIPPING STAR', type: 'Kargo & Emas', flag: '🇨🇳 China', speed: 20.5, color: '#00ccff', dest: 'Kaohsiung, TW', eta: '25 Jul 14:00', lat: 14.50, lon: 112.60, status: 'Navigating Underway' },
+        { name: 'PHILIPPINE SPIRIT OIL', type: 'Tanker Minyak', flag: '🇵🇭 Filipina', speed: 12.3, color: '#00e676', dest: 'Batangas, PH', eta: '24 Jul 23:00', lat: 13.60, lon: 111.50, status: 'Navigating Underway' },
+        { name: 'HAIPHONG COAL CARRIER', type: 'Bulk Carrier', flag: '🇻🇳 Vietnam', speed: 10.0, color: '#ffaa00', dest: 'Haiphong Port, VN', eta: '27 Jul 08:30', lat: 14.40, lon: 112.00, status: 'Navigating Underway' },
+        { name: 'BRUNEI SHELL LNG', type: 'LNG Supertanker', flag: '🇧🇳 Brunei', speed: 16.2, color: '#a855f7', dest: 'Lumut LNG, BN', eta: '26 Jul 19:00', lat: 13.50, lon: 112.70, status: 'Navigating Underway' }
+    ],
+    mediterranean: [
+        { name: 'MSC EUROPA', type: 'Kargo & Emas', flag: '🇨🇭 Swiss', speed: 22.8, color: '#00ccff', dest: 'Genoa, Italy', eta: '25 Jul 08:00', lat: 36.20, lon: 14.50, status: 'Navigating Underway' },
+        { name: 'AEGEAN WARRIOR', type: 'Tanker Minyak', flag: '🇬🇷 Yunani', speed: 14.3, color: '#00e676', dest: 'Piraeus, Greece', eta: '24 Jul 17:00', lat: 35.80, lon: 15.20, status: 'Navigating Underway' },
+        { name: 'ALGERIAN SONATRACH LNG', type: 'LNG Supertanker', flag: '🇩🇿 Aljazair', speed: 16.0, color: '#a855f7', dest: 'Arzew LNG, DZ', eta: '26 Jul 11:30', lat: 36.50, lon: 13.00, status: 'Navigating Underway' },
+        { name: 'CMA CGM RIVIERA', type: 'Kargo & Emas', flag: '🇫🇷 Prancis', speed: 21.5, color: '#00ccff', dest: 'Marseille-Fos, FR', eta: '25 Jul 14:00', lat: 37.00, lon: 12.50, status: 'Navigating Underway' },
+        { name: 'TURKISH STRAIT BULKER', type: 'Bulk Carrier', flag: '🇹🇷 Turki', speed: 11.0, color: '#ffaa00', dest: 'Istanbul Strait, TR', eta: '27 Jul 06:00', lat: 35.50, lon: 16.00, status: 'Navigating Underway' },
+        { name: 'LIBYAN CRUDE OIL III', type: 'Tanker Minyak', flag: '🇱🇾 Libya', speed: 12.6, color: '#00e676', dest: 'Es Sider, LY', eta: '25 Jul 22:00', lat: 34.80, lon: 17.50, status: 'Navigating Underway' },
+        { name: 'GIBRALTAR EXPRESS', type: 'Kargo & Emas', flag: '🇬🇮 Gibraltar', speed: 19.0, color: '#00ccff', dest: 'Valencia, ES', eta: '26 Jul 08:00', lat: 36.00, lon: -4.50, status: 'Navigating Underway' },
+        { name: 'ENI SAIPEM DRILLER', type: 'Tanker Minyak', flag: '🇮🇹 Italia', speed: 8.0, color: '#00e676', dest: 'Augusta, Sicily', eta: '24 Jul 20:30', lat: 36.80, lon: 14.00, status: 'Navigating Underway' },
+        { name: 'HAIFA CONTAINER KING', type: 'Kargo & Emas', flag: '🇮🇱 Israel', speed: 18.5, color: '#00ccff', dest: 'Haifa Port, IL', eta: '26 Jul 16:00', lat: 34.50, lon: 30.00, status: 'Navigating Underway' }
+    ],
+    gulfmexico: [
+        { name: 'CHEVRON GULF STAR', type: 'Tanker Minyak', flag: '🇺🇸 Amerika Serikat', speed: 14.0, color: '#00e676', dest: 'Houston Ship Channel', eta: '25 Jul 10:00', lat: 27.50, lon: -90.20, status: 'Navigating Underway' },
+        { name: 'PEMEX AZTECA', type: 'Tanker Minyak', flag: '🇲🇽 Meksiko', speed: 12.5, color: '#00e676', dest: 'Veracruz, MX', eta: '24 Jul 18:00', lat: 23.80, lon: -92.50, status: 'Navigating Underway' },
+        { name: 'LOUISIANA GAS SPIRIT', type: 'LNG Supertanker', flag: '🇺🇸 Amerika Serikat', speed: 15.8, color: '#a855f7', dest: 'Sabine Pass LNG, US', eta: '24 Jul 14:30', lat: 28.20, lon: -89.50, status: 'Navigating Underway' },
+        { name: 'GULF COAST BULKER', type: 'Bulk Carrier', flag: '🇧🇷 Brasil', speed: 10.5, color: '#ffaa00', dest: 'New Orleans, US', eta: '26 Jul 07:00', lat: 26.50, lon: -88.00, status: 'Navigating Underway' },
+        { name: 'TAMPICO CARGO EXPRESS', type: 'Kargo & Emas', flag: '🇲🇽 Meksiko', speed: 16.0, color: '#00ccff', dest: 'Tampico, MX', eta: '25 Jul 13:30', lat: 24.50, lon: -91.00, status: 'Navigating Underway' },
+        { name: 'FLORIDA SUNRISE', type: 'Kargo & Emas', flag: '🇺🇸 Amerika Serikat', speed: 18.0, color: '#00ccff', dest: 'Tampa Bay, FL', eta: 'Hari ini 22:00', lat: 26.00, lon: -86.50, status: 'Navigating Underway' },
+        { name: 'CANCUN CRUISE TANKER', type: 'Tanker Minyak', flag: '🇧🇸 Bahamas', speed: 13.5, color: '#00e676', dest: 'Progreso, MX', eta: '25 Jul 20:00', lat: 22.50, lon: -89.00, status: 'Navigating Underway' },
+        { name: 'CORPUS CHRISTI LNG II', type: 'LNG Supertanker', flag: '🇺🇸 Amerika Serikat', speed: 16.5, color: '#a855f7', dest: 'Corpus Christi, TX', eta: '24 Jul 16:45', lat: 27.00, lon: -91.50, status: 'Navigating Underway' }
+    ],
+    indianocean: [
+        { name: 'MUMBAI CRUDE CARRIER', type: 'Tanker Minyak', flag: '🇮🇳 India', speed: 13.5, color: '#00e676', dest: 'Mumbai JNPT, IN', eta: '26 Jul 08:00', lat: 12.00, lon: 68.00, status: 'Navigating Underway' },
+        { name: 'CAPE OF GOOD HOPE', type: 'Bulk Carrier', flag: '🇿🇦 Afrika Selatan', speed: 11.8, color: '#ffaa00', dest: 'Durban, ZA', eta: '30 Jul 16:00', lat: -8.00, lon: 55.00, status: 'Navigating Underway' },
+        { name: 'MALDIVES GEM', type: 'Kargo & Emas', flag: '🇲🇻 Maladewa', speed: 14.0, color: '#00ccff', dest: 'Male Port, MV', eta: '25 Jul 05:00', lat: 4.20, lon: 73.50, status: 'Navigating Underway' },
+        { name: 'INDIAN OCEAN LNG FLEET', type: 'LNG Supertanker', flag: '🇦🇺 Australia', speed: 15.5, color: '#a855f7', dest: 'Kochi LNG, IN', eta: '28 Jul 12:00', lat: 6.50, lon: 75.00, status: 'Navigating Underway' },
+        { name: 'ZANZIBAR PETROL', type: 'Tanker Minyak', flag: '🇹🇿 Tanzania', speed: 10.0, color: '#00e676', dest: 'Dar es Salaam, TZ', eta: '25 Jul 19:00', lat: -6.00, lon: 42.00, status: 'Navigating Underway' },
+        { name: 'MOZAMBIQUE CHANNEL BULKER', type: 'Bulk Carrier', flag: '🇲🇿 Mozambik', speed: 12.0, color: '#ffaa00', dest: 'Maputo, MZ', eta: '29 Jul 09:00', lat: -15.00, lon: 40.50, status: 'Navigating Underway' },
+        { name: 'SRI LANKAN PEARL', type: 'Kargo & Emas', flag: '🇱🇰 Sri Lanka', speed: 17.5, color: '#00ccff', dest: 'Colombo Port, LK', eta: '25 Jul 07:30', lat: 7.00, lon: 79.00, status: 'Navigating Underway' },
+        { name: 'SEYCHELLES VOYAGER', type: 'Kargo & Emas', flag: '🇸🇨 Seychelles', speed: 13.0, color: '#00ccff', dest: 'Victoria Port, SC', eta: '26 Jul 14:00', lat: -4.50, lon: 55.50, status: 'Navigating Underway' },
+        { name: 'CHENNAI REFINERY EXPRESS', type: 'Tanker Minyak', flag: '🇮🇳 India', speed: 14.8, color: '#00e676', dest: 'Chennai, IN', eta: '27 Jul 11:00', lat: 10.00, lon: 80.00, status: 'Navigating Underway' }
     ]
 };
 
