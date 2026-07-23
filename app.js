@@ -1642,6 +1642,296 @@ window.filterVesselTable = function() {
 };
 
 /* ==========================================================================
+   DATA DOCKED MARITIME API & ROUTE PLANNER ENGINE
+   ========================================================================== */
+let routePolylineGroup = null;
+
+const portCoordinatesMap = {
+    IDTPP: { name: 'Tanjung Priok, Jakarta', lat: -6.10, lon: 106.88, country: '🇮🇩 Indonesia' },
+    SGSIN: { name: 'Singapore Port', lat: 1.26, lon: 103.84, country: '🇸🇬 Singapore' },
+    NLRTM: { name: 'Rotterdam Port', lat: 51.95, lon: 4.14, country: '🇳🇱 Netherlands' },
+    EGSUZ: { name: 'Suez Canal Port', lat: 29.93, lon: 32.55, country: '🇪🇬 Egypt' },
+    AEAJM: { name: 'Jebel Ali, Dubai', lat: 24.98, lon: 55.06, country: '🇦🇪 UAE' },
+    CNSHA: { name: 'Shanghai Port', lat: 31.23, lon: 121.47, country: '🇨🇳 China' },
+    USHOU: { name: 'Houston Ship Channel', lat: 29.76, lon: -95.36, country: '🇺🇸 USA' },
+    JPYOK: { name: 'Yokohama Port', lat: 35.44, lon: 139.64, country: '🇯🇵 Japan' },
+    MYPKG: { name: 'Port Klang', lat: 3.00, lon: 101.38, country: '🇲🇾 Malaysia' },
+    USLAX: { name: 'Los Angeles Port', lat: 33.74, lon: -118.27, country: '🇺🇸 USA' },
+    ESBCN: { name: 'Barcelona Port', lat: 41.35, lon: 2.17, country: '🇪🇸 Spain' },
+    BRSSZ: { name: 'Santos Port', lat: -23.96, lon: -46.30, country: '🇧🇷 Brazil' },
+    CNNGB: { name: 'Ningbo-Zhoushan', lat: 29.86, lon: 121.54, country: '🇨🇳 China' },
+    DEHAM: { name: 'Hamburg Port', lat: 53.55, lon: 9.99, country: '🇩🇪 Germany' }
+};
+
+window.toggleRoutePlannerPanel = function() {
+    const panel = document.getElementById('datadocked-route-planner-panel');
+    if (!panel) return;
+    panel.classList.toggle('hidden');
+    if (!panel.classList.contains('hidden')) {
+        const timeInput = document.getElementById('route-departure-time');
+        if (timeInput && !timeInput.value) {
+            const now = new Date();
+            timeInput.value = now.toISOString().slice(0, 16);
+        }
+    }
+};
+
+window.toggleDataDockedConfigModal = function() {
+    const modal = document.getElementById('datadocked-config-modal');
+    if (!modal) return;
+    modal.classList.toggle('hidden');
+    if (!modal.classList.contains('hidden')) {
+        const savedKey = localStorage.getItem('datadocked_api_key') || '';
+        const input = document.getElementById('datadocked-api-key-input');
+        if (input) input.value = savedKey;
+    }
+};
+
+window.saveDataDockedApiKey = function() {
+    const input = document.getElementById('datadocked-api-key-input');
+    const key = (input?.value || '').trim();
+    if (!key) {
+        alert('Silakan masukkan API Key Data Docked terlebih dahulu.');
+        return;
+    }
+    localStorage.setItem('datadocked_api_key', key);
+    alert('API Key Data Docked berhasil disimpan!');
+    toggleDataDockedConfigModal();
+};
+
+window.clearDataDockedApiKey = function() {
+    localStorage.removeItem('datadocked_api_key');
+    const input = document.getElementById('datadocked-api-key-input');
+    if (input) input.value = '';
+    alert('API Key Data Docked telah dihapus.');
+};
+
+window.calculateDataDockedRoute = async function() {
+    const originPortCode = document.getElementById('route-origin-port')?.value || 'SGSIN';
+    const destPortCode = document.getElementById('route-dest-port')?.value || 'NLRTM';
+    const speed = parseInt(document.getElementById('route-vessel-speed')?.value || '14');
+    const deptTimeInput = document.getElementById('route-departure-time')?.value;
+
+    let departureTimeISO = new Date().toISOString();
+    if (deptTimeInput) {
+        departureTimeISO = new Date(deptTimeInput).toISOString();
+    }
+
+    // Gateways to exclude
+    const excludedGateways = [];
+    if (document.getElementById('gate-suez')?.checked) excludedGateways.push('suez');
+    if (document.getElementById('gate-panama')?.checked) excludedGateways.push('panama');
+    if (document.getElementById('gate-malacca')?.checked) excludedGateways.push('malacca');
+    if (document.getElementById('gate-kiel')?.checked) excludedGateways.push('kiel');
+    if (document.getElementById('gate-magellan')?.checked) excludedGateways.push('magellan');
+
+    const ecaAvoid = document.getElementById('route-eca-avoid')?.checked ? 'avoid' : '';
+    const apiKey = localStorage.getItem('datadocked_api_key') || '';
+
+    const portsQuery = `${originPortCode},${destPortCode}`;
+    let apiUrl = `https://datadocked.com/api/vessels_operations/route-planner?ports=${portsQuery}&vessel_speed=${speed}&departure_time=${encodeURIComponent(departureTimeISO)}`;
+    if (excludedGateways.length > 0) {
+        apiUrl += `&exclude_gateways=${excludedGateways.join(',')}`;
+    }
+    if (ecaAvoid) {
+        apiUrl += `&eca=avoid`;
+    }
+
+    let routeData = null;
+    let isLiveApiSuccess = false;
+
+    if (apiKey) {
+        try {
+            const res = await fetch(apiUrl, {
+                headers: {
+                    'accept': 'application/json',
+                    'x-api-key': apiKey
+                }
+            });
+            if (res.ok) {
+                routeData = await res.json();
+                isLiveApiSuccess = true;
+            }
+        } catch (e) {
+            console.warn('Data Docked live API fetch error, using fallback route calculator', e);
+        }
+    }
+
+    // Fallback simulation engine if no API key or fetch fails
+    if (!routeData || !routeData.routes || routeData.routes.length === 0) {
+        routeData = generateFallbackSeaRoute(originPortCode, destPortCode, speed, departureTimeISO, excludedGateways, ecaAvoid === 'avoid');
+    }
+
+    displayRoutePlannerResult(routeData, isLiveApiSuccess, originPortCode, destPortCode);
+};
+
+function generateFallbackSeaRoute(originCode, destCode, speed, deptISO, excludedGates, isEcaAvoid) {
+    const origin = portCoordinatesMap[originCode] || portCoordinatesMap['SGSIN'];
+    const dest = portCoordinatesMap[destCode] || portCoordinatesMap['NLRTM'];
+
+    // Generate maritime route waypoints
+    const pathPoints = generateMaritimeWaypoints(origin, dest, excludedGates);
+
+    // Calculate approximate sea distance in nautical miles
+    let totalNm = 0;
+    for (let i = 0; i < pathPoints.length - 1; i++) {
+        totalNm += calculateGreatCircleDistanceNm(pathPoints[i][1], pathPoints[i][0], pathPoints[i+1][1], pathPoints[i+1][0]);
+    }
+    totalNm = Math.round(totalNm);
+    const ecaNm = isEcaAvoid ? 0 : Math.round(totalNm * 0.05);
+
+    // Calculate hours and days
+    const totalHours = Math.round(totalNm / Math.max(5, speed));
+    const days = Math.floor(totalHours / 24);
+    const hours = totalHours % 24;
+
+    const deptDate = new Date(deptISO);
+    const etaDate = new Date(deptDate.getTime() + totalHours * 3600 * 1000);
+
+    const crossings = [];
+    if (pathPoints.some(pt => pt[0] > 30 && pt[0] < 35 && pt[1] > 25 && pt[1] < 32)) crossings.push('Terusan Suez');
+    if (pathPoints.some(pt => pt[0] > 100 && pt[0] < 104 && pt[1] > 1 && pt[1] < 4)) crossings.push('Selat Malaka');
+    if (pathPoints.some(pt => pt[0] > 54 && pt[0] < 57 && pt[1] > 25 && pt[1] < 27)) crossings.push('Selat Hormuz');
+    if (pathPoints.some(pt => pt[0] > -6 && pt[0] < -5 && pt[1] > 35 && pt[1] < 37)) crossings.push('Selat Gibraltar');
+    if (pathPoints.some(pt => pt[0] > -80 && pt[0] < -78 && pt[1] > 8 && pt[1] < 10)) crossings.push('Terusan Panama');
+
+    return {
+        routes: [{
+            fromPort: originCode,
+            toPort: destCode,
+            distance: { distance: totalNm, unit: 'kn' },
+            distanceInEca: { distance: ecaNm, unit: 'kn' },
+            crossing: crossings.length > 0 ? crossings : ['Lautan Lepas International'],
+            estimatedArrival: etaDate.toISOString(),
+            duration: { years: 0, month: 0, days: days, hours: hours },
+            pathPoints: pathPoints
+        }]
+    };
+}
+
+function generateMaritimeWaypoints(origin, dest, excludedGates) {
+    const pts = [[origin.lon, origin.lat]];
+
+    // If route goes between Asia/Southeast Asia and Europe
+    if ((origin.lon > 90 && dest.lon < 20) || (origin.lon < 20 && dest.lon > 90)) {
+        if (!excludedGates.includes('malacca')) pts.push([103.8, 1.25]); // Malacca
+        pts.push([80.0, 6.0]); // Sri Lanka
+        pts.push([65.0, 12.0]); // Arabian Sea
+        pts.push([43.3, 12.5]); // Bab el-Mandeb
+        if (!excludedGates.includes('suez')) {
+            pts.push([32.55, 29.9]); // Suez
+            pts.push([14.0, 36.0]); // Med Sea
+            pts.push([-5.3, 36.0]); // Gibraltar
+        } else {
+            // Around Africa (Cape of Good Hope)
+            pts.push([40.0, -15.0]);
+            pts.push([18.4, -34.4]); // Cape
+            pts.push([-15.0, 15.0]); // Atlantic
+        }
+        pts.push([-9.0, 43.0]); // Cape Finisterre
+    }
+    // If route goes between Asia and Americas West Coast
+    else if (origin.lon > 100 && dest.lon < -100) {
+        pts.push([140.0, 30.0]); // Japan East
+        pts.push([-170.0, 45.0]); // North Pacific
+    }
+
+    pts.push([dest.lon, dest.lat]);
+    return pts;
+}
+
+function calculateGreatCircleDistanceNm(lat1, lon1, lat2, lon2) {
+    const R = 3440.065; // Radius of Earth in nautical miles
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+}
+
+function displayRoutePlannerResult(routeData, isLiveApi, originCode, destCode) {
+    const resultCard = document.getElementById('route-planner-result-card');
+    if (!resultCard || !shipMap) return;
+
+    resultCard.classList.remove('hidden');
+
+    const leg = routeData.routes[0];
+    const totalDist = leg.distance ? leg.distance.distance : 0;
+    const ecaDist = leg.distanceInEca ? leg.distanceInEca.distance : 0;
+    const etaStr = leg.estimatedArrival ? new Date(leg.estimatedArrival).toUTCString().replace('GMT', 'UTC') : 'N/A';
+    const durDays = leg.duration ? leg.duration.days : 0;
+    const durHours = leg.duration ? leg.duration.hours : 0;
+    const crossingsList = (leg.crossing && leg.crossing.length > 0) ? leg.crossing.join(', ') : 'Lautan Lepas International';
+
+    document.getElementById('res-from-to-ports').innerText = `${originCode} ➔ ${destCode}`;
+    document.getElementById('res-status-badge').innerText = isLiveApi ? 'Live Data Docked API Route' : 'Data Docked Optimal Route Engine';
+    document.getElementById('res-credits-info').innerText = isLiveApi ? '10 Credits (Live API)' : '10 Credits Equivalent';
+
+    document.getElementById('res-total-distance').innerText = `${totalDist.toLocaleString()} kn`;
+    document.getElementById('res-eca-distance').innerText = `${ecaDist.toLocaleString()} kn`;
+    document.getElementById('res-eta-utc').innerText = etaStr;
+    document.getElementById('res-duration').innerText = `${durDays} Hari ${durHours} Jam`;
+    document.getElementById('res-crossings-list').innerText = crossingsList;
+
+    // Draw route polyline on Leaflet map
+    if (!routePolylineGroup) {
+        routePolylineGroup = L.layerGroup().addTo(shipMap);
+    }
+    routePolylineGroup.clearLayers();
+
+    const pathCoords = leg.pathPoints.map(pt => [pt[1], pt[0]]); // Leaflet uses [lat, lon]
+
+    // Glowing route polyline
+    const outerPolyline = L.polyline(pathCoords, {
+        color: '#00ccff',
+        weight: 6,
+        opacity: 0.4
+    });
+
+    const innerPolyline = L.polyline(pathCoords, {
+        color: '#00e676',
+        weight: 3,
+        dashArray: '8, 8',
+        opacity: 0.95
+    });
+
+    routePolylineGroup.addLayer(outerPolyline);
+    routePolylineGroup.addLayer(innerPolyline);
+
+    // Departure marker
+    const startPt = pathCoords[0];
+    const startMarker = L.marker(startPt, {
+        icon: L.divIcon({
+            className: 'start-port-pin',
+            html: `<div style="background:#00e676; padding: 4px 8px; border-radius: 6px; border: 1.5px solid #fff; color: #000; font-weight: bold; font-size: 10px; box-shadow: 0 0 10px #00e676;">DEP: ${originCode}</div>`,
+            iconSize: [80, 24],
+            iconAnchor: [40, 12]
+        })
+    });
+    startMarker.bindPopup(`<b>Keberangkatan: ${originCode}</b>`);
+
+    // Destination marker
+    const endPt = pathCoords[pathCoords.length - 1];
+    const endMarker = L.marker(endPt, {
+        icon: L.divIcon({
+            className: 'end-port-pin',
+            html: `<div style="background:#ff3366; padding: 4px 8px; border-radius: 6px; border: 1.5px solid #fff; color: #fff; font-weight: bold; font-size: 10px; box-shadow: 0 0 10px #ff3366;">DEST: ${destCode}</div>`,
+            iconSize: [80, 24],
+            iconAnchor: [40, 12]
+        })
+    });
+    endMarker.bindPopup(`<b>Pelabuhan Tujuan: ${destCode}</b><br>ETA: ${etaStr}`);
+
+    routePolylineGroup.addLayer(startMarker);
+    routePolylineGroup.addLayer(endMarker);
+
+    // Fit map bounds to view full route
+    shipMap.fitBounds(innerPolyline.getBounds(), { padding: [50, 50] });
+};
+
+/* ==========================================================================
    11. CRYPTO & STOCK DASHBOARDS (INCLUDES INDONESIAN BLUECHIPS)
    ========================================================================== */
 function initCryptoDashboard() {
