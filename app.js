@@ -16,31 +16,79 @@ document.addEventListener('DOMContentLoaded', () => {
     initCryptoDashboard();
     initStockDashboard();
     init3DCanvasBackground();
-    initScrollNavHighlight();
+    initViewRouter();
 });
 
-function initScrollNavHighlight() {
-    const sections = document.querySelectorAll('section[id]');
-    const navLinks = document.querySelectorAll('.nav-item');
+function initViewRouter() {
+    const views = document.querySelectorAll('.app-view');
+    const navLinks = document.querySelectorAll('.nav-item, .mobile-nav-link');
 
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('hud-section-animate');
-                const id = entry.target.getAttribute('id');
-                navLinks.forEach(link => {
-                    link.classList.remove('active-nav');
-                    if (link.getAttribute('href') === `#${id}`) {
-                        link.classList.add('active-nav');
-                    }
-                });
+    function activateView(targetId) {
+        if (!targetId) targetId = 'home';
+        targetId = targetId.replace(/^#/, '');
+
+        let targetEl = document.getElementById(targetId);
+        if (!targetEl) targetId = 'home';
+
+        // Hide all view sections
+        views.forEach(v => {
+            v.classList.remove('active-view');
+            v.style.display = 'none';
+        });
+
+        // Show target view section
+        const activeEl = document.getElementById(targetId);
+        if (activeEl) {
+            activeEl.style.display = 'block';
+            activeEl.classList.add('active-view');
+        }
+
+        // Highlight active navbar items
+        navLinks.forEach(link => {
+            link.classList.remove('active-nav');
+            const href = link.getAttribute('href') || '';
+            if (href === `#${targetId}`) {
+                link.classList.add('active-nav');
             }
         });
-    }, { threshold: 0.15 });
 
-    sections.forEach(section => observer.observe(section));
+        // Special handling for Leaflet Map when switching to shipfinder tab
+        if (targetId === 'shipfinder' && window.map) {
+            setTimeout(() => {
+                window.map.invalidateSize();
+            }, 150);
+        }
 
-    // Mobile hamburger menu toggle
+        // Scroll to top instantly when changing view tabs
+        window.scrollTo({ top: 0, behavior: 'instant' });
+    }
+
+    // Intercept clicks on links pointing to #hash
+    document.addEventListener('click', (e) => {
+        const link = e.target.closest('a[href^="#"]');
+        if (link) {
+            const href = link.getAttribute('href');
+            if (href && href !== '#') {
+                e.preventDefault();
+                const targetId = href.replace(/^#/, '');
+                history.pushState(null, '', `#${targetId}`);
+                activateView(targetId);
+            }
+        }
+    });
+
+    // Handle back/forward browser history navigation
+    window.addEventListener('popstate', () => {
+        const hash = window.location.hash;
+        activateView(hash || 'home');
+    });
+
+    window.addEventListener('hashchange', () => {
+        const hash = window.location.hash;
+        activateView(hash || 'home');
+    });
+
+    // Mobile menu toggle logic
     const mobileMenuBtn = document.getElementById('mobile-menu-btn');
     const mobileNav = document.getElementById('mobile-nav');
     if (mobileMenuBtn && mobileNav) {
@@ -54,14 +102,18 @@ function initScrollNavHighlight() {
             }
         });
 
-        // Auto-close mobile nav when a link is clicked
         mobileNav.querySelectorAll('a').forEach(link => {
             link.addEventListener('click', () => {
                 mobileNav.classList.add('hidden');
-                mobileMenuBtn.querySelector('i').className = 'fa-solid fa-bars';
+                const icon = mobileMenuBtn.querySelector('i');
+                if (icon) icon.className = 'fa-solid fa-bars';
             });
         });
     }
+
+    // Activate initial view from URL hash or default to home
+    const initialHash = window.location.hash;
+    activateView(initialHash || 'home');
 }
 
 /* ==========================================================================

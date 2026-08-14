@@ -250,31 +250,158 @@
     </div>
 
     <!-- MAIN CONTENT WRAPPER -->
-    <main class="relative z-10 space-y-8 sm:space-y-12 lg:space-y-16 py-4 sm:py-6 lg:py-8 max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+    <main class="relative z-10 py-4 sm:py-6 lg:py-8 max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
 
-        <!-- HERO HEADER SECTION -->
-        <section id="home" class="relative rounded-2xl sm:rounded-3xl overflow-hidden bg-gradient-to-b from-slate-900/80 to-slate-950/80 border border-slate-800 p-5 sm:p-8 lg:p-12 text-center space-y-4 sm:space-y-6">
-            <div class="inline-flex items-center gap-2 px-3 sm:px-4 py-1 sm:py-1.5 rounded-full bg-teal-500/10 border border-teal-500/20 text-teal-300 text-[10px] sm:text-xs font-semibold">
-                <i class="fa-solid fa-sparkles"></i> <span class="hidden min-[420px]:inline">Platform Trading Pro Berbasis</span> AI<span class="hidden sm:inline">, Analytics Live & Jurnal Presisi</span>
+        <!-- HOME COMMAND CENTER VIEW -->
+        <section id="home" class="app-view active-view space-y-6 sm:space-y-8">
+            <!-- Hero Header Banner -->
+            <div class="relative rounded-2xl sm:rounded-3xl overflow-hidden bg-gradient-to-b from-slate-900/90 via-slate-900/80 to-slate-950/90 border border-slate-800 p-6 sm:p-10 lg:p-12 text-center space-y-4 sm:space-y-6 shadow-2xl">
+                <div class="inline-flex items-center gap-2 px-3 sm:px-4 py-1 sm:py-1.5 rounded-full bg-teal-500/10 border border-teal-500/20 text-teal-300 text-[10px] sm:text-xs font-semibold">
+                    <i class="fa-solid fa-sparkles"></i> <span class="hidden min-[420px]:inline">Platform Trading Pro Berbasis</span> AI<span class="hidden sm:inline">, Analytics Live & Jurnal Presisi</span>
+                </div>
+                <h1 class="text-2xl sm:text-4xl lg:text-6xl font-extrabold tracking-tight text-white leading-tight font-heading">
+                    Navigasi Pasar<span class="hidden sm:inline"> & Logistik</span> <br>Dengan <span class="bg-gradient-to-r from-teal-400 via-cyan-400 to-emerald-400 bg-clip-text text-transparent">Kecerdasan Presisi</span>
+                </h1>
+                <p class="max-w-2xl mx-auto text-slate-400 text-xs sm:text-sm lg:text-base leading-relaxed">
+                    Pilih modul fitur utama di bawah untuk langsung membuka tampilan khusus tanpa perlu scroll: Multi-Chart, Jurnal Trading, News Live, AI Intel, AI Chat, ShipFinder, Crypto, dan Stock.
+                </p>
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 pt-2">
+                    <a href="#chart-hub" class="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-teal-400 to-cyan-500 text-slate-950 font-bold rounded-xl shadow-lg shadow-teal-500/25 hover:brightness-110 transition flex items-center justify-center gap-2 text-sm">
+                        Buka Multi-Chart Hub <i class="fa-solid fa-arrow-right"></i>
+                    </a>
+                    <a href="#jurnal" class="w-full sm:w-auto px-6 py-3 bg-amber-500/20 border border-amber-500/30 text-amber-300 font-semibold rounded-xl hover:bg-amber-500/30 transition flex items-center justify-center gap-2 text-sm">
+                        <i class="fa-solid fa-book-bookmark"></i> Jurnal Trading Saya
+                    </a>
+                </div>
             </div>
-            <h1 class="text-2xl sm:text-4xl lg:text-6xl font-extrabold tracking-tight text-white leading-tight font-heading">
-                Navigasi Pasar<span class="hidden sm:inline"> & Logistik</span> <br>Dengan <span class="bg-gradient-to-r from-teal-400 via-cyan-400 to-emerald-400 bg-clip-text text-transparent">Kecerdasan Presisi</span>
-            </h1>
-            <p class="max-w-2xl mx-auto text-slate-400 text-xs sm:text-sm lg:text-base leading-relaxed">
-                Platform unggulan serba ada: Multi-chart fleksibel, sinyal rekomendasi AI, Jurnal Trading pribadi, notifikasi berita suara, AI voice assistant, dan pelacakan live maritim ShipFinder.
-            </p>
-            <div class="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 pt-2">
-                <a href="#chart-hub" class="w-full sm:w-auto px-5 py-2.5 sm:px-6 sm:py-3 bg-gradient-to-r from-teal-400 to-cyan-500 text-slate-950 font-bold rounded-xl shadow-lg shadow-teal-500/25 hover:brightness-110 transition flex items-center justify-center gap-2 text-sm">
-                    Buka Multi-Chart <i class="fa-solid fa-arrow-right"></i>
-                </a>
-                <a href="#jurnal" class="w-full sm:w-auto px-5 py-2.5 sm:px-6 sm:py-3 bg-amber-500/20 border border-amber-500/30 text-amber-300 font-semibold rounded-xl hover:bg-amber-500/30 transition flex items-center justify-center gap-2 text-sm">
-                    <i class="fa-solid fa-book-bookmark"></i> Jurnal Trading Saya
-                </a>
+
+            <!-- Quick Module Launcher Grid (Tampilan Langsung Modul Utama) -->
+            <div class="space-y-4 pt-2">
+                <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                    <h2 class="text-base sm:text-lg font-bold text-white flex items-center gap-2 font-heading">
+                        <i class="fa-solid fa-cubes text-teal-400"></i> Modul Utama <span class="text-teal-400">TradeVision</span>
+                    </h2>
+                    <span class="text-xs text-slate-400">Klik untuk langsung membuka tampilan modul</span>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <!-- Module 1: Multi-Chart -->
+                    <a href="#chart-hub" class="bg-slate-900/90 hover:bg-slate-900 border border-slate-800 hover:border-teal-500/50 p-5 rounded-2xl transition group flex flex-col justify-between space-y-4 shadow-xl">
+                        <div class="flex items-center justify-between">
+                            <div class="w-12 h-12 rounded-xl bg-teal-500/10 text-teal-400 flex items-center justify-center text-xl group-hover:scale-110 transition shadow-inner">
+                                <i class="fa-solid fa-chart-line"></i>
+                            </div>
+                            <span class="text-xs text-teal-400 font-semibold group-hover:translate-x-1 transition flex items-center gap-1">Buka <i class="fa-solid fa-arrow-right text-[10px]"></i></span>
+                        </div>
+                        <div>
+                            <h3 class="text-base font-bold text-white group-hover:text-teal-300 transition">Multi-Chart Hub</h3>
+                            <p class="text-xs text-slate-400 mt-1">Grafik TradingView interaktif multi-grid (Stock, Forex, Crypto).</p>
+                        </div>
+                    </a>
+
+                    <!-- Module 2: Trading Journal -->
+                    <a href="#jurnal" class="bg-slate-900/90 hover:bg-slate-900 border border-slate-800 hover:border-amber-500/50 p-5 rounded-2xl transition group flex flex-col justify-between space-y-4 shadow-xl">
+                        <div class="flex items-center justify-between">
+                            <div class="w-12 h-12 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center text-xl group-hover:scale-110 transition shadow-inner">
+                                <i class="fa-solid fa-book-bookmark"></i>
+                            </div>
+                            <span class="text-xs text-amber-400 font-semibold group-hover:translate-x-1 transition flex items-center gap-1">Buka <i class="fa-solid fa-arrow-right text-[10px]"></i></span>
+                        </div>
+                        <div>
+                            <h3 class="text-base font-bold text-white group-hover:text-amber-300 transition">Jurnal Trading</h3>
+                            <p class="text-xs text-slate-400 mt-1">Catat posisi entry, evaluasi emosi psikologis & kurva ekuitas.</p>
+                        </div>
+                    </a>
+
+                    <!-- Module 3: News & Calendar -->
+                    <a href="#news" class="bg-slate-900/90 hover:bg-slate-900 border border-slate-800 hover:border-cyan-500/50 p-5 rounded-2xl transition group flex flex-col justify-between space-y-4 shadow-xl">
+                        <div class="flex items-center justify-between">
+                            <div class="w-12 h-12 rounded-xl bg-cyan-500/10 text-cyan-400 flex items-center justify-center text-xl group-hover:scale-110 transition shadow-inner">
+                                <i class="fa-solid fa-newspaper"></i>
+                            </div>
+                            <span class="text-xs text-cyan-400 font-semibold group-hover:translate-x-1 transition flex items-center gap-1">Buka <i class="fa-solid fa-arrow-right text-[10px]"></i></span>
+                        </div>
+                        <div>
+                            <h3 class="text-base font-bold text-white group-hover:text-cyan-300 transition">Live News & Calendar</h3>
+                            <p class="text-xs text-slate-400 mt-1">ForexFactory live news per 5m & kalender ekonomi dunia.</p>
+                        </div>
+                    </a>
+
+                    <!-- Module 4: AI Market Intel -->
+                    <a href="#ai-intel" class="bg-slate-900/90 hover:bg-slate-900 border border-slate-800 hover:border-emerald-500/50 p-5 rounded-2xl transition group flex flex-col justify-between space-y-4 shadow-xl">
+                        <div class="flex items-center justify-between">
+                            <div class="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-xl group-hover:scale-110 transition shadow-inner">
+                                <i class="fa-solid fa-brain"></i>
+                            </div>
+                            <span class="text-xs text-emerald-400 font-semibold group-hover:translate-x-1 transition flex items-center gap-1">Buka <i class="fa-solid fa-arrow-right text-[10px]"></i></span>
+                        </div>
+                        <div>
+                            <h3 class="text-base font-bold text-white group-hover:text-emerald-300 transition">AI Market Intel</h3>
+                            <p class="text-xs text-slate-400 mt-1">Proyeksi sinyal 8 pair utama & riset sentimen makro 06 AM.</p>
+                        </div>
+                    </a>
+
+                    <!-- Module 5: AI Voice Chat -->
+                    <a href="#ai-chat" class="bg-slate-900/90 hover:bg-slate-900 border border-slate-800 hover:border-purple-500/50 p-5 rounded-2xl transition group flex flex-col justify-between space-y-4 shadow-xl">
+                        <div class="flex items-center justify-between">
+                            <div class="w-12 h-12 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center text-xl group-hover:scale-110 transition shadow-inner">
+                                <i class="fa-solid fa-comments"></i>
+                            </div>
+                            <span class="text-xs text-purple-400 font-semibold group-hover:translate-x-1 transition flex items-center gap-1">Buka <i class="fa-solid fa-arrow-right text-[10px]"></i></span>
+                        </div>
+                        <div>
+                            <h3 class="text-base font-bold text-white group-hover:text-purple-300 transition">AI Voice Chat Assistant</h3>
+                            <p class="text-xs text-slate-400 mt-1">Asisten intelijen suara interaktif untuk analisis teknikal & SMC.</p>
+                        </div>
+                    </a>
+
+                    <!-- Module 6: ShipFinder AIS -->
+                    <a href="#shipfinder" class="bg-slate-900/90 hover:bg-slate-900 border border-slate-800 hover:border-blue-500/50 p-5 rounded-2xl transition group flex flex-col justify-between space-y-4 shadow-xl">
+                        <div class="flex items-center justify-between">
+                            <div class="w-12 h-12 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center text-xl group-hover:scale-110 transition shadow-inner">
+                                <i class="fa-solid fa-ship"></i>
+                            </div>
+                            <span class="text-xs text-blue-400 font-semibold group-hover:translate-x-1 transition flex items-center gap-1">Buka <i class="fa-solid fa-arrow-right text-[10px]"></i></span>
+                        </div>
+                        <div>
+                            <h3 class="text-base font-bold text-white group-hover:text-blue-300 transition">ShipFinder Maritime</h3>
+                            <p class="text-xs text-slate-400 mt-1">Pelacakan live posisi kapal tanker & Sea Route Planner.</p>
+                        </div>
+                    </a>
+
+                    <!-- Module 7: Crypto Analytics -->
+                    <a href="#crypto" class="bg-slate-900/90 hover:bg-slate-900 border border-slate-800 hover:border-amber-500/50 p-5 rounded-2xl transition group flex flex-col justify-between space-y-4 shadow-xl">
+                        <div class="flex items-center justify-between">
+                            <div class="w-12 h-12 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center text-xl group-hover:scale-110 transition shadow-inner">
+                                <i class="fa-brands fa-bitcoin"></i>
+                            </div>
+                            <span class="text-xs text-amber-400 font-semibold group-hover:translate-x-1 transition flex items-center gap-1">Buka <i class="fa-solid fa-arrow-right text-[10px]"></i></span>
+                        </div>
+                        <div>
+                            <h3 class="text-base font-bold text-white group-hover:text-amber-300 transition">Crypto Dashboard</h3>
+                            <p class="text-xs text-slate-400 mt-1">Harga aset digital realtime & rekomendasi token trending.</p>
+                        </div>
+                    </a>
+
+                    <!-- Module 8: Stock Dashboard -->
+                    <a href="#stock" class="bg-slate-900/90 hover:bg-slate-900 border border-slate-800 hover:border-emerald-500/50 p-5 rounded-2xl transition group flex flex-col justify-between space-y-4 shadow-xl">
+                        <div class="flex items-center justify-between">
+                            <div class="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-xl group-hover:scale-110 transition shadow-inner">
+                                <i class="fa-solid fa-arrow-trend-up"></i>
+                            </div>
+                            <span class="text-xs text-emerald-400 font-semibold group-hover:translate-x-1 transition flex items-center gap-1">Buka <i class="fa-solid fa-arrow-right text-[10px]"></i></span>
+                        </div>
+                        <div>
+                            <h3 class="text-base font-bold text-white group-hover:text-emerald-300 transition">Saham US & Indonesia</h3>
+                            <p class="text-xs text-slate-400 mt-1">Pantau emiten Raksasa US & Bluechip IHSG (BBRI, BMRI, BBCA).</p>
+                        </div>
+                    </a>
+                </div>
             </div>
         </section>
 
         <!-- SECTION 1: MULTI-CHART HUB & INSTRUMENT SELECTOR -->
-        <section id="chart-hub" class="space-y-4 sm:space-y-6">
+        <section id="chart-hub" class="app-view space-y-4 sm:space-y-6">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 pb-2 border-b border-slate-800">
                 <div>
                     <h2 class="text-lg sm:text-2xl font-extrabold text-white flex items-center gap-2 font-heading">
@@ -298,7 +425,7 @@
         </section>
 
         <!-- SECTION 1.5: PERSONAL TRADING JOURNAL (FITUR UTAMA BARU) -->
-        <section id="jurnal" class="space-y-6">
+        <section id="jurnal" class="app-view space-y-6">
             <div class="flex flex-wrap items-center justify-between gap-4 pb-2 border-b border-slate-800">
                 <div>
                     <h2 class="text-2xl font-extrabold text-white flex items-center gap-2 font-heading">
@@ -469,7 +596,7 @@
         </section>
 
         <!-- SECTION 2: LIVE NEWS & BREAKING ALERTS -->
-        <section id="news" class="space-y-6">
+        <section id="news" class="app-view space-y-6">
             <div class="flex flex-wrap items-center justify-between gap-4 pb-2 border-b border-slate-800">
                 <div>
                     <h2 class="text-2xl font-extrabold text-white flex items-center gap-2 font-heading">
@@ -518,7 +645,7 @@
         </section>
 
         <!-- SECTION 3: AI TODAY MARKET INTEL (EXPANDED TO 8 PAIRS & 5M RESET) -->
-        <section id="ai-intel" class="space-y-6">
+        <section id="ai-intel" class="app-view space-y-6">
             <div class="flex flex-wrap items-center justify-between gap-4 pb-2 border-b border-slate-800">
                 <div>
                     <h2 class="text-2xl font-extrabold text-white flex items-center gap-2 font-heading">
@@ -560,7 +687,7 @@
         </section>
 
         <!-- SECTION 4: AI VOICE CHAT ASSISTANT -->
-        <section id="ai-chat" class="space-y-6">
+        <section id="ai-chat" class="app-view space-y-6">
             <div class="pb-2 border-b border-slate-800">
                 <h2 class="text-2xl font-extrabold text-white flex items-center gap-2 font-heading">
                     <i class="fa-solid fa-comments text-cyan-400"></i> AI Voice <span class="text-cyan-400">Trading Chat</span>
@@ -593,7 +720,7 @@
         </section>
 
         <!-- SECTION 5: SHIPFINDER MARITIME LOGISTICS (INTERACTIVE LEAFLET AIS MAP - LIVE AIS RADAR STREAM & DATA DOCKED ROUTE PLANNER) -->
-        <section id="shipfinder" class="space-y-6">
+        <section id="shipfinder" class="app-view space-y-6">
             <div class="flex flex-wrap items-center justify-between gap-4 pb-2 border-b border-slate-800">
                 <div>
                     <h2 class="text-2xl font-extrabold text-white flex items-center gap-2 font-heading">
@@ -801,7 +928,7 @@
         </section>
 
         <!-- SECTION 6: CRYPTO DASHBOARD -->
-        <section id="crypto" class="space-y-6">
+        <section id="crypto" class="app-view space-y-6">
             <div class="pb-2 border-b border-slate-800">
                 <h2 class="text-2xl font-extrabold text-white flex items-center gap-2 font-heading">
                     <i class="fa-brands fa-bitcoin text-amber-400"></i> Crypto <span class="text-amber-400">Dashboard & Analytics</span>
@@ -846,7 +973,7 @@
         </section>
 
         <!-- SECTION 7: STOCK DASHBOARD (INCLUDES INDONESIAN BLUECHIPS) -->
-        <section id="stock" class="space-y-6">
+        <section id="stock" class="app-view space-y-6">
             <div class="pb-2 border-b border-slate-800">
                 <h2 class="text-2xl font-extrabold text-white flex items-center gap-2 font-heading">
                     <i class="fa-solid fa-arrow-trend-up text-emerald-400"></i> Stock <span class="text-emerald-400">Dashboard & Equities</span>
