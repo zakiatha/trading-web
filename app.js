@@ -2,6 +2,19 @@
    TRADEVISION PRO — ADVANCED REACT & JAVASCRIPT APPLICATION ENGINE
    ========================================================================== */
 
+/**
+ * Global HTML Escaper to prevent DOM XSS (Cross-Site Scripting)
+ */
+function escapeHtml(str) {
+    if (str === null || str === undefined) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     initThemeManager();
     initGlobalSearch();
@@ -279,8 +292,12 @@ window.openAuthModal = function(mode) {
 };
 
 window.handleAuthSubmit = function() {
-    const email = document.getElementById('auth-email-input').value;
-    alert(`Selamat datang kembali, ${email.split('@')[0]}! Sesi trading Anda telah aktif.`);
+    const emailInput = document.getElementById('auth-email-input');
+    const email = (emailInput?.value || '').trim();
+    const usernameRaw = email.split('@')[0] || 'Trader';
+    const safeUsername = escapeHtml(usernameRaw);
+
+    alert(`Selamat datang kembali, ${safeUsername}! Sesi trading Anda telah aktif.`);
     document.getElementById('auth-modal').classList.add('hidden');
     
     const userNav = document.getElementById('user-nav-status');
@@ -288,7 +305,7 @@ window.handleAuthSubmit = function() {
         userNav.innerHTML = `
             <div class="flex items-center gap-2 bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-xl text-xs">
                 <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
-                <span class="font-bold text-white">${email.split('@')[0]}</span>
+                <span class="font-bold text-white">${safeUsername}</span>
             </div>
         `;
     }
@@ -680,10 +697,17 @@ window.openInfoModalForCurrent = function(index) {
 /* ==========================================================================
    5. PERSONAL TRADING JOURNAL SYSTEM (#JURNAL)
    ========================================================================== */
-let tradesList = JSON.parse(localStorage.getItem('tv_trades')) || [
-    { id: 1, pair: 'XAUUSD', type: 'BUY', risk: 1, rr: '1:2.5', entry: 2340.0, sl: 2325.0, tp: 2377.5, emotion: 'Sabar', reason: 'BOS M15 + FVG Tap H1', status: 'WIN', pnl: 250 },
-    { id: 2, pair: 'BBRI', type: 'BUY', risk: 1, rr: '1:2', entry: 5150, sl: 5050, tp: 5350, emotion: 'Confident', reason: 'Retest Support Akumulasi Dividen', status: 'WIN', pnl: 200 }
-];
+let tradesList = [];
+try {
+    const stored = localStorage.getItem('tv_trades');
+    tradesList = stored ? JSON.parse(stored) : null;
+    if (!Array.isArray(tradesList)) throw new Error('Invalid format');
+} catch (e) {
+    tradesList = [
+        { id: 1, pair: 'XAUUSD', type: 'BUY', risk: 1, rr: '1:2.5', entry: 2340.0, sl: 2325.0, tp: 2377.5, emotion: 'Sabar', reason: 'BOS M15 + FVG Tap H1', status: 'WIN', pnl: 250 },
+        { id: 2, pair: 'BBRI', type: 'BUY', risk: 1, rr: '1:2', entry: 5150, sl: 5050, tp: 5350, emotion: 'Confident', reason: 'Retest Support Akumulasi Dividen', status: 'WIN', pnl: 200 }
+    ];
+}
 
 let journalWinrateChart = null;
 let journalPnlChart = null;
@@ -779,29 +803,41 @@ function renderTradesList(filter = 'ALL') {
                             isLoss ? 'bg-rose-500/20 text-rose-400 border-rose-500/30' :
                             'bg-slate-700 text-slate-300 border-slate-600';
         
+        const safePair = escapeHtml(t.pair);
+        const safeType = escapeHtml(t.type);
+        const safeStatus = escapeHtml(t.status);
+        const safeEmotion = escapeHtml(t.emotion);
+        const safeReason = escapeHtml(t.reason);
+        const safeEntry = escapeHtml(t.entry);
+        const safeSl = escapeHtml(t.sl);
+        const safeTp = escapeHtml(t.tp);
+        const safeRr = escapeHtml(t.rr);
+        const safeId = parseInt(t.id, 10) || 0;
+        const pnlNum = Number(t.pnl) || 0;
+
         return `
             <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3 hover:border-slate-700 transition text-xs">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-2">
-                        <span class="font-bold text-white text-sm">${t.pair}</span>
-                        <span class="px-2 py-0.5 rounded ${t.type === 'BUY' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'} font-bold">${t.type}</span>
-                        <span class="px-2 py-0.5 rounded border text-[10px] font-bold ${statusClass}">${t.status}</span>
+                        <span class="font-bold text-white text-sm">${safePair}</span>
+                        <span class="px-2 py-0.5 rounded ${safeType === 'BUY' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'} font-bold">${safeType}</span>
+                        <span class="px-2 py-0.5 rounded border text-[10px] font-bold ${statusClass}">${safeStatus}</span>
                     </div>
                     <div class="flex items-center gap-3">
-                        <span class="font-bold ${t.pnl >= 0 ? 'text-emerald-400' : 'text-rose-400'} text-sm">${t.pnl >= 0 ? '+' : ''}$${t.pnl.toFixed(2)}</span>
-                        <button onclick="editJournalEntry(${t.id})" class="text-slate-400 hover:text-white"><i class="fa-solid fa-pen-to-square"></i></button>
-                        <button onclick="deleteJournalEntry(${t.id})" class="text-rose-400 hover:text-rose-300"><i class="fa-solid fa-trash-can"></i></button>
+                        <span class="font-bold ${pnlNum >= 0 ? 'text-emerald-400' : 'text-rose-400'} text-sm">${pnlNum >= 0 ? '+' : ''}$${pnlNum.toFixed(2)}</span>
+                        <button onclick="editJournalEntry(${safeId})" class="text-slate-400 hover:text-white"><i class="fa-solid fa-pen-to-square"></i></button>
+                        <button onclick="deleteJournalEntry(${safeId})" class="text-rose-400 hover:text-rose-300"><i class="fa-solid fa-trash-can"></i></button>
                     </div>
                 </div>
                 <div class="grid grid-cols-4 gap-2 bg-slate-950 p-2.5 rounded-xl border border-slate-800/60 text-[11px] text-slate-300 font-mono">
-                    <div><span class="text-slate-400 block text-[9px]">Entry:</span> ${t.entry}</div>
-                    <div><span class="text-slate-400 block text-[9px]">SL:</span> ${t.sl}</div>
-                    <div><span class="text-slate-400 block text-[9px]">TP:</span> ${t.tp}</div>
-                    <div><span class="text-slate-400 block text-[9px]">RR:</span> ${t.rr}</div>
+                    <div><span class="text-slate-400 block text-[9px]">Entry:</span> ${safeEntry}</div>
+                    <div><span class="text-slate-400 block text-[9px]">SL:</span> ${safeSl}</div>
+                    <div><span class="text-slate-400 block text-[9px]">TP:</span> ${safeTp}</div>
+                    <div><span class="text-slate-400 block text-[9px]">RR:</span> ${safeRr}</div>
                 </div>
                 <div class="flex justify-between items-center text-[10px] text-slate-400">
-                    <span><i class="fa-solid fa-brain text-teal-400"></i> Emosi: <strong>${t.emotion}</strong></span>
-                    <span class="line-clamp-1 max-w-xs text-slate-300">"${t.reason}"</span>
+                    <span><i class="fa-solid fa-brain text-teal-400"></i> Emosi: <strong>${safeEmotion}</strong></span>
+                    <span class="line-clamp-1 max-w-xs text-slate-300">"${safeReason}"</span>
                 </div>
             </div>
         `;
@@ -865,7 +901,7 @@ function updateJournalStats() {
     
     if (badLosses.length > 0 && shameBox && shameList) {
         shameBox.classList.remove('hidden');
-        shameList.innerHTML = badLosses.map(l => `<div>• <strong>${l.pair}</strong> (${l.emotion}): Rugi -$${Math.abs(l.pnl)} — ${l.reason}</div>`).join('');
+        shameList.innerHTML = badLosses.map(l => `<div>• <strong>${escapeHtml(l.pair)}</strong> (${escapeHtml(l.emotion)}): Rugi -$${Math.abs(Number(l.pnl) || 0).toFixed(2)} — ${escapeHtml(l.reason)}</div>`).join('');
     } else if (shameBox) {
         shameBox.classList.add('hidden');
     }
@@ -1064,19 +1100,25 @@ function renderCategoryNews(container, category) {
     const articles = newsDb[category] || newsDb.forex;
     container.innerHTML = articles.map(item => {
         const impactBadge = item.impact === 'High' ? 'bg-rose-500/20 text-rose-400 border-rose-500/30' : 'bg-amber-500/20 text-amber-400 border-amber-500/30';
+        const safeUrl = encodeURI(item.url);
+        const safeTitle = escapeHtml(item.title);
+        const safeImpact = escapeHtml(item.impact.toUpperCase());
+        const safeCountry = escapeHtml(item.country);
+        const safeMeta = escapeHtml(item.meta);
+
         return `
-            <div onclick="window.open('${item.url}', '_blank')" class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-2 hover:border-teal-500/50 cursor-pointer transition shadow-lg group">
+            <div onclick="window.open('${safeUrl}', '_blank', 'noopener,noreferrer')" class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-2 hover:border-teal-500/50 cursor-pointer transition shadow-lg group">
                 <div class="flex items-center gap-2">
-                    <span class="px-2 py-0.5 rounded text-[10px] font-bold border ${impactBadge}"><i class="fa-solid fa-bolt"></i> ${item.impact.toUpperCase()} IMPACT</span>
-                    <span class="text-xs font-bold text-white bg-slate-800 px-2 py-0.5 rounded">${item.country}</span>
+                    <span class="px-2 py-0.5 rounded text-[10px] font-bold border ${impactBadge}"><i class="fa-solid fa-bolt"></i> ${safeImpact} IMPACT</span>
+                    <span class="text-xs font-bold text-white bg-slate-800 px-2 py-0.5 rounded">${safeCountry}</span>
                 </div>
                 <h4 class="text-sm font-bold text-white group-hover:text-teal-300 transition flex items-center justify-between">
-                    <span>${item.title}</span>
+                    <span>${safeTitle}</span>
                     <i class="fa-solid fa-arrow-up-right-from-square text-xs text-slate-400 group-hover:text-teal-300"></i>
                 </h4>
                 <p class="text-xs text-slate-400">ForexFactory & Global Live Economic Feed — Klik untuk membaca berita sumber resmi.</p>
                 <div class="flex justify-between items-center text-[10px] text-slate-400 pt-1">
-                    <span><i class="fa-regular fa-clock"></i> ${item.meta}</span>
+                    <span><i class="fa-regular fa-clock"></i> ${safeMeta}</span>
                     <span class="text-teal-400 font-semibold"><i class="fa-solid fa-globe"></i> Buka Website Berita</span>
                 </div>
             </div>
@@ -1319,13 +1361,14 @@ window.sendAIChatMessage = function() {
     const log = document.getElementById('ai-chat-messages');
     if (!input || !input.value.trim() || !log) return;
 
-    const userText = input.value.trim();
+    const rawText = input.value.trim();
+    const safeUserText = escapeHtml(rawText);
     input.value = '';
 
     log.innerHTML += `
         <div class="flex gap-3 items-start justify-end">
             <div class="bg-teal-500/20 text-teal-200 border border-teal-500/30 p-3 rounded-2xl rounded-tr-none max-w-xl text-xs">
-                ${userText}
+                ${safeUserText}
             </div>
         </div>
     `;
@@ -1333,17 +1376,17 @@ window.sendAIChatMessage = function() {
 
     setTimeout(() => {
         let aiReply = "Berdasarkan analisis teknikal SMC, struktur harga saat ini menunjukkan zona FVG H1 terkonfirmasi.";
-        if (userText.toLowerCase().includes('gold') || userText.toLowerCase().includes('xau')) {
+        if (rawText.toLowerCase().includes('gold') || rawText.toLowerCase().includes('xau')) {
             aiReply = "XAU/USD (Emas) berada dalam bias BULLISH dengan target $2,370 dan support di $2,320.";
-        } else if (userText.toLowerCase().includes('bbri') || userText.toLowerCase().includes('saham')) {
+        } else if (rawText.toLowerCase().includes('bbri') || rawText.toLowerCase().includes('saham')) {
             aiReply = "Saham BBRI (Bank BRI) berada di zona akumulasi kuat Rp 5,150 - Rp 5,250 dengan target kenaikan Rp 5,500.";
         }
 
         log.innerHTML += `
             <div class="flex gap-3 items-start">
                 <div class="w-7 h-7 rounded-lg bg-teal-500/20 text-teal-300 flex items-center justify-center font-bold text-sm shrink-0">🤖</div>
-                <div class="bg-slate-800 p-3 rounded-2xl rounded-tl-none max-w-xl text-slate-200 text-xs">
-                    ${aiReply}
+                <div class="bg-slate-800 p-3 rounded-2xl rounded-tr-none max-w-xl text-slate-200 text-xs">
+                    ${escapeHtml(aiReply)}
                 </div>
             </div>
         `;
@@ -1785,8 +1828,13 @@ window.saveDataDockedApiKey = function() {
         alert('Silakan masukkan API Key Data Docked terlebih dahulu.');
         return;
     }
+    // Strict validation: alphanumeric with dashes/underscores/dots (8-128 chars)
+    if (!/^[A-Za-z0-9_\-\.]{8,128}$/.test(key)) {
+        alert('Format API Key tidak valid. Hanya karakter alfanumerik, titik, strip, dan garis bawah yang diperbolehkan (panjang 8-128 karakter).');
+        return;
+    }
     localStorage.setItem('datadocked_api_key', key);
-    alert('API Key Data Docked berhasil disimpan!');
+    alert('API Key Data Docked berhasil disimpan di browser lokal Anda.');
     toggleDataDockedConfigModal();
 };
 
